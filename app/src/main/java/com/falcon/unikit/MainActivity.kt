@@ -20,12 +20,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,6 +35,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
@@ -81,7 +84,7 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         WalkThroughScreen {
-                            navController.navigate("prefered_language_screen")
+                            navController.navigate("select_college_screen")
                         }
                     }
                     val colleges = listOf("University School of Chemical Technology",
@@ -100,7 +103,7 @@ class MainActivity : ComponentActivity() {
                     "JIMS Engineering Management Technical Campus",
                     "Trinity Institute of Technology and Research",
                     "SBIT")
-                    composable("prefered_language_screen") {
+                    composable("select_college_screen") {
                         val sharedPreferences = remember {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                         }
@@ -120,7 +123,10 @@ class MainActivity : ComponentActivity() {
                                 finish()
                             }
                         )
-                        Text(text = "main screen")
+                        LoginScreen()
+                    }
+                    composable("main_screen") {
+
                     }
                     composable("profile") {
                         val sharedPreferences = remember {
@@ -217,12 +223,24 @@ fun isNetworkAvailable(context: Context): Boolean {
     return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
-fun base64Encode(input: String): String {
-    val bytes = input.toByteArray(Charsets.UTF_8)
-    return  Base64.encodeToString(bytes, Base64.URL_SAFE)
+enum class PAGES {
+    LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
 }
 
-fun base64Decode(input: String?): String {
-    val decodedBytes = Base64.decode(input, Base64.URL_SAFE)
-    return String(decodedBytes, Charsets.UTF_8)
+enum class SCREEN {
+    LOGIN, SIGNUP
+}
+
+@Composable
+fun EditText(text: String, visualTransformation: VisualTransformation = VisualTransformation.None) {
+    val content = remember { mutableStateOf("") }
+    OutlinedTextField(
+        value = content.value,
+        onValueChange = {
+            content.value = it
+        },
+        label = { androidx.compose.material.Text(text) },
+        modifier = Modifier.padding(16.dp),
+        visualTransformation = visualTransformation
+    )
 }

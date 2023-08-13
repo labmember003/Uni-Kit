@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.toSize
 import com.falcon.unikit.Utils.LANGUAGE
 
 @Composable
-fun LanguagePicker(languages: List<String>){
+fun CollegePicker(colleges: List<String>){
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -92,7 +92,7 @@ fun LanguagePicker(languages: List<String>){
                     mExpanded = true
                 }
         ) {
-            languages.forEach { language ->
+            colleges.forEach { language ->
                 DropdownMenuItem(onClick = {
                     editor.putString(LANGUAGE, language)
                     editor.apply()

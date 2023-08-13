@@ -84,14 +84,28 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("prefered_language_screen")
                         }
                     }
-                    val languages = listOf("English", "Español", "Français", "Deutsch",
-                        "简体中文", "日本語", "العربية", "हिन्दी", "русский", "한국어", "Italiano", "Português")
+                    val colleges = listOf("University School of Chemical Technology",
+                    "University School of Information Communication and Technology",
+                    "University School of Biotechnology",
+                    "University School of Automation ",
+                    "Maharaja Agrasen Institute of Technology",
+                    "Maharaja Surajmal Institute of Technology",
+                    "Bharti Vidyapeeth's College of Engineering",
+                    "Bhagwan Parshuram Institute of Technology",
+                    "Vivekananda Institute of Professional Studies",
+                    "Dr. Akhilesh Das Gupta Institute of Technology and Management",
+                    "Guru Tegh Bahadur Institute of Technology",
+                    "HMR Institute of Technology and Management",
+                    "Delhi Technical Campus, Greater Noida",
+                    "JIMS Engineering Management Technical Campus",
+                    "Trinity Institute of Technology and Research",
+                    "SBIT")
                     composable("prefered_language_screen") {
                         val sharedPreferences = remember {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                         }
                         if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
-                            PreferredLanguageScreen(languages = languages, navController = navController)
+                            SelectCollegeScreen(colleges = colleges, navController = navController)
                         } else {
                             LaunchedEffect(key1 = Unit) {
                                 if(googleAuthUiClient.getSignedInUser() != null) {

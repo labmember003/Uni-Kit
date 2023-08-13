@@ -21,7 +21,7 @@ import com.falcon.unikit.Utils.INITIAL_LAUCH
 
 
 @Composable
-fun PreferredLanguageScreen(languages: List<String>, navController: NavHostController) {
+fun SelectCollegeScreen(colleges: List<String>, navController: NavHostController) {
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -41,8 +41,8 @@ fun PreferredLanguageScreen(languages: List<String>, navController: NavHostContr
             color = Color.Gray,
             fontSize = 12.sp
         )
-        LottieAnimation(animationID = R.raw.translate_animation)
-        LanguagePicker(languages = languages)
+        LottieAnimation(animationID = R.raw.university)
+        CollegePicker(colleges = colleges)
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {

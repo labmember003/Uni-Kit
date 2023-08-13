@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "111863307103",
+    "project_id": "comicify-f0d9c",
+    "storage_bucket": "comicify-f0d9c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:111863307103:android:8bd05b4e8db9407f18b4ea",
+        "android_client_info": {
+          "package_name": "com.falcon.comicify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "111863307103-9tvai485kig70mo8ksod2dla01031hmf.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD8XqSp3G2MjQ1JTK5khcrovD7nm6DUv90"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "111863307103-9tvai485kig70mo8ksod2dla01031hmf.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

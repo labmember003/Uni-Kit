@@ -1,10 +1,10 @@
-package com.falcon.comicify.ui.sign_in
+package com.falcon.unikit.ui.sign_in
 
 import android.widget.Toast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
-import com.falcon.comicify.GoogleSignInMainScreen
+import com.falcon.unikit.GoogleSignInMainScreen
 
 @Composable
 fun SignInScreen(

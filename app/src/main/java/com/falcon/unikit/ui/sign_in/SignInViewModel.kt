@@ -1,8 +1,6 @@
-package com.falcon.comicify.ui.sign_in
+package com.falcon.unikit.ui.sign_in
 
 import androidx.lifecycle.ViewModel
-import com.falcon.comicify.ui.sign_in.SignInResult
-import com.falcon.comicify.ui.sign_in.SignInState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update

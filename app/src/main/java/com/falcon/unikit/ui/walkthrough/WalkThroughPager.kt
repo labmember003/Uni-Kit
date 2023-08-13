@@ -1,4 +1,4 @@
-package com.falcon.comicify.ui.walkthrough
+package com.falcon.unikit.ui.walkthrough
 
 data class WalkThroughPager(
     val image: Int,

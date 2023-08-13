@@ -1,4 +1,4 @@
-package com.falcon.comicify.ui.sign_in
+package com.falcon.unikit.ui.sign_in
 
 data class SignInResult(
     val data: UserData?,

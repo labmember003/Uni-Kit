@@ -1,4 +1,4 @@
-package com.falcon.comicify.ui.sign_in
+package com.falcon.unikit.ui.sign_in
 
 data class SignInState(
     val isSignInSuccessful: Boolean = false,

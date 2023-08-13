@@ -1,4 +1,4 @@
-package com.falcon.comicify
+package com.falcon.unikit
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

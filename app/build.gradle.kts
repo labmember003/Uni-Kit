@@ -6,7 +6,7 @@ plugins {
 }
 
 android {
-    namespace = "com.falcon.comicify"
+    namespace = "com.falcon.unikit"
     compileSdk = 34
 
     defaultConfig {

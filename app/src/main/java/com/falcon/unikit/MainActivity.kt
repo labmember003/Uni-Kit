@@ -1,4 +1,4 @@
-package com.falcon.comicify
+package com.falcon.unikit
 
 import android.content.Context
 import android.net.ConnectivityManager
@@ -33,7 +33,6 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
@@ -44,11 +43,10 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
-import com.falcon.comicify.Utils.INITIAL_LAUCH
-import com.falcon.comicify.profile.ProfileScreen
-import com.falcon.comicify.ui.sign_in.GoogleAuthUiClient
-import com.falcon.comicify.ui.theme.ComicifyTheme
-import com.falcon.comicify.ui.walkthrough.WalkThroughScreen
+import com.falcon.unikit.Utils.INITIAL_LAUCH
+import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
+import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.google.android.gms.auth.api.identity.Identity
 import kotlinx.coroutines.launch
 

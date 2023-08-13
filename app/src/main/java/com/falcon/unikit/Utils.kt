@@ -1,4 +1,4 @@
-package com.falcon.comicify
+package com.falcon.unikit
 
 object Utils {
     const val API_KEY = "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"

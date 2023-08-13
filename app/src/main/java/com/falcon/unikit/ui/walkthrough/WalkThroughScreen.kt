@@ -1,4 +1,4 @@
-package com.falcon.comicify.ui.walkthrough
+package com.falcon.unikit.ui.walkthrough
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -28,8 +28,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.falcon.comicify.LottieAnimation
-import com.falcon.comicify.R
+import com.falcon.unikit.LottieAnimation
+import com.falcon.unikit.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
 val walkThroughPagerContent = listOf(

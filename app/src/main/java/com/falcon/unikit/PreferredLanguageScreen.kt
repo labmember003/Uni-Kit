@@ -1,7 +1,6 @@
-package com.falcon.comicify
+package com.falcon.unikit
 
 import android.content.Context
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.falcon.comicify.Utils.INITIAL_LAUCH
+import com.falcon.unikit.Utils.INITIAL_LAUCH
 
 
 @Composable

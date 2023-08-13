@@ -1,4 +1,4 @@
-package com.falcon.comicify.profile
+package com.falcon.unikit.profile
 
 
 import androidx.compose.foundation.layout.*
@@ -15,7 +15,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.falcon.comicify.ui.sign_in.UserData
+import com.falcon.unikit.ui.sign_in.UserData
 
 @Composable
 fun ProfileScreen(

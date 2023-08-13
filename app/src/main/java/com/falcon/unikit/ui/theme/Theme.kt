@@ -1,4 +1,4 @@
-package com.falcon.comicify.ui.theme
+package com.falcon.unikit.ui.theme
 
 import android.app.Activity
 import android.os.Build

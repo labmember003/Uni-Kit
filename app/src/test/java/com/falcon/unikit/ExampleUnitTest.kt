@@ -1,4 +1,4 @@
-package com.falcon.comicify
+package com.falcon.unikit
 
 import org.junit.Test
 

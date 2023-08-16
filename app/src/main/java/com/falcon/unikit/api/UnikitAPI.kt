@@ -14,11 +14,12 @@ interface UnikitAPI {
     @POST("/getCourseList")
     suspend fun getCourseList(@Body body: CourseBody): Response<List<CourseItem>>
 
+    @POST("/getBranchList")
+    suspend fun getBranchList(@Body body: BranchBody): Response<List<BranchItem>>
+
     @POST("/getYearList")
     suspend fun getNumberOfYear(@Body body: YearListBody): Response<List<Int>>
 
-    @POST("/getBranchList")
-    suspend fun getBranchList(@Body body: BranchBody): Response<List<BranchItem>>
 
     @POST("/getSubjectList")
     suspend fun getSubjectList(@Body body: SubjectBody): Response<List<SubjectItem>>

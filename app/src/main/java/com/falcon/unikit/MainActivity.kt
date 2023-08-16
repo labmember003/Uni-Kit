@@ -95,7 +95,8 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     lifecycleScope.launch {
-                        unikitAPI.getCollegeList()
+                        val cat = unikitAPI.getCollegeList()
+//                        cat.body()?.get(0)?.collegeID
                     }
                     val colleges = listOf("University School of Chemical Technology",
                     "University School of Information Communication and Technology",

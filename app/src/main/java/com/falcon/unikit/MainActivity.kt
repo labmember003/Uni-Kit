@@ -48,6 +48,8 @@ import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.Utils.INITIAL_LAUCH
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.screens.MainScreen
+import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.google.android.gms.auth.api.identity.Identity
@@ -59,7 +61,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject
-    private lateinit var unikitAPI: UnikitAPI
+    lateinit var unikitAPI: UnikitAPI
 
     private val  googleAuthUiClient by lazy {
         GoogleAuthUiClient(
@@ -122,14 +124,21 @@ class MainActivity : ComponentActivity() {
                         if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
                             SelectCollegeCourseScreen(
                                 itemList = colleges,
-                                navController = navController,
                                 title = "Select Your CollegeItem",
                                 sharedPrefTitle = "COLLEGE"
-                            )
+                            ) {
+                                navController.navigate("select_course_screen")
+                                val editor = sharedPreferences.edit()
+                                editor.putBoolean(INITIAL_LAUCH, false)
+                                editor.apply()
+                            }
                         } else {
                             LaunchedEffect(key1 = Unit) {
                                 if(googleAuthUiClient.getSignedInUser() != null) {
                                     navController.navigate("main_screen")
+                                    val editor = sharedPreferences.edit()
+                                    editor.putBoolean(INITIAL_LAUCH, false)
+                                    editor.apply()
                                 }
                             }
                         }
@@ -141,10 +150,11 @@ class MainActivity : ComponentActivity() {
                         }
                         SelectCollegeCourseScreen(
                             itemList = courses,
-                            navController = navController,
                             title = "Select Your Course",
                             sharedPrefTitle = "COURSE"
-                        )
+                        ) {
+                            navController.navigate("main_screen")
+                        }
                     }
                     composable("sign_in") {
                         BackHandler(
@@ -155,7 +165,7 @@ class MainActivity : ComponentActivity() {
                         LoginScreen { navController.navigate("main_screen") }
                     }
                     composable("main_screen") {
-                        MainScreen(4)
+                        MainScreen(4, navController)
                     }
                     composable("profile") {
                         val sharedPreferences = remember {
@@ -173,6 +183,11 @@ class MainActivity : ComponentActivity() {
                                 editor.apply()
                             }
                         )
+                    }
+                    composable("settings") {
+                        SettingsScreen (){
+                            navController.popBackStack()
+                        }
                     }
                 }
             }
@@ -269,4 +284,34 @@ fun EditText(text: String, visualTransformation: VisualTransformation = VisualTr
         modifier = Modifier.padding(16.dp),
         visualTransformation = visualTransformation
     )
+}
+
+@Composable
+fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
+            .padding(12.dp)
+    ) {
+        Image(
+            painter = painterResource(id = imageID),
+            contentDescription = "" ,
+            modifier = Modifier
+                .size(30.dp)
+        )
+        Spacer(
+            modifier = Modifier
+                .size(5.dp)
+        )
+        Text(
+            text = contentName,
+            style = androidx.compose.material.MaterialTheme.typography.body1,
+            color = Color.Unspecified
+        )
+    }
 }

@@ -23,9 +23,9 @@ import com.falcon.unikit.Utils.INITIAL_LAUCH
 @Composable
 fun SelectCollegeCourseScreen(
     itemList: List<String>,
-    navController: NavHostController,
     title: String,
-    sharedPrefTitle: String
+    sharedPrefTitle: String,
+    onClick: () -> Unit
 ) {
     val context = LocalContext.current
     val sharedPreferences = remember {
@@ -51,10 +51,7 @@ fun SelectCollegeCourseScreen(
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            navController.navigate("select_course_screen")
-            val editor = sharedPreferences.edit()
-            editor.putBoolean(INITIAL_LAUCH, false)
-            editor.apply()
+            onClick()
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
             ) {
             Text(

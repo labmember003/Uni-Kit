@@ -26,12 +26,12 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
-@Preview
 @Composable
-fun LoginScreen() {
+fun LoginScreen(
+    onLogin: () -> Unit
+) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier.fillMaxSize()
@@ -95,18 +95,17 @@ fun LoginScreen() {
                     )
                 }
                 if (screen.value == SCREEN.LOGIN) {
-                    Login()
+                    Login(onLogin)
                 } else {
-                    SignUp()
+                    SignUp(onLogin)
                 }
 
             }
         }
     }
 }
-@Preview
 @Composable
-fun Login() {
+fun Login(onLogin: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -114,13 +113,13 @@ fun Login() {
         LoginImage()
         EditText("Username")
         EditText("Password", PasswordVisualTransformation())
-        LoginButton("Login", PAGES.MAINPAGE)
+        LoginButton("Login", onLogin)
     }
 }
 
 
 @Composable
-fun SignUp() {
+fun SignUp(onLogin: () -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -129,7 +128,7 @@ fun SignUp() {
         EditText("Username")
         EditText("Email")
         EditText("Password", PasswordVisualTransformation())
-        LoginButton("SignUp", PAGES.MAINPAGE)
+        LoginButton("SignUp", onLogin)
     }
 }
 
@@ -146,9 +145,9 @@ fun LoginImage() {
 
 
 @Composable
-fun LoginButton(text: String, role: PAGES = PAGES.LOGIN) {
+fun LoginButton(text: String, onLogin: () -> Unit) {
     Button(onClick = {
-        DataManager.currentPage.value = role
+        onLogin()
     }) {
         Text(text = text)
     }

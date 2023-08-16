@@ -4,7 +4,6 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
-import android.util.Base64
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -90,7 +89,7 @@ class MainActivity : ComponentActivity() {
                     val colleges = listOf("University School of Chemical Technology",
                     "University School of Information Communication and Technology",
                     "University School of Biotechnology",
-                    "University School of Automation ",
+                    "University School of Automation and Robotics",
                     "Maharaja Agrasen Institute of Technology",
                     "Maharaja Surajmal Institute of Technology",
                     "Bharti Vidyapeeth's College of Engineering",
@@ -108,7 +107,7 @@ class MainActivity : ComponentActivity() {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                         }
                         if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
-                            SelectCollegeScreen(colleges = colleges, navController = navController)
+                            SelectCollegeCourseScreen(itemList = colleges, navController = navController)
                         } else {
                             LaunchedEffect(key1 = Unit) {
                                 if(googleAuthUiClient.getSignedInUser() != null) {
@@ -117,16 +116,23 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                     }
+                    val courses = listOf("Btech", "Mtech", "Phd")
+                    composable("select_course_screen") {
+                        val sharedPreferences = remember {
+                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                        }
+                        SelectCollegeCourseScreen(itemList = courses, navController = navController)
+                    }
                     composable("sign_in") {
                         BackHandler(
                             onBack = {
                                 finish()
                             }
                         )
-                        LoginScreen()
+                        LoginScreen { navController.navigate("main_screen") }
                     }
                     composable("main_screen") {
-
+                        MainScreen(4)
                     }
                     composable("profile") {
                         val sharedPreferences = remember {
@@ -223,9 +229,6 @@ fun isNetworkAvailable(context: Context): Boolean {
     return networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
 }
 
-enum class PAGES {
-    LOGIN, WALKTHROUGH, MAINPAGE, BUYTOKEN
-}
 
 enum class SCREEN {
     LOGIN, SIGNUP

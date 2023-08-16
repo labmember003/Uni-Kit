@@ -28,21 +28,19 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
-import com.falcon.unikit.Utils.LANGUAGE
 
 @Composable
-fun CollegePicker(colleges: List<String>){
+fun Picker(colleges: List<String>, sharedPrefTitle: String){
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
-    val language = sharedPreferences.getString(LANGUAGE, "ENGLISH")
-    Log.i(LANGUAGE, "meow "+language.toString())
+    val language = sharedPreferences.getString(sharedPrefTitle, sharedPrefTitle)
+    Log.i(sharedPrefTitle, "meow "+language.toString())
     var mSelectedText by remember { mutableStateOf(language) }
     val editor = sharedPreferences.edit()
 
     var mExpanded by remember { mutableStateOf(false) }
-//    val languageMap: Map<String, String> = languages.associate { it.languageName to it.languageCode }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     val icon = if (mExpanded)
         Icons.Filled.KeyboardArrowUp
@@ -57,7 +55,7 @@ fun CollegePicker(colleges: List<String>){
             value = mSelectedText.toString(),
             onValueChange = {
                 mSelectedText = it
-                editor.putString(LANGUAGE, it)
+                editor.putString(sharedPrefTitle, it)
                 editor.apply()
 //                TRY HERE TO OPEN DROP DOWN TODO()
             },
@@ -69,7 +67,7 @@ fun CollegePicker(colleges: List<String>){
                     mTextFieldSize = coordinates.size.toSize()
                 }
             ,
-            label = {Text("Language", modifier = Modifier
+            label = {Text(text = sharedPrefTitle, modifier = Modifier
                 .clickable {
                     mExpanded = !mExpanded
                 })},
@@ -92,17 +90,17 @@ fun CollegePicker(colleges: List<String>){
                     mExpanded = true
                 }
         ) {
-            colleges.forEach { language ->
+            colleges.forEach {
                 DropdownMenuItem(onClick = {
-                    editor.putString(LANGUAGE, language)
+                    editor.putString(sharedPrefTitle, it)
                     editor.apply()
-                    Log.i("qwertyuiop", language)
+                    Log.i("qwertyuiop", it)
                     Log.i("qwertyuiop", "label.languageName")
                     mSelectedText = language
                     mExpanded = false
                 }) {
                     Text(
-                        text = language,
+                        text = it,
                         modifier = Modifier
                     )
                 }

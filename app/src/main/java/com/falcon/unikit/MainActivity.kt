@@ -77,11 +77,11 @@ class MainActivity : ComponentActivity() {
                                 finish()
                             }
                         )
-                        LaunchedEffect(key1 = Unit) {
-                            if(googleAuthUiClient.getSignedInUser() != null) {
-                                navController.navigate("main_screen")
-                            }
-                        }
+//                        LaunchedEffect(key1 = Unit) {
+//                            if(googleAuthUiClient.getSignedInUser() != null) {
+//                                navController.navigate("main_screen")
+//                            }
+//                        }
                         WalkThroughScreen {
                             navController.navigate("select_college_screen")
                         }
@@ -106,8 +106,14 @@ class MainActivity : ComponentActivity() {
                         val sharedPreferences = remember {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                         }
+//                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
                         if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
-                            SelectCollegeCourseScreen(itemList = colleges, navController = navController)
+                            SelectCollegeCourseScreen(
+                                itemList = colleges,
+                                navController = navController,
+                                title = "Select Your College",
+                                sharedPrefTitle = "COLLEGE"
+                            )
                         } else {
                             LaunchedEffect(key1 = Unit) {
                                 if(googleAuthUiClient.getSignedInUser() != null) {
@@ -121,7 +127,12 @@ class MainActivity : ComponentActivity() {
                         val sharedPreferences = remember {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                         }
-                        SelectCollegeCourseScreen(itemList = courses, navController = navController)
+                        SelectCollegeCourseScreen(
+                            itemList = courses,
+                            navController = navController,
+                            title = "Select Your Course",
+                            sharedPrefTitle = "COURSE"
+                        )
                     }
                     composable("sign_in") {
                         BackHandler(

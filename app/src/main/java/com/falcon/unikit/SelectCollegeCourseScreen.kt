@@ -21,7 +21,12 @@ import com.falcon.unikit.Utils.INITIAL_LAUCH
 
 
 @Composable
-fun SelectCollegeCourseScreen(itemList: List<String>, navController: NavHostController) {
+fun SelectCollegeCourseScreen(
+    itemList: List<String>,
+    navController: NavHostController,
+    title: String,
+    sharedPrefTitle: String
+) {
     val context = LocalContext.current
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -33,7 +38,7 @@ fun SelectCollegeCourseScreen(itemList: List<String>, navController: NavHostCont
         Spacer(modifier = Modifier
             .size(100.dp))
         Text(
-            text = "Select Your Preferred Language",
+            text = title,
             fontSize = 18.sp
         )
         Text(
@@ -42,7 +47,7 @@ fun SelectCollegeCourseScreen(itemList: List<String>, navController: NavHostCont
             fontSize = 12.sp
         )
         LottieAnimation(animationID = R.raw.university)
-        CollegePicker(colleges = itemList)
+        Picker(colleges = itemList, sharedPrefTitle = sharedPrefTitle)
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {

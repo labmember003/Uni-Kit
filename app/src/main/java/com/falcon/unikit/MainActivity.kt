@@ -46,13 +46,21 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.Utils.INITIAL_LAUCH
+import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.google.android.gms.auth.api.identity.Identity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    private lateinit var unikitAPI: UnikitAPI
+
     private val  googleAuthUiClient by lazy {
         GoogleAuthUiClient(
             context = applicationContext,
@@ -86,13 +94,16 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("select_college_screen")
                         }
                     }
+                    lifecycleScope.launch {
+                        unikitAPI.getCollegeList()
+                    }
                     val colleges = listOf("University School of Chemical Technology",
                     "University School of Information Communication and Technology",
                     "University School of Biotechnology",
                     "University School of Automation and Robotics",
                     "Maharaja Agrasen Institute of Technology",
                     "Maharaja Surajmal Institute of Technology",
-                    "Bharti Vidyapeeth's College of Engineering",
+                    "Bharti Vidyapeeth's CollegeItem of Engineering",
                     "Bhagwan Parshuram Institute of Technology",
                     "Vivekananda Institute of Professional Studies",
                     "Dr. Akhilesh Das Gupta Institute of Technology and Management",
@@ -111,7 +122,7 @@ class MainActivity : ComponentActivity() {
                             SelectCollegeCourseScreen(
                                 itemList = colleges,
                                 navController = navController,
-                                title = "Select Your College",
+                                title = "Select Your CollegeItem",
                                 sharedPrefTitle = "COLLEGE"
                             )
                         } else {

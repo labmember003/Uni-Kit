@@ -25,6 +25,8 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +40,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -47,11 +50,15 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.Utils.INITIAL_LAUCH
 import com.falcon.unikit.api.UnikitAPI
+import com.falcon.unikit.models.CollegeItem
+import com.falcon.unikit.models.CourseItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
+import com.falcon.unikit.viewmodels.CollegeViewModel
+import com.falcon.unikit.viewmodels.CourseViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -96,60 +103,28 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("select_college_screen")
                         }
                     }
-                    lifecycleScope.launch {
-                        val cat = unikitAPI.getCollegeList()
-//                        cat.body()?.get(0)?.collegeID
-                    }
-                    val colleges = listOf("University School of Chemical Technology",
-                    "University School of Information Communication and Technology",
-                    "University School of Biotechnology",
-                    "University School of Automation and Robotics",
-                    "Maharaja Agrasen Institute of Technology",
-                    "Maharaja Surajmal Institute of Technology",
-                    "Bharti Vidyapeeth's CollegeItem of Engineering",
-                    "Bhagwan Parshuram Institute of Technology",
-                    "Vivekananda Institute of Professional Studies",
-                    "Dr. Akhilesh Das Gupta Institute of Technology and Management",
-                    "Guru Tegh Bahadur Institute of Technology",
-                    "HMR Institute of Technology and Management",
-                    "Delhi Technical Campus, Greater Noida",
-                    "JIMS Engineering Management Technical Campus",
-                    "Trinity Institute of Technology and Research",
-                    "SBIT")
                     composable("select_college_screen") {
-                        val sharedPreferences = remember {
-                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-                        }
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
-                        if (sharedPreferences.getBoolean(INITIAL_LAUCH, true)) {
-                            SelectCollegeCourseScreen(
-                                itemList = colleges,
+                        val collegeViewModel : CollegeViewModel = viewModel()
+                        val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
+                        if (colleges.value != emptyList<CollegeItem>()) {
+                            SelectItemScreen(
+                                itemList = colleges.value.map { it.collegeName },
                                 title = "Select Your CollegeItem",
                                 sharedPrefTitle = "COLLEGE"
                             ) {
                                 navController.navigate("select_course_screen")
-                                val editor = sharedPreferences.edit()
-                                editor.putBoolean(INITIAL_LAUCH, false)
-                                editor.apply()
                             }
                         } else {
-                            LaunchedEffect(key1 = Unit) {
-                                if(googleAuthUiClient.getSignedInUser() != null) {
-                                    navController.navigate("main_screen")
-                                    val editor = sharedPreferences.edit()
-                                    editor.putBoolean(INITIAL_LAUCH, false)
-                                    editor.apply()
-                                }
-                            }
+                           LoadingScreen()
                         }
                     }
-                    val courses = listOf("Btech", "Mtech", "Phd")
+
                     composable("select_course_screen") {
-                        val sharedPreferences = remember {
-                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-                        }
-                        SelectCollegeCourseScreen(
-                            itemList = courses,
+                        val collegeViewModel : CourseViewModel = viewModel()
+                        val courses: State<List<CourseItem>> = collegeViewModel.courses.collectAsState()
+                        SelectItemScreen(
+                            itemList = courses.value.map { it.courseName },
                             title = "Select Your Course",
                             sharedPrefTitle = "COURSE"
                         ) {
@@ -204,6 +179,12 @@ fun LottieAnimation(animationID: Int) {
         modifier = Modifier
             .size(400.dp)
     )
+}
+
+
+@Composable
+fun LoadingScreen() {
+    Text(text = "loading")
 }
 
 @Composable

@@ -1,6 +1,5 @@
 package com.falcon.unikit
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -9,28 +8,20 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import com.falcon.unikit.Utils.INITIAL_LAUCH
 
 
 @Composable
-fun SelectCollegeCourseScreen(
+fun SelectItemScreen(
     itemList: List<String>,
     title: String,
     sharedPrefTitle: String,
     onClick: () -> Unit
 ) {
-    val context = LocalContext.current
-    val sharedPreferences = remember {
-        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-    }
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally

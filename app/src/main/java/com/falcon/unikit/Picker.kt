@@ -31,15 +31,7 @@ import androidx.compose.ui.unit.toSize
 
 @Composable
 fun Picker(colleges: List<String>, sharedPrefTitle: String){
-    val context = LocalContext.current
-    val sharedPreferences = remember {
-        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-    }
-    val language = sharedPreferences.getString(sharedPrefTitle, sharedPrefTitle)
-    Log.i(sharedPrefTitle, "meow "+language.toString())
-    var mSelectedText by remember { mutableStateOf(language) }
-    val editor = sharedPreferences.edit()
-
+    var value by remember { mutableStateOf(sharedPrefTitle) }
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     val icon = if (mExpanded)
@@ -52,18 +44,13 @@ fun Picker(colleges: List<String>, sharedPrefTitle: String){
     ) {
         OutlinedTextField(
             readOnly = true,
-            value = mSelectedText.toString(),
+            value = value,
             onValueChange = {
-                mSelectedText = it
-                editor.putString(sharedPrefTitle, it)
-                editor.apply()
-//                TRY HERE TO OPEN DROP DOWN TODO()
+                value = it
             },
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { coordinates ->
-                    // This value is used to assign to
-                    // the DropDown the same width
                     mTextFieldSize = coordinates.size.toSize()
                 }
             ,
@@ -92,11 +79,7 @@ fun Picker(colleges: List<String>, sharedPrefTitle: String){
         ) {
             colleges.forEach {
                 DropdownMenuItem(onClick = {
-                    editor.putString(sharedPrefTitle, it)
-                    editor.apply()
-                    Log.i("qwertyuiop", it)
-                    Log.i("qwertyuiop", "label.languageName")
-                    mSelectedText = language
+                    value = it
                     mExpanded = false
                 }) {
                     Text(

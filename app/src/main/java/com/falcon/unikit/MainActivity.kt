@@ -24,7 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -48,10 +47,10 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
-import com.falcon.unikit.Utils.INITIAL_LAUCH
 import com.falcon.unikit.api.UnikitAPI
-import com.falcon.unikit.models.CollegeItem
-import com.falcon.unikit.models.CourseItem
+import com.falcon.unikit.models.item.YearItem
+import com.falcon.unikit.models.item.CollegeItem
+import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
@@ -59,6 +58,7 @@ import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.CollegeViewModel
 import com.falcon.unikit.viewmodels.CourseViewModel
+import com.falcon.unikit.viewmodels.YearViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -119,16 +119,31 @@ class MainActivity : ComponentActivity() {
                            LoadingScreen()
                         }
                     }
-
                     composable("select_course_screen") {
-                        val collegeViewModel : CourseViewModel = viewModel()
-                        val courses: State<List<CourseItem>> = collegeViewModel.courses.collectAsState()
-                        SelectItemScreen(
-                            itemList = courses.value.map { it.courseName },
-                            title = "Select Your Course",
-                            sharedPrefTitle = "COURSE"
-                        ) {
-                            navController.navigate("main_screen")
+                        val courseViewModel : CourseViewModel = viewModel()
+                        val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
+                        if (courses.value != emptyList<CollegeItem>()) {
+                            SelectItemScreen(
+                                itemList = courses.value.map { it.courseName },
+                                title = "Select Your Course",
+                                sharedPrefTitle = "COURSE"
+                            ) {
+                                navController.navigate("main_screen")
+                            }
+                        } else {
+                            LoadingScreen()
+                        }
+                    }
+                    composable("main_screen") {
+                        val yearViewModel : YearViewModel = viewModel()
+                        val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
+                        if (years.value != emptyList<YearItem>()) {
+                            MainScreen(
+                                yearList = years,
+                                navController = navController
+                            )
+                        } else {
+                            LoadingScreen()
                         }
                     }
                     composable("sign_in") {
@@ -138,9 +153,6 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         LoginScreen { navController.navigate("main_screen") }
-                    }
-                    composable("main_screen") {
-                        MainScreen(4, navController)
                     }
                     composable("profile") {
                         val sharedPreferences = remember {
@@ -184,7 +196,22 @@ fun LottieAnimation(animationID: Int) {
 
 @Composable
 fun LoadingScreen() {
-    Text(text = "loading")
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_cats))
+        com.airbnb.lottie.compose.LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .fillMaxSize()
+                .size(400.dp)
+        )
+        Text (
+            text = "Loading..."
+        )
+    }
 }
 
 @Composable

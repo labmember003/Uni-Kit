@@ -1,4 +1,4 @@
-package com.falcon.unikit.api
+package com.falcon.unikit.models.item
 
 data class SubjectItem (
     val subjectID: String,

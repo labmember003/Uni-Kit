@@ -2,7 +2,7 @@ package com.falcon.unikit.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.falcon.unikit.models.CollegeItem
+import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.repository.UnikitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow

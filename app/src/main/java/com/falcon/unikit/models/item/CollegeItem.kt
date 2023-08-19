@@ -1,4 +1,4 @@
-package com.falcon.unikit.models
+package com.falcon.unikit.models.item
 
 data class CollegeItem(
     val collegeID: String,

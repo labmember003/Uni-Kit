@@ -154,6 +154,9 @@ class MainActivity : ComponentActivity() {
                         )
                         LoginScreen { navController.navigate("main_screen") }
                     }
+                    composable("branches_screen") {
+
+                    }
                     composable("profile") {
                         val sharedPreferences = remember {
                             context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)

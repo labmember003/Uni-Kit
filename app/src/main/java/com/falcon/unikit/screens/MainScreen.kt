@@ -1,5 +1,6 @@
 package com.falcon.unikit.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -73,19 +74,27 @@ fun ModalDrawerSample(yearList: State<List<YearItem>>, navController: NavHostCon
             DrawerContent(navController)
         },
         content = {
-            ChooseYearScreen(yearList, drawerState)
+            ChooseYearScreen(yearList, drawerState, navController)
         }
     )
 }
 
 @Composable
-fun ChooseYearScreen(yearList: State<List<YearItem>>, drawerState: DrawerState) {
+fun ChooseYearScreen(
+    yearList: State<List<YearItem>>,
+    drawerState: DrawerState,
+    navController: NavHostController
+) {
     val scope = rememberCoroutineScope()
     Column {
         TopBar(scope, drawerState)
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
+            modifier = Modifier
+                .clickable {
+                    navController.navigate("branches_screen")
+                },
             verticalArrangement = Arrangement.SpaceAround) {
                items(yearList.value){
                    YearItemComposable(year = it)

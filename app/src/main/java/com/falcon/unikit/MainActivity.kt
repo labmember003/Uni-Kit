@@ -48,6 +48,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.api.UnikitAPI
+import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
@@ -56,6 +57,7 @@ import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
+import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.CollegeViewModel
 import com.falcon.unikit.viewmodels.CourseViewModel
 import com.falcon.unikit.viewmodels.YearViewModel
@@ -87,7 +89,10 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val context = LocalContext.current
 
-                NavHost(navController = navController, startDestination = "walk_through_screen") {
+                NavHost(navController = navController, startDestination = "test") {
+                    composable("test") {
+                        Test()
+                    }
                     composable("walk_through_screen") {
                         BackHandler(
                             onBack = {
@@ -145,6 +150,19 @@ class MainActivity : ComponentActivity() {
                         } else {
                             LoadingScreen()
                         }
+                    }
+                    composable("branches_screen") {
+                        val branchViewModel : BranchViewModel = viewModel()
+                        val branches: State<List<BranchItem>> = branchViewModel.branches.collectAsState()
+                        if (branches.value != emptyList<BranchItem>()) {
+                            BranchesScreen(
+                                branches.value,
+                                navController = navController
+                            )
+                        } else {
+                            LoadingScreen()
+                        }
+
                     }
                     composable("sign_in") {
                         BackHandler(

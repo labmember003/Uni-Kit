@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.falcon.unikit.LottieAnimation
@@ -33,10 +34,17 @@ import com.falcon.unikit.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
 val walkThroughPagerContent = listOf(
-    WalkThroughPager(R.raw.animation_comic, "Instant Summaries", "Quickly get concise summaries for easy understanding."),
-    WalkThroughPager(R.raw.translate_animation, "Language Preference", "Choose preferred language for automatic conversion."),
-    WalkThroughPager(R.raw.multiple_inputs, "Multiple Inputs", "Upload PDF or use photos from gallery/camera for text extraction.")
+    WalkThroughPager(R.raw.animation_comic, "Welcome to Unikit", "Empowering Academic Excellence."),
+    WalkThroughPager(R.raw.translate_animation, "Streamlined Resources", "Effortless Access to Notes, Books, and More."),
+    WalkThroughPager(R.raw.multiple_inputs, "Bridging the Knowledge Gap", "Access, Discuss, Learn, Grow.")
 )
+@Preview
+@Composable
+fun _WalkThroughScreen() {
+    WalkThroughScreen {
+
+    }
+}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable

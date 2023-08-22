@@ -3,11 +3,13 @@ package com.falcon.unikit.repository
 import com.falcon.unikit.models.body.CourseBody
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.body.BranchBody
+import com.falcon.unikit.models.body.SubjectBody
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.models.body.YearListBody
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
+import com.falcon.unikit.models.item.SubjectItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -29,6 +31,10 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     private val _branch = MutableStateFlow<List<BranchItem>>(emptyList())
     val branch: StateFlow<List<BranchItem>>
         get() = _branch
+
+    private val _subject = MutableStateFlow<List<SubjectItem>>(emptyList())
+    val subject: StateFlow<List<SubjectItem>>
+        get() = _subject
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
         if (response.isSuccessful && response.body() != null) {
@@ -54,6 +60,13 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         val response = unikitAPI.getBranchList(BranchBody(yearItem.yearID))
         if (response.isSuccessful && response.body() != null) {
             _branch.emit(response.body()!!)
+        }
+    }
+
+    suspend fun getSubject(branchItem: BranchItem) {
+        val response = unikitAPI.getSubjectList(SubjectBody(branchItem.branchID))
+        if (response.isSuccessful && response.body() != null) {
+            _subject.emit(response.body()!!)
         }
     }
 }

@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,9 +27,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.falcon.unikit.models.item.BranchItem
+import com.falcon.unikit.models.item.SubjectItem
+import com.falcon.unikit.viewmodels.BranchViewModel
+import com.falcon.unikit.viewmodels.SubjectViewModel
 import kotlinx.coroutines.launch
 
 @Preview(showBackground = true, showSystemUi = true)
@@ -100,13 +106,19 @@ fun BranchesScreen(branchList: List<BranchItem>, navController: NavHostControlle
 
 @Composable
 fun SubjectList(branch: BranchItem) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Text(text = branch.branchName)
+    val subjectViewModel : SubjectViewModel = viewModel()
+    val subjects: State<List<SubjectItem>> = subjectViewModel.subjects.collectAsState()
+    if (subjects.value != emptyList<SubjectItem>()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(text = branch.branchName)
+        }
+    } else {
+        LoadingScreen()
     }
 }
 @Composable

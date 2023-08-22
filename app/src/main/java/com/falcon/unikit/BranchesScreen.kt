@@ -1,6 +1,7 @@
 package com.falcon.unikit
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,6 +37,20 @@ import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.SubjectViewModel
 import kotlinx.coroutines.launch
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.Text
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import coil.compose.rememberImagePainter
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Test() {
@@ -116,11 +131,42 @@ fun SubjectList(branch: BranchItem) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(text = branch.branchName)
+            LazyColumn(content = {
+                items(subjects.value) { subject ->
+                    SubjectItemRow(subject)
+                }
+            })
         }
     } else {
         LoadingScreen()
     }
 }
+
+@Composable
+fun SubjectItemRow(subjectItem: SubjectItem) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = rememberImagePainter(data = subjectItem.imageURL),
+            contentDescription = null,
+            modifier = Modifier
+                .size(50.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colors.primary)
+        )
+        Spacer(modifier = Modifier.width(16.dp))
+        Text(
+            text = subjectItem.subjectName,
+            fontSize = 16.sp,
+            fontWeight = FontWeight.Bold
+        )
+    }
+}
+
 @Composable
 private fun HeadingSummarizedPage() {
     Row(

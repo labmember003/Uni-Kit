@@ -40,25 +40,30 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
+import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.CollegeViewModel
+import com.falcon.unikit.viewmodels.ContentViewModel
 import com.falcon.unikit.viewmodels.CourseViewModel
 import com.falcon.unikit.viewmodels.YearViewModel
 import com.google.android.gms.auth.api.identity.Identity
@@ -162,7 +167,27 @@ class MainActivity : ComponentActivity() {
                         } else {
                             LoadingScreen()
                         }
-
+                    }
+                    composable(
+                        "content_screen" + "/{subjectID}",
+                        arguments = listOf(
+                            navArgument("subjectID") {
+                                type = NavType.StringType
+                                nullable = false
+                            }
+                        )
+                    ) { entry ->
+                        val subject = entry.arguments?.getString("subjectID")
+                        val contentViewModel : ContentViewModel = viewModel()
+                        val content: State<List<Content>> = contentViewModel.contents.collectAsState()
+                        if (content.value != emptyList<BranchItem>()) {
+                            ContentScreen(
+                                content.value,
+                                navController
+                            )
+                        } else {
+                            LoadingScreen()
+                        }
                     }
                     composable("sign_in") {
                         BackHandler(

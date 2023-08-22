@@ -1,5 +1,7 @@
 package com.falcon.unikit.repository
 
+import com.falcon.unikit.api.Content
+import com.falcon.unikit.api.ContentBody
 import com.falcon.unikit.models.body.CourseBody
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.body.BranchBody
@@ -35,6 +37,10 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     private val _subject = MutableStateFlow<List<SubjectItem>>(emptyList())
     val subject: StateFlow<List<SubjectItem>>
         get() = _subject
+
+    private val _content = MutableStateFlow<List<Content>>(emptyList())
+    val content: StateFlow<List<Content>>
+        get() = _content
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
         if (response.isSuccessful && response.body() != null) {
@@ -67,6 +73,13 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         val response = unikitAPI.getSubjectList(SubjectBody(branchItem.branchID))
         if (response.isSuccessful && response.body() != null) {
             _subject.emit(response.body()!!)
+        }
+    }
+
+    suspend fun getContent(subject: SubjectItem) {
+        val response = unikitAPI.getContentOfSubject(ContentBody(subject.subjectID))
+        if (response.isSuccessful && response.body() != null) {
+            _content.emit(response.body()!!)
         }
     }
 }

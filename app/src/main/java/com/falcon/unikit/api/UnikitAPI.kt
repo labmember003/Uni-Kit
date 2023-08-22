@@ -29,4 +29,7 @@ interface UnikitAPI {
 
     @POST("/getSubjectList")
     suspend fun getSubjectList(@Body body: SubjectBody): Response<List<SubjectItem>>
+
+    @POST("/getContent")
+    suspend fun getContentOfSubject(@Body body: ContentBody): Response<List<Content>>
 }

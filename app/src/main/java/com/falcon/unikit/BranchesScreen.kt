@@ -33,23 +33,17 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.SubjectItem
-import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.SubjectViewModel
 import kotlinx.coroutines.launch
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.Text
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.rememberImagePainter
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
@@ -113,14 +107,14 @@ fun BranchesScreen(branchList: List<BranchItem>, navController: NavHostControlle
                 .fillMaxWidth()
                 .weight(0.6f),
             pageContent = { pageNumber ->
-                SubjectList(branchList[pageNumber])
+                SubjectList(branchList[pageNumber], navController)
             }
         )
     }
 }
 
 @Composable
-fun SubjectList(branch: BranchItem) {
+fun SubjectList(branch: BranchItem, navController: NavHostController) {
     val subjectViewModel : SubjectViewModel = viewModel()
     val subjects: State<List<SubjectItem>> = subjectViewModel.subjects.collectAsState()
     if (subjects.value != emptyList<SubjectItem>()) {
@@ -133,7 +127,7 @@ fun SubjectList(branch: BranchItem) {
             Text(text = branch.branchName)
             LazyColumn(content = {
                 items(subjects.value) { subject ->
-                    SubjectItemRow(subject)
+                    SubjectItemRow(subject, navController)
                 }
             })
         }
@@ -143,11 +137,14 @@ fun SubjectList(branch: BranchItem) {
 }
 
 @Composable
-fun SubjectItemRow(subjectItem: SubjectItem) {
+fun SubjectItemRow(subjectItem: SubjectItem, navController: NavHostController) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .padding(16.dp)
+            .clickable {
+                navController.navigate("content_screen/${subjectItem.subjectID}")
+            },
         verticalAlignment = Alignment.CenterVertically
     ) {
         Image(
@@ -162,13 +159,14 @@ fun SubjectItemRow(subjectItem: SubjectItem) {
         Text(
             text = subjectItem.subjectName,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f)
         )
     }
 }
 
 @Composable
-private fun HeadingSummarizedPage() {
+fun HeadingSummarizedPage() {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,

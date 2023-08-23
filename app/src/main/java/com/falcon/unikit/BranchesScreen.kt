@@ -45,6 +45,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberImagePainter
 import androidx.compose.foundation.lazy.items
+import androidx.hilt.navigation.compose.hiltViewModel
+
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun Test() {
@@ -115,7 +117,7 @@ fun BranchesScreen(branchList: List<BranchItem>, navController: NavHostControlle
 
 @Composable
 fun SubjectList(branch: BranchItem, navController: NavHostController) {
-    val subjectViewModel : SubjectViewModel = viewModel()
+    val subjectViewModel : SubjectViewModel = hiltViewModel()
     val subjects: State<List<SubjectItem>> = subjectViewModel.subjects.collectAsState()
     if (subjects.value != emptyList<SubjectItem>()) {
         Column(

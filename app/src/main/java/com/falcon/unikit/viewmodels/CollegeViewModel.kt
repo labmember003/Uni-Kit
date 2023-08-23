@@ -1,5 +1,6 @@
 package com.falcon.unikit.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.falcon.unikit.models.item.CollegeItem
@@ -10,7 +11,10 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class CollegeViewModel @Inject constructor(private val unikitRepository: UnikitRepository) : ViewModel() {
+class CollegeViewModel @Inject constructor(
+    private val unikitRepository: UnikitRepository,
+    private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
     val colleges : StateFlow<List<CollegeItem>>
         get() = unikitRepository.college
 

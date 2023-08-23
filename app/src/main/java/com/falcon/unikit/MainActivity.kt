@@ -38,6 +38,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
@@ -115,7 +116,7 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("select_college_screen") {
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
-                        val collegeViewModel : CollegeViewModel = viewModel()
+                        val collegeViewModel : CollegeViewModel = hiltViewModel()
                         val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
                         if (colleges.value != emptyList<CollegeItem>()) {
                             SelectItemScreen(
@@ -130,7 +131,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("select_course_screen") {
-                        val courseViewModel : CourseViewModel = viewModel()
+                        val courseViewModel : CourseViewModel = hiltViewModel()
                         val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
                         if (courses.value != emptyList<CollegeItem>()) {
                             SelectItemScreen(
@@ -145,7 +146,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("main_screen") {
-                        val yearViewModel : YearViewModel = viewModel()
+                        val yearViewModel : YearViewModel = hiltViewModel()
                         val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
                         if (years.value != emptyList<YearItem>()) {
                             MainScreen(
@@ -157,7 +158,7 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("branches_screen") {
-                        val branchViewModel : BranchViewModel = viewModel()
+                        val branchViewModel : BranchViewModel = hiltViewModel()
                         val branches: State<List<BranchItem>> = branchViewModel.branches.collectAsState()
                         if (branches.value != emptyList<BranchItem>()) {
                             BranchesScreen(
@@ -178,7 +179,7 @@ class MainActivity : ComponentActivity() {
                         )
                     ) { entry ->
                         val subject = entry.arguments?.getString("subjectID")
-                        val contentViewModel : ContentViewModel = viewModel()
+                        val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
                         if (content.value != emptyList<BranchItem>()) {
                             ContentScreen(

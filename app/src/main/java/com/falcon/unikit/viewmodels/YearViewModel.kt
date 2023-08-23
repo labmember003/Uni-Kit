@@ -1,5 +1,6 @@
 package com.falcon.unikit.viewmodels
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.falcon.unikit.models.item.YearItem
@@ -9,7 +10,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class YearViewModel@Inject constructor(private val unikitRepository: UnikitRepository): ViewModel() {
+class YearViewModel@Inject constructor(
+    private val unikitRepository: UnikitRepository,
+    private val savedStateHandle: SavedStateHandle
+): ViewModel() {
     val years : StateFlow<List<YearItem>>
         get() = unikitRepository.year
 

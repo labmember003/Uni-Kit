@@ -40,7 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -119,8 +118,8 @@ class MainActivity : ComponentActivity() {
                         val collegeViewModel : CollegeViewModel = hiltViewModel()
                         val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
                         if (colleges.value != emptyList<CollegeItem>()) {
-                            SelectItemScreen(
-                                itemList = colleges.value.map { it.collegeName },
+                            SelectCollegeScreen(
+                                itemList = colleges.value,
                                 title = "Select Your CollegeItem",
                                 sharedPrefTitle = "COLLEGE"
                             ) {
@@ -130,12 +129,19 @@ class MainActivity : ComponentActivity() {
                            LoadingScreen()
                         }
                     }
-                    composable("select_course_screen") {
+                    composable(
+                        "select_course_screen/{collegeID}",
+                        arguments = listOf(
+                            navArgument("collegeID") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) {
                         val courseViewModel : CourseViewModel = hiltViewModel()
                         val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
                         if (courses.value != emptyList<CollegeItem>()) {
-                            SelectItemScreen(
-                                itemList = courses.value.map { it.courseName },
+                            SelectCourseScreen(
+                                itemList = courses.value,
                                 title = "Select Your Course",
                                 sharedPrefTitle = "COURSE"
                             ) {

@@ -21,9 +21,8 @@ class CourseViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-//            TODO(ABHI STATIC RKHA HAI DATA, ISSE DYNAMICALLY PASS KRNA HAI)
-//            val college = savedStateHandle.get<>()
-            unikitRepository.getCourse(CollegeItem("abc", "USAR"))
+            val collegeID = savedStateHandle.get<String>("collegeID") ?: "123"
+            unikitRepository.getCourse(collegeID)
         }
     }
 }

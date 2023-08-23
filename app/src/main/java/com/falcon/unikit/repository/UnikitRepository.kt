@@ -48,36 +48,36 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         }
     }
 
-    suspend fun getCourse(collegeItem: CollegeItem) {
-        val response = unikitAPI.getCourseList(CourseBody(collegeItem.collegeID))
+    suspend fun getCourse(collegeID: String) {
+        val response = unikitAPI.getCourseList(CourseBody(collegeID))
         if (response.isSuccessful && response.body() != null) {
             _course.emit(response.body()!!)
         }
     }
 
-    suspend fun getYear(courseItem: CourseItem) {
-        val response = unikitAPI.getYearList(YearListBody(courseItem.courseID))
+    suspend fun getYear(courseID: String) {
+        val response = unikitAPI.getYearList(YearListBody(courseID))
         if (response.isSuccessful && response.body() != null) {
             _year.emit(response.body()!!)
         }
     }
 
-    suspend fun getBranch(yearItem: YearItem) {
-        val response = unikitAPI.getBranchList(BranchBody(yearItem.yearID))
+    suspend fun getBranch(yearID: String) {
+        val response = unikitAPI.getBranchList(BranchBody(yearID))
         if (response.isSuccessful && response.body() != null) {
             _branch.emit(response.body()!!)
         }
     }
 
-    suspend fun getSubject(branchItem: BranchItem) {
-        val response = unikitAPI.getSubjectList(SubjectBody(branchItem.branchID))
+    suspend fun getSubject(branchID: String) {
+        val response = unikitAPI.getSubjectList(SubjectBody(branchID))
         if (response.isSuccessful && response.body() != null) {
             _subject.emit(response.body()!!)
         }
     }
 
-    suspend fun getContent(subject: SubjectItem) {
-        val response = unikitAPI.getContentOfSubject(ContentBody(subject.subjectID))
+    suspend fun getContent(subjectID: String) {
+        val response = unikitAPI.getContentOfSubject(ContentBody(subjectID))
         if (response.isSuccessful && response.body() != null) {
             _content.emit(response.body()!!)
         }

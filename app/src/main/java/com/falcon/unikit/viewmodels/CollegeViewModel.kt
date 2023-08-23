@@ -12,8 +12,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class CollegeViewModel @Inject constructor(
-    private val unikitRepository: UnikitRepository,
-    private val savedStateHandle: SavedStateHandle
+    private val unikitRepository: UnikitRepository
 ) : ViewModel() {
     val colleges : StateFlow<List<CollegeItem>>
         get() = unikitRepository.college

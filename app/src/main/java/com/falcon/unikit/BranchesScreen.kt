@@ -25,12 +25,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.viewmodels.SubjectViewModel
@@ -45,24 +43,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import coil.compose.rememberImagePainter
 import androidx.compose.foundation.lazy.items
-import androidx.hilt.navigation.compose.hiltViewModel
 
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-fun Test() {
-    val navController = rememberNavController()
-    val list = listOf(
-        BranchItem("cat","cat"),
-        BranchItem("dog","dog"),
-        BranchItem("rat","rat"),
-        BranchItem("mat","mat")
-    )
-    BranchesScreen(list, navController)
-}
+//@Preview(showBackground = true, showSystemUi = true)
+//@Composable
+//fun Test() {
+//    val navController = rememberNavController()
+//    val list = listOf(
+//        BranchItem("cat","cat"),
+//        BranchItem("dog","dog"),
+//        BranchItem("rat","rat"),
+//        BranchItem("mat","mat")
+//    )
+//    BranchesScreen(list, navController)
+//}
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun BranchesScreen(branchList: List<BranchItem>, navController: NavHostController) {
+fun BranchesScreen(
+    branchList: List<BranchItem>,
+    navigateToContentScreen: (String) -> Unit
+) {
     val list = branchList.map { branch ->
         branch.branchName
     }
@@ -109,15 +109,19 @@ fun BranchesScreen(branchList: List<BranchItem>, navController: NavHostControlle
                 .fillMaxWidth()
                 .weight(0.6f),
             pageContent = { pageNumber ->
-                SubjectList(branchList[pageNumber], navController)
+                SubjectList(branchList[pageNumber], navigateToContentScreen)
             }
         )
     }
 }
 
 @Composable
-fun SubjectList(branch: BranchItem, navController: NavHostController) {
-    val subjectViewModel : SubjectViewModel = hiltViewModel()
+fun SubjectList(
+    branch: BranchItem,
+    navigateToContentScreen: (String) -> Unit
+) {
+    val subjectViewModel : SubjectViewModel = viewModel()
+    subjectViewModel.setBranchID(branch.branchID)
     val subjects: State<List<SubjectItem>> = subjectViewModel.subjects.collectAsState()
     if (subjects.value != emptyList<SubjectItem>()) {
         Column(
@@ -129,7 +133,7 @@ fun SubjectList(branch: BranchItem, navController: NavHostController) {
             Text(text = branch.branchName)
             LazyColumn(content = {
                 items(subjects.value) { subject ->
-                    SubjectItemRow(subject, navController)
+                    SubjectItemRow(subject, navigateToContentScreen)
                 }
             })
         }
@@ -139,13 +143,16 @@ fun SubjectList(branch: BranchItem, navController: NavHostController) {
 }
 
 @Composable
-fun SubjectItemRow(subjectItem: SubjectItem, navController: NavHostController) {
+fun SubjectItemRow(
+    subjectItem: SubjectItem,
+    navigateToContentScreen: (String) -> Unit
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                navController.navigate("content_screen/${subjectItem.subjectID}")
+                navigateToContentScreen(subjectItem.subjectID)
             },
         verticalAlignment = Alignment.CenterVertically
     ) {

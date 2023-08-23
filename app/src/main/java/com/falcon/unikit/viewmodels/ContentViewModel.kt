@@ -20,8 +20,8 @@ class ContentViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-//            TODO(ABHI STATIC RKHA HAI DATA, ISSE DYNAMICALLY PASS KRNA HAI)
-            unikitRepository.getContent(SubjectItem("abc", "USAR", "english"))
+            val subjectID = savedStateHandle.get<String>("subjectID") ?: "123"
+            unikitRepository.getContent(subjectID)
         }
     }
 }

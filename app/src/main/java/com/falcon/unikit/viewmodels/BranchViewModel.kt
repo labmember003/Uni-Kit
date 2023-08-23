@@ -21,8 +21,8 @@ class BranchViewModel@Inject constructor(
 
     init {
         viewModelScope.launch {
-//            TODO(ABHI STATIC RKHA HAI DATA, ISSE DYNAMICALLY PASS KRNA HAI)
-            unikitRepository.getBranch(YearItem("abc", "USAR"))
+            val yearID = savedStateHandle.get<String>("yearID") ?: "123"
+            unikitRepository.getBranch(yearID)
         }
     }
 

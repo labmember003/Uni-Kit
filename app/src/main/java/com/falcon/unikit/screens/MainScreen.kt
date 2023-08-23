@@ -52,19 +52,23 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun MainScreen(yearList: State<List<YearItem>>, navController: NavHostController) {
+fun MainScreen(yearList: State<List<YearItem>>, navController: NavHostController, navigateToBranchScreen: (yearID: String) -> Unit) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .verticalScroll(rememberScrollState())
     ) {
-        ModalDrawerSample(yearList, navController)
+        ModalDrawerSample(yearList, navController, navigateToBranchScreen)
     }
 
 }
 
 @Composable
-fun ModalDrawerSample(yearList: State<List<YearItem>>, navController: NavHostController) {
+fun ModalDrawerSample(
+    yearList: State<List<YearItem>>,
+    navController: NavHostController,
+    navigateToBranchScreen: (yearID: String) -> Unit
+) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     rememberCoroutineScope()
 
@@ -74,7 +78,7 @@ fun ModalDrawerSample(yearList: State<List<YearItem>>, navController: NavHostCon
             DrawerContent(navController)
         },
         content = {
-            ChooseYearScreen(yearList, drawerState, navController)
+            ChooseYearScreen(yearList, drawerState, navigateToBranchScreen)
         }
     )
 }
@@ -83,7 +87,7 @@ fun ModalDrawerSample(yearList: State<List<YearItem>>, navController: NavHostCon
 fun ChooseYearScreen(
     yearList: State<List<YearItem>>,
     drawerState: DrawerState,
-    navController: NavHostController
+    navigateToBranchScreen: (yearID: String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     Column {
@@ -91,20 +95,17 @@ fun ChooseYearScreen(
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
-            modifier = Modifier
-                .clickable {
-                    navController.navigate("branches_screen")
-                },
+            modifier = Modifier,
             verticalArrangement = Arrangement.SpaceAround) {
                items(yearList.value){
-                   YearItemComposable(year = it)
+                   YearItemComposable(year = it, navigateToBranchScreen)
                }
             }
     }
 }
 
 @Composable
-fun YearItemComposable(year: YearItem) {
+fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
     val backGroundImage = getImageFromYear(year.yearName)
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -115,7 +116,12 @@ fun YearItemComposable(year: YearItem) {
             .paint(
                 painterResource(id = backGroundImage),
                 contentScale = ContentScale.Crop
-            ),
+            )
+            .clickable {
+                navigateToBranchScreen(
+                    year.yearID
+                )
+            },
     ) {
         Text(
             text =  year.yearName,

@@ -95,9 +95,9 @@ class MainActivity : ComponentActivity() {
                 val context = LocalContext.current
 
                 NavHost(navController = navController, startDestination = "test") {
-                    composable("test") {
-                        Test()
-                    }
+//                    composable("test") {
+//                        Test()
+//                    }
                     composable("walk_through_screen") {
                         BackHandler(
                             onBack = {
@@ -122,8 +122,8 @@ class MainActivity : ComponentActivity() {
                                 itemList = colleges.value,
                                 title = "Select Your CollegeItem",
                                 sharedPrefTitle = "COLLEGE"
-                            ) {
-                                navController.navigate("select_course_screen")
+                            ) { collegeID ->
+                                navController.navigate("select_course_screen/${collegeID}")
                             }
                         } else {
                            LoadingScreen()
@@ -144,33 +144,50 @@ class MainActivity : ComponentActivity() {
                                 itemList = courses.value,
                                 title = "Select Your Course",
                                 sharedPrefTitle = "COURSE"
-                            ) {
-                                navController.navigate("main_screen")
+                            ) { courseID ->
+                                navController.navigate("main_screen/${courseID}")
                             }
                         } else {
                             LoadingScreen()
                         }
                     }
-                    composable("main_screen") {
+                    composable(
+                        "main_screen/{courseID}",
+                        arguments = listOf(
+                            navArgument("courseID") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) {
                         val yearViewModel : YearViewModel = hiltViewModel()
                         val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
                         if (years.value != emptyList<YearItem>()) {
                             MainScreen(
                                 yearList = years,
                                 navController = navController
-                            )
+                            ) { yearID ->
+                                navController.navigate("branches_screen/${yearID}")
+                            }
                         } else {
                             LoadingScreen()
                         }
                     }
-                    composable("branches_screen") {
+                    composable(
+                        "branches_screen/{yearID}",
+                        arguments = listOf(
+                            navArgument("yearID") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) {
                         val branchViewModel : BranchViewModel = hiltViewModel()
                         val branches: State<List<BranchItem>> = branchViewModel.branches.collectAsState()
                         if (branches.value != emptyList<BranchItem>()) {
                             BranchesScreen(
-                                branches.value,
-                                navController = navController
-                            )
+                                branches.value
+                            ) { subjectID ->
+                                navController.navigate("content_screen/${subjectID}")
+                            }
                         } else {
                             LoadingScreen()
                         }
@@ -183,8 +200,7 @@ class MainActivity : ComponentActivity() {
                                 nullable = false
                             }
                         )
-                    ) { entry ->
-                        val subject = entry.arguments?.getString("subjectID")
+                    ) {
                         val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
                         if (content.value != emptyList<BranchItem>()) {
@@ -196,34 +212,31 @@ class MainActivity : ComponentActivity() {
                             LoadingScreen()
                         }
                     }
-                    composable("sign_in") {
-                        BackHandler(
-                            onBack = {
-                                finish()
-                            }
-                        )
-                        LoginScreen { navController.navigate("main_screen") }
-                    }
-                    composable("branches_screen") {
-
-                    }
-                    composable("profile") {
-                        val sharedPreferences = remember {
-                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-                        }
-                        ProfileScreen(
-                            userData = googleAuthUiClient.getSignedInUser(),
-                            onSignOut = {
-                                lifecycleScope.launch {
-                                    googleAuthUiClient.signOut()
-                                    navController.navigate("walk_through_screen")
-                                }
-                                val editor = sharedPreferences.edit()
-                                editor.clear()
-                                editor.apply()
-                            }
-                        )
-                    }
+//                    composable("sign_in") {
+//                        BackHandler(
+//                            onBack = {
+//                                finish()
+//                            }
+//                        )
+//                        LoginScreen { navController.navigate("main_screen") }
+//                    }
+//                    composable("profile") {
+//                        val sharedPreferences = remember {
+//                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+//                        }
+//                        ProfileScreen(
+//                            userData = googleAuthUiClient.getSignedInUser(),
+//                            onSignOut = {
+//                                lifecycleScope.launch {
+//                                    googleAuthUiClient.signOut()
+//                                    navController.navigate("walk_through_screen")
+//                                }
+//                                val editor = sharedPreferences.edit()
+//                                editor.clear()
+//                                editor.apply()
+//                            }
+//                        )
+//                    }
                     composable("settings") {
                         SettingsScreen (){
                             navController.popBackStack()

@@ -19,8 +19,8 @@ class YearViewModel@Inject constructor(
 
     init {
         viewModelScope.launch {
-//            TODO(ABHI STATIC RKHA HAI DATA, ISSE DYNAMICALLY PASS KRNA HAI)
-            unikitRepository.getYear(CourseItem("abc", "USAR"))
+            val courseID = savedStateHandle.get<String>("courseID") ?: "123"
+            unikitRepository.getYear(courseID)
         }
     }
 }

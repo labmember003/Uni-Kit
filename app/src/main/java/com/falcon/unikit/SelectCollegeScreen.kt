@@ -40,7 +40,7 @@ fun SelectCollegeScreen(
     itemList: List<CollegeItem>,
     title: String,
     sharedPrefTitle: String,
-    onClick: () -> Unit
+    onClick: (collegeID: String) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -58,82 +58,88 @@ fun SelectCollegeScreen(
             fontSize = 12.sp
         )
         LottieAnimation(animationID = R.raw.university)
-        CollegePicker(colleges = itemList.map { it.collegeName }, sharedPrefTitle = sharedPrefTitle)
+
+
+        var value by remember { mutableStateOf(sharedPrefTitle) }
+        var college by remember { mutableStateOf(CollegeItem("123", "USAR")) }
+        var mExpanded by remember { mutableStateOf(false) }
+        var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+        val icon = if (mExpanded)
+            Icons.Filled.KeyboardArrowUp
+        else
+            Icons.Filled.KeyboardArrowDown
+        Column(
+            Modifier
+                .padding(10.dp, 5.dp)
+        ) {
+            OutlinedTextField(
+                readOnly = true,
+                value = value,
+                onValueChange = {
+                    value = it
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onGloballyPositioned { coordinates ->
+                        mTextFieldSize = coordinates.size.toSize()
+                    }
+                ,
+                label = {
+                    androidx.compose.material.Text(text = sharedPrefTitle, modifier = Modifier
+                        .clickable {
+                            mExpanded = !mExpanded
+                        })
+                },
+                trailingIcon = {
+                    Icon(icon,"contentDescription",
+                        Modifier
+                            .size(35.dp)
+                            .clickable {
+                                mExpanded = !mExpanded
+                            }
+                    )
+                }
+            )
+            DropdownMenu(
+                expanded = mExpanded,
+                onDismissRequest = { mExpanded = false },
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { mTextFieldSize.width.toDp() })
+                    .clickable {
+                        mExpanded = true
+                    }
+            ) {
+                itemList.forEach {
+                    DropdownMenuItem(onClick = {
+                        value = it.collegeName
+                        mExpanded = false
+                        college = it
+                    }) {
+                        androidx.compose.material.Text(
+                            text = it.collegeName,
+                            modifier = Modifier
+                        )
+                    }
+                }
+            }
+        }
+
+
+
+
+
+
+
+
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            onClick()
+            onClick(college.collegeID)
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
         ) {
             Text(
                 text = "NEXT",
             )
-        }
-    }
-}
-
-
-@Composable
-fun CollegePicker(colleges: List<String>, sharedPrefTitle: String){
-    var value by remember { mutableStateOf(sharedPrefTitle) }
-    var mExpanded by remember { mutableStateOf(false) }
-    var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
-    val icon = if (mExpanded)
-        Icons.Filled.KeyboardArrowUp
-    else
-        Icons.Filled.KeyboardArrowDown
-    Column(
-        Modifier
-            .padding(10.dp, 5.dp)
-    ) {
-        OutlinedTextField(
-            readOnly = true,
-            value = value,
-            onValueChange = {
-                value = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .onGloballyPositioned { coordinates ->
-                    mTextFieldSize = coordinates.size.toSize()
-                }
-            ,
-            label = {
-                androidx.compose.material.Text(text = sharedPrefTitle, modifier = Modifier
-                    .clickable {
-                        mExpanded = !mExpanded
-                    })
-            },
-            trailingIcon = {
-                Icon(icon,"contentDescription",
-                    Modifier
-                        .size(35.dp)
-                        .clickable {
-                            mExpanded = !mExpanded
-                        }
-                )
-            }
-        )
-        DropdownMenu(
-            expanded = mExpanded,
-            onDismissRequest = { mExpanded = false },
-            modifier = Modifier
-                .width(with(LocalDensity.current) { mTextFieldSize.width.toDp() })
-                .clickable {
-                    mExpanded = true
-                }
-        ) {
-            colleges.forEach {
-                DropdownMenuItem(onClick = {
-                    value = it
-                    mExpanded = false
-                }) {
-                    androidx.compose.material.Text(
-                        text = it,
-                        modifier = Modifier
-                    )
-                }
-            }
         }
     }
 }

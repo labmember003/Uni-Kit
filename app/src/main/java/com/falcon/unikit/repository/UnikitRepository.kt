@@ -49,35 +49,35 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     }
 
     suspend fun getCourse(collegeID: String) {
-        val response = unikitAPI.getCourseList(CourseBody(collegeID))
+        val response = unikitAPI.getCourseList(collegeID)
         if (response.isSuccessful && response.body() != null) {
             _course.emit(response.body()!!)
         }
     }
 
     suspend fun getYear(courseID: String) {
-        val response = unikitAPI.getYearList(YearListBody(courseID))
+        val response = unikitAPI.getYearList(courseID)
         if (response.isSuccessful && response.body() != null) {
             _year.emit(response.body()!!)
         }
     }
 
     suspend fun getBranch(yearID: String) {
-        val response = unikitAPI.getBranchList(BranchBody(yearID))
+        val response = unikitAPI.getBranchList(yearID)
         if (response.isSuccessful && response.body() != null) {
             _branch.emit(response.body()!!)
         }
     }
 
     suspend fun getSubject(branchID: String) {
-        val response = unikitAPI.getSubjectList(SubjectBody(branchID))
+        val response = unikitAPI.getSubjectList(branchID)
         if (response.isSuccessful && response.body() != null) {
             _subject.emit(response.body()!!)
         }
     }
 
     suspend fun getContent(subjectID: String) {
-        val response = unikitAPI.getContentOfSubject(ContentBody(subjectID))
+        val response = unikitAPI.getContentOfSubject(subjectID)
         if (response.isSuccessful && response.body() != null) {
             _content.emit(response.body()!!)
         }

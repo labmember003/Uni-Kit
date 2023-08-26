@@ -13,23 +13,24 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.POST
+import retrofit2.http.Query
 
 interface UnikitAPI {
     @GET("/getCollegeList")
     suspend fun getCollegeList(): Response<List<CollegeItem>>
 
-    @POST("/getCourseList")
-    suspend fun getCourseList(@Body body: CourseBody): Response<List<CourseItem>>
+    @GET("/getCourseList")
+    suspend fun getCourseList(@Query("college_id") courseQueryParam: String): Response<List<CourseItem>>
 
-    @POST("/getYearList")
-    suspend fun getYearList(@Body body: YearListBody): Response<List<YearItem>>
+    @GET("/getYearList")
+    suspend fun getYearList(@Query("course_id") yearListQueryParam: String): Response<List<YearItem>>
 
-    @POST("/getBranchList")
-    suspend fun getBranchList(@Body body: BranchBody): Response<List<BranchItem>>
+    @GET("/getBranchList")
+    suspend fun getBranchList(@Query("year_id") branchQueryParam: String): Response<List<BranchItem>>
 
-    @POST("/getSubjectList")
-    suspend fun getSubjectList(@Body body: SubjectBody): Response<List<SubjectItem>>
+    @GET("/getSubjectList")
+    suspend fun getSubjectList(@Query("branch_id") subjectQueryParam: String): Response<List<SubjectItem>>
 
-    @POST("/getContent")
-    suspend fun getContentOfSubject(@Body body: ContentBody): Response<List<Content>>
+    @GET("/getContent")
+    suspend fun getContentOfSubject(@Query("subject_id") contentQueryParam: String): Response<List<Content>>
 }

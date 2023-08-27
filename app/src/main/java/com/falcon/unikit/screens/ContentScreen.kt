@@ -2,7 +2,6 @@ package com.falcon.unikit.screens
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -18,9 +17,13 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -30,6 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -135,6 +139,11 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
     }
 }
 
+@Preview(showBackground = true)
+@Composable()
+fun test() {
+    ContentItemRow(Item("itemNAME", "f"), R.drawable.ic_goole)
+}
 @Composable
 fun ContentItemRow(contentItem: Item, icon: Int) {
     Row(
@@ -154,7 +163,6 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
             modifier = Modifier
                 .size(50.dp)
                 .clip(CircleShape)
-                .background(MaterialTheme.colors.primary)
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
@@ -163,5 +171,41 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)
         )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+        ) {
+            IconButton(
+                modifier = Modifier,
+                onClick = {
+
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
+                    contentDescription = "Thumbs Up",
+                    modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                )
+            }
+            Text(
+                text = "0",
+            )
+            IconButton(
+                modifier = Modifier,
+                onClick = {
+
+                }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
+                    contentDescription = "Thumbs Up",
+                    modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                )
+            }
+            Text(
+                text = "0"
+            )
+        }
+
     }
 }

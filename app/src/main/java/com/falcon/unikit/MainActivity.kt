@@ -27,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -72,6 +73,7 @@ import com.falcon.unikit.viewmodels.CourseViewModel
 import com.falcon.unikit.viewmodels.YearViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -119,19 +121,37 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("select_college_screen") {
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
+                        val errorState = remember { mutableStateOf(false) }
                         val collegeViewModel : CollegeViewModel = hiltViewModel()
                         val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
-                        if (colleges.value != emptyList<CollegeItem>()) {
-                            SelectCollegeScreen(
-                                itemList = colleges.value,
-                                title = "Select Your CollegeItem",
-                                sharedPrefTitle = "COLLEGE"
-                            ) { collegeID ->
-                                navController.navigate("select_course_screen/${collegeID}")
-                                Log.i("catcatcat", collegeID)
+
+                        LaunchedEffect(key1 = errorState.value) {
+                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+                            delay(timeoutDurationMillis) // Wait for the timeout duration
+                            // Check if the data is still not available (i.e., an error occurred)
+                            if (colleges.value.isEmpty()) {
+                                errorState.value = true
+                            }
+                        }
+
+                        if (errorState.value) {
+                            // Show error message and retry button
+                            ErrorPage {
+
                             }
                         } else {
-                           LoadingScreen()
+                            if (colleges.value != emptyList<CollegeItem>()) {
+                                SelectCollegeScreen(
+                                    itemList = colleges.value,
+                                    title = "Select Your College",
+                                    sharedPrefTitle = "COLLEGE"
+                                ) { collegeID ->
+                                    navController.navigate("select_course_screen/${collegeID}")
+                                    Log.i("catcatcat", collegeID)
+                                }
+                            } else {
+                                LoadingScreen()
+                            }
                         }
 //                        TODO
 //                          use ErrorPage() composable also
@@ -267,25 +287,6 @@ fun LottieAnimation(animationID: Int) {
 }
 
 
-@Composable
-fun LoadingScreen() {
-    Column(
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.loading_cats))
-        com.airbnb.lottie.compose.LottieAnimation(
-            composition = composition,
-            iterations = LottieConstants.IterateForever,
-            modifier = Modifier
-                .fillMaxSize()
-                .size(400.dp)
-        )
-        Text (
-            text = "Loading..."
-        )
-    }
-}
 
 @Composable
 fun GoogleSignInMainScreen(
@@ -398,24 +399,34 @@ fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
 }
 
 @Composable
+fun LoadingScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(animationID = R.raw.loading_cats)
+        Text (
+            text = "Loading..."
+        )
+    }
+}
+
+@Composable
 fun ErrorPage(
     onClick: () -> Unit
 ) {
     Column(
+        modifier = Modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.error_cat))
-        com.airbnb.lottie.compose.LottieAnimation(
-            composition = composition,
-            iterations = LottieConstants.IterateForever,
-            modifier = Modifier
-                .fillMaxSize()
-                .size(400.dp)
-        )
+        LottieAnimation(animationID = R.raw.error_cat)
         Text (
             text = "Something Went Wrong..."
         )
+        Spacer(modifier = Modifier
+            .size(20.dp))
         Button(onClick = {
             onClick()
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),

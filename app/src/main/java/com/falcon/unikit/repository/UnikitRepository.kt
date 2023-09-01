@@ -1,17 +1,12 @@
 package com.falcon.unikit.repository
 
 import com.falcon.unikit.api.Content
-import com.falcon.unikit.api.ContentBody
-import com.falcon.unikit.models.body.CourseBody
 import com.falcon.unikit.api.UnikitAPI
-import com.falcon.unikit.models.body.BranchBody
-import com.falcon.unikit.models.body.SubjectBody
-import com.falcon.unikit.models.item.YearItem
-import com.falcon.unikit.models.body.YearListBody
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.SubjectItem
+import com.falcon.unikit.models.item.YearItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import javax.inject.Inject
@@ -81,5 +76,9 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         if (response.isSuccessful && response.body() != null) {
             _content.emit(response.body()!!)
         }
+    }
+
+    suspend fun likeButtonPressed(itemID: String) {
+        unikitAPI.likeButtonPressed(itemID)
     }
 }

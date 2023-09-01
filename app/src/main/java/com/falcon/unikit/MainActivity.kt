@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
@@ -20,6 +21,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -36,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -94,7 +98,7 @@ class MainActivity : ComponentActivity() {
                 val navController = rememberNavController()
                 val context = LocalContext.current
 
-                NavHost(navController = navController, startDestination = "test") {
+                NavHost(navController = navController, startDestination = "walk_through_screen") {
 //                    composable("test") {
 //                        Test()
 //                    }
@@ -124,10 +128,13 @@ class MainActivity : ComponentActivity() {
                                 sharedPrefTitle = "COLLEGE"
                             ) { collegeID ->
                                 navController.navigate("select_course_screen/${collegeID}")
+                                Log.i("catcatcat", collegeID)
                             }
                         } else {
                            LoadingScreen()
                         }
+//                        TODO
+//                          use ErrorPage() composable also
                     }
                     composable(
                         "select_course_screen/{collegeID}",
@@ -387,5 +394,35 @@ fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
             style = androidx.compose.material.MaterialTheme.typography.body1,
             color = Color.Unspecified
         )
+    }
+}
+
+@Composable
+fun ErrorPage(
+    onClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.error_cat))
+        com.airbnb.lottie.compose.LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .fillMaxSize()
+                .size(400.dp)
+        )
+        Text (
+            text = "Something Went Wrong..."
+        )
+        Button(onClick = {
+            onClick()
+        },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
+        ) {
+            Text(
+                text = "RETRY",
+            )
+        }
     }
 }

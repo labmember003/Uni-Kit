@@ -132,7 +132,8 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(content = {
-            items(items) { content ->
+            val sortedItems = items.sortedByDescending { it.likeCount }
+            items(sortedItems) { content ->
                 ContentItemRow(content, icon)
             }
         })

@@ -18,7 +18,7 @@ class NetworkModule {
     fun providesRetrofit(): Retrofit {
         return Retrofit
             .Builder()
-            .baseUrl("https://www.google.com/")
+            .baseUrl("https://uni-kit-api.vercel.app/")
             .addConverterFactory(GsonConverterFactory.create())
             .build()
     }

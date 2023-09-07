@@ -56,7 +56,6 @@ fun MainScreen(yearList: State<List<YearItem>>, navController: NavHostController
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
     ) {
         ModalDrawerSample(yearList, navController, navigateToBranchScreen)
     }
@@ -106,7 +105,10 @@ fun ChooseYearScreen(
 
 @Composable
 fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
-    val backGroundImage = getImageFromYear(year.yearName)
+    var backGroundImage = R.drawable.year4
+    if (year.yearName != null) {
+        backGroundImage = getImageFromYear(year.yearName)
+    }
     Box(
         contentAlignment = Alignment.BottomCenter,
         modifier = Modifier
@@ -119,12 +121,12 @@ fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) 
             )
             .clickable {
                 navigateToBranchScreen(
-                    year.yearID
+                    year.yearID?: "Error: yearID is NULL"
                 )
             },
     ) {
         Text(
-            text =  year.yearName,
+            text =  year.yearName?: "Error: yearName is NULL",
             fontSize = 18.sp,
             color = Color.Black,
             modifier = Modifier

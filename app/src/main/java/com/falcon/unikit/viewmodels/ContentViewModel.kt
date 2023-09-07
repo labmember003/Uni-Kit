@@ -6,10 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.repository.UnikitRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+@HiltViewModel
 class ContentViewModel @Inject constructor(
     private val unikitRepository: UnikitRepository,
     private val savedStateHandle: SavedStateHandle

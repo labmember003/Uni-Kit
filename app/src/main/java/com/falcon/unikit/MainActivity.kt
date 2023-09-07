@@ -184,7 +184,7 @@ class MainActivity : ComponentActivity() {
                         val errorState = remember { mutableStateOf(false) }
                         val courseViewModel : CourseViewModel = hiltViewModel()
                         val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
-                        Log.i("catcatcat", courses.value.size.toString())
+                        Log.i("catcatcatcat", courses.value.size.toString())
                         LaunchedEffect(key1 = errorState.value) {
                             val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
                             delay(timeoutDurationMillis) // Wait for the timeout duration
@@ -199,7 +199,7 @@ class MainActivity : ComponentActivity() {
                                 errorState.value = false
                             }
                         } else {
-                            if (courses.value != emptyList<CollegeItem>()) {
+                            if (courses.value != emptyList<CourseItem>()) {
                                 SelectCourseScreen(
                                     itemList = courses.value,
                                     title = "Select Your Course",
@@ -220,17 +220,34 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
+                        val errorState = remember { mutableStateOf(false) }
                         val yearViewModel : YearViewModel = hiltViewModel()
                         val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
-                        if (years.value != emptyList<YearItem>()) {
-                            MainScreen(
-                                yearList = years,
-                                navController = navController
-                            ) { yearID ->
-                                navController.navigate("branches_screen/${yearID}")
+                        Log.i("catcatcatdog", years.value.size.toString())
+                        LaunchedEffect(key1 = errorState.value) {
+                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+                            delay(timeoutDurationMillis) // Wait for the timeout duration
+                            // Check if the data is still not available (i.e., an error occurred)
+                            if (years.value.isEmpty()) {
+                                errorState.value = true
+                            }
+                        }
+                        if (errorState.value) {
+                            ErrorPage {
+                                errorState.value = false
                             }
                         } else {
-                            LoadingScreen()
+                            if (years.value != emptyList<CollegeItem>()) {
+                                MainScreen(
+                                    yearList = years,
+                                    navController = navController
+                                ) { yearID ->
+                                    Log.i("yearyearyear", yearID)
+                                    navController.navigate("branches_screen/${yearID}")
+                                }
+                            } else {
+                                LoadingScreen()
+                            }
                         }
                     }
                     composable(

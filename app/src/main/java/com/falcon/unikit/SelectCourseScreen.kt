@@ -110,12 +110,12 @@ fun SelectCourseScreen(
             ) {
                 itemList.forEach {
                     DropdownMenuItem(onClick = {
-                        value = it.courseName
+                        value = it.courseName ?: "ERROR: courseName is NULL"
                         mExpanded = false
                         course = it
                     }) {
                         androidx.compose.material.Text(
-                            text = it.courseName,
+                            text = it.courseName ?: "ERROR: courseName is NULL",
                             modifier = Modifier
                         )
                     }
@@ -134,7 +134,7 @@ fun SelectCourseScreen(
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            onClick(course.courseID)
+            onClick(course.courseID ?: "ERROR: courseID is NULL")
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
             ) {
             Text(

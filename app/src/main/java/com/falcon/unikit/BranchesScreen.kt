@@ -82,7 +82,7 @@ fun BranchesScreen(
                 Tab(
                     text = {
                         Text(
-                            list[index],
+                            list[index]?: "ERROR: branchName is NULL",
                             // on below line we are specifying the text color
                             // for the text in that tab
                             color = if (pageState.currentPage == index) Color(R.color.custom_color_tab_bar) else Color.Black
@@ -121,7 +121,7 @@ fun SubjectList(
     navigateToContentScreen: (String) -> Unit
 ) {
     val subjectViewModel : SubjectViewModel = viewModel()
-    subjectViewModel.setBranchID(branch.branchID)
+    subjectViewModel.setBranchID(branch.branchID ?: "ERROR: branchID is NULL")
     val subjects: State<List<SubjectItem>> = subjectViewModel.subjects.collectAsState()
     if (subjects.value != emptyList<SubjectItem>()) {
         Column(
@@ -130,7 +130,7 @@ fun SubjectList(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = branch.branchName)
+            Text(text = branch.branchName ?: "ERROR: branchName is NULL")
             LazyColumn(content = {
                 items(subjects.value) { subject ->
                     SubjectItemRow(subject, navigateToContentScreen)
@@ -152,7 +152,7 @@ fun SubjectItemRow(
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                navigateToContentScreen(subjectItem.subjectID)
+                navigateToContentScreen(subjectItem.subjectID ?: "ERROR: Subject Id is NULL")
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -166,7 +166,7 @@ fun SubjectItemRow(
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = subjectItem.subjectName,
+            text = subjectItem.subjectName ?: "ERROR: subjectName is NULL",
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)

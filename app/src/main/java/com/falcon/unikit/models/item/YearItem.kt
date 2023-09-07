@@ -1,6 +1,6 @@
 package com.falcon.unikit.models.item
 
 data class YearItem (
-    val yearID: String,
-    val yearName: String
+    val yearID: String?,
+    val yearName: String?
 )

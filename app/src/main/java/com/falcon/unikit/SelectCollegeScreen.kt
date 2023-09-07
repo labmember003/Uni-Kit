@@ -116,7 +116,7 @@ fun SelectCollegeScreen(
             ) {
                 itemList.forEach {
                     DropdownMenuItem(onClick = {
-                        value = it.collegeName
+                        value = it.collegeName ?: "ERROR: collegeName is NULL"
                         mExpanded = false
                         college = it
 
@@ -127,7 +127,7 @@ fun SelectCollegeScreen(
 
                     }) {
                         androidx.compose.material.Text(
-                            text = it.collegeName,
+                            text = it.collegeName ?: "ERROR: collegeName is NULL",
                             modifier = Modifier
                         )
                     }
@@ -145,7 +145,7 @@ fun SelectCollegeScreen(
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            onClick(college.collegeID)
+            onClick(college.collegeID ?: "ERROR: collegeID is NULL")
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
         ) {
             Text(

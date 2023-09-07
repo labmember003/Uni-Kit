@@ -1,6 +1,7 @@
 package com.falcon.unikit.settings
 
 import android.content.ActivityNotFoundException
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
@@ -19,6 +20,7 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -28,7 +30,7 @@ import com.falcon.unikit.R
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
 @Composable
-fun SettingsScreen(onBackCLick: () -> Boolean) {
+fun SettingsScreen(onBackCLick: () -> Boolean, navigateToSelectCollegeScreen: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,6 +59,9 @@ fun SettingsScreen(onBackCLick: () -> Boolean) {
         val openUrlLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
         ) {}
+        val sharedPreferences = remember {
+            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+        }
         val sendMail = { title: String ->
             val emailIntent = Intent(Intent.ACTION_SENDTO).apply {
                 data = Uri.parse("mailto:") // only email apps should handle this
@@ -79,10 +84,20 @@ fun SettingsScreen(onBackCLick: () -> Boolean) {
         val openOssLicensesMenuActivity = {
             startActivity(context, Intent(context, OssLicensesMenuActivity::class.java), null)
         }
+        val clearSharedPreferences = {
+            val editor = sharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+        }
+        val performStartOver = {
+            clearSharedPreferences()
+            navigateToSelectCollegeScreen()
+        }
         Column(
             modifier = Modifier
                 .verticalScroll(rememberScrollState())
         ) {
+            RegularPreference("Start Over","Change College / Course", { performStartOver() })
             PreferenceCategory("General")
             RegularPreference("Contact Us", "", {sendMail("Regarding App ")})
             PreferenceCategory("About")

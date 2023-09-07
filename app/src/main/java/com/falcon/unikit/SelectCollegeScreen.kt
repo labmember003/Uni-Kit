@@ -1,6 +1,8 @@
 package com.falcon.unikit
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +34,8 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import com.falcon.unikit.Utils.COLLEGE_ID
+import com.falcon.unikit.Utils.COLLEGE_NAME
 import com.falcon.unikit.models.item.CollegeItem
 
 
@@ -40,7 +44,8 @@ fun SelectCollegeScreen(
     itemList: List<CollegeItem>,
     title: String,
     sharedPrefTitle: String,
-    onClick: (collegeID: String) -> Unit
+    sharedPreferences: SharedPreferences,
+    onClick: (collegeID: String) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -114,6 +119,12 @@ fun SelectCollegeScreen(
                         value = it.collegeName
                         mExpanded = false
                         college = it
+
+                        val editor = sharedPreferences.edit()
+                        editor.putString(COLLEGE_NAME, college.collegeName)
+                        editor.putString(COLLEGE_ID, college.collegeID)
+                        editor.apply()
+
                     }) {
                         androidx.compose.material.Text(
                             text = it.collegeName,

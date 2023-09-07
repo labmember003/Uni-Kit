@@ -40,11 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -54,13 +52,13 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
+import com.falcon.unikit.Utils.COLLEGE_ID
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
-import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
@@ -74,7 +72,6 @@ import com.falcon.unikit.viewmodels.YearViewModel
 import com.google.android.gms.auth.api.identity.Identity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -99,6 +96,9 @@ class MainActivity : ComponentActivity() {
             ) {
                 val navController = rememberNavController()
                 val context = LocalContext.current
+                val sharedPreferences = remember {
+                    context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                }
 
                 NavHost(navController = navController, startDestination = "walk_through_screen") {
 //                    composable("test") {
@@ -121,6 +121,22 @@ class MainActivity : ComponentActivity() {
                     }
                     composable("select_college_screen") {
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
+                        LaunchedEffect(Unit) {
+                            val collegeID = sharedPreferences.getString(COLLEGE_ID, "NO_COLLEGE_SELECTED")
+                            if (collegeID != "NO_COLLEGE_SELECTED") {
+                                navController.navigate("select_course_screen/${collegeID}")
+                            }
+                        }
+                        BackHandler(
+                            onBack = {
+                                navController.navigate("walk_through_screen")
+                            }
+                        )
+
+//                        TODO - PERFORM AT CHANGE COLLEGE OPTION IN SETTINGS
+//                        val editor = sharedPreferences.edit()
+//                        editor.clear()
+//                        editor.apply()
                         val errorState = remember { mutableStateOf(false) }
                         val collegeViewModel : CollegeViewModel = hiltViewModel()
                         val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
@@ -137,14 +153,15 @@ class MainActivity : ComponentActivity() {
                         if (errorState.value) {
                             // Show error message and retry button
                             ErrorPage {
-
+                                errorState.value = false
                             }
                         } else {
                             if (colleges.value != emptyList<CollegeItem>()) {
                                 SelectCollegeScreen(
                                     itemList = colleges.value,
                                     title = "Select Your College",
-                                    sharedPrefTitle = "COLLEGE"
+                                    sharedPrefTitle = "COLLEGE",
+                                    sharedPreferences = sharedPreferences
                                 ) { collegeID ->
                                     navController.navigate("select_course_screen/${collegeID}")
                                     Log.i("catcatcat", collegeID)
@@ -164,18 +181,35 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
+                        val errorState = remember { mutableStateOf(false) }
                         val courseViewModel : CourseViewModel = hiltViewModel()
                         val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
-                        if (courses.value != emptyList<CollegeItem>()) {
-                            SelectCourseScreen(
-                                itemList = courses.value,
-                                title = "Select Your Course",
-                                sharedPrefTitle = "COURSE"
-                            ) { courseID ->
-                                navController.navigate("main_screen/${courseID}")
+                        Log.i("catcatcat", courses.value.size.toString())
+                        LaunchedEffect(key1 = errorState.value) {
+                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+                            delay(timeoutDurationMillis) // Wait for the timeout duration
+                            // Check if the data is still not available (i.e., an error occurred)
+                            if (courses.value.isEmpty()) {
+                                errorState.value = true
+                            }
+                        }
+                        if (errorState.value) {
+                            // Show error message and retry button
+                            ErrorPage {
+                                errorState.value = false
                             }
                         } else {
-                            LoadingScreen()
+                            if (courses.value != emptyList<CollegeItem>()) {
+                                SelectCourseScreen(
+                                    itemList = courses.value,
+                                    title = "Select Your Course",
+                                    sharedPrefTitle = "COURSE"
+                                ) { courseID ->
+                                    navController.navigate("main_screen/${courseID}")
+                                }
+                            } else {
+                                LoadingScreen()
+                            }
                         }
                     }
                     composable(
@@ -265,8 +299,10 @@ class MainActivity : ComponentActivity() {
 //                        )
 //                    }
                     composable("settings") {
-                        SettingsScreen (){
+                        SettingsScreen ({
                             navController.popBackStack()
+                        }) {
+                            navController.navigate("select_college_screen")
                         }
                     }
                 }

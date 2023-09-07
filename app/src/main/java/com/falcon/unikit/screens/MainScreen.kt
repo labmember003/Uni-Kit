@@ -96,7 +96,8 @@ fun ChooseYearScreen(
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier,
             verticalArrangement = Arrangement.SpaceAround) {
-               items(yearList.value){
+                val reversedList = yearList.value.reversed()
+               items(reversedList){
                    YearItemComposable(year = it, navigateToBranchScreen)
                }
             }
@@ -106,8 +107,8 @@ fun ChooseYearScreen(
 @Composable
 fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
     var backGroundImage = R.drawable.year4
-    if (year.yearName != null) {
-        backGroundImage = getImageFromYear(year.yearName)
+    if (year.numofYear != null) {
+        backGroundImage = getImageFromYear(year.numofYear)
     }
     Box(
         contentAlignment = Alignment.BottomCenter,
@@ -126,9 +127,9 @@ fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) 
             },
     ) {
         Text(
-            text =  year.yearName?: "Error: yearName is NULL",
+            text =  year.numofYear?: "Error: yearName is NULL",
             fontSize = 18.sp,
-            color = Color.Black,
+            color = Color.White,
             modifier = Modifier
                 .padding(8.dp, 20.dp),
             style = MaterialTheme.typography.body1
@@ -138,16 +139,16 @@ fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) 
 
 fun getImageFromYear(yearName: String): Int {
     when (yearName) {
-        "First Year" -> {
+        "First" -> {
             return R.drawable.year1
         }
-        "Second Year" -> {
+        "Second" -> {
             return R.drawable.year2
         }
-        "Third Year" -> {
+        "Third" -> {
             return R.drawable.year3
         }
-        "Fourth Year" -> {
+        "Fourth" -> {
             return R.drawable.year4
         }
     }

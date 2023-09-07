@@ -53,6 +53,7 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.Utils.COLLEGE_ID
+import com.falcon.unikit.Utils.COURSE_ID
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.item.BranchItem
@@ -181,6 +182,12 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
+                        LaunchedEffect(Unit) {
+                            val courseID = sharedPreferences.getString(COURSE_ID, "NO_COURSE_SELECTED")
+                            if (courseID != "NO_COURSE_SELECTED") {
+                                navController.navigate("main_screen/${courseID}")
+                            }
+                        }
                         val errorState = remember { mutableStateOf(false) }
                         val courseViewModel : CourseViewModel = hiltViewModel()
                         val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
@@ -203,7 +210,8 @@ class MainActivity : ComponentActivity() {
                                 SelectCourseScreen(
                                     itemList = courses.value,
                                     title = "Select Your Course",
-                                    sharedPrefTitle = "COURSE"
+                                    sharedPrefTitle = "COURSE",
+                                    sharedPreferences = sharedPreferences
                                 ) { courseID ->
                                     navController.navigate("main_screen/${courseID}")
                                 }
@@ -220,6 +228,11 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
+                        BackHandler(
+                            onBack = {
+                                finish()
+                            }
+                        )
                         val errorState = remember { mutableStateOf(false) }
                         val yearViewModel : YearViewModel = hiltViewModel()
                         val years: State<List<YearItem>> = yearViewModel.years.collectAsState()

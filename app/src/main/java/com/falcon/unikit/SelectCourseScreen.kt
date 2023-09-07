@@ -1,5 +1,6 @@
 package com.falcon.unikit
 
+import android.content.SharedPreferences
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -39,7 +40,8 @@ fun SelectCourseScreen(
     itemList: List<CourseItem>,
     title: String,
     sharedPrefTitle: String,
-    onClick: (courseID: String) -> Unit
+    sharedPreferences: SharedPreferences,
+    onClick: (courseID: String) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -113,6 +115,11 @@ fun SelectCourseScreen(
                         value = it.courseName ?: "ERROR: courseName is NULL"
                         mExpanded = false
                         course = it
+
+                        val editor = sharedPreferences.edit()
+                        editor.putString(Utils.COLLEGE_NAME, course.courseName)
+                        editor.putString(Utils.COLLEGE_ID, course.courseID)
+                        editor.apply()
                     }) {
                         androidx.compose.material.Text(
                             text = it.courseName ?: "ERROR: courseName is NULL",
@@ -122,14 +129,6 @@ fun SelectCourseScreen(
                 }
             }
         }
-
-
-
-
-
-
-
-
 
         Spacer(modifier = Modifier
             .size(20.dp))

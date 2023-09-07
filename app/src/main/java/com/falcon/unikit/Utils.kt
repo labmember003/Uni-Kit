@@ -4,4 +4,6 @@ object Utils {
     const val INITIAL_LAUCH = "INITIAL_LAUCH"
     const val COLLEGE_NAME = "COLLEGE_NAME"
     const val COLLEGE_ID = "COLLEGE_ID"
+    const val COURSE_ID = "COURSE_ID"
+    const val COURSE_NAME = "COURSE_NAME"
 }

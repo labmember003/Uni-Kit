@@ -199,6 +199,10 @@ fun DrawerContent(navController: NavHostController) {
             navController.navigate("profile")
         }
         Spacer(modifier = Modifier.height(2.dp))
+        NavDrawerContent("My Notes", R.drawable.baseline_sticky_note_2_24) {
+            navController.navigate("my_notes")
+        }
+        Spacer(modifier = Modifier.height(2.dp))
         NavDrawerContent("Settings", R.drawable.baseline_settings_24) {
             navController.navigate("settings")
         }

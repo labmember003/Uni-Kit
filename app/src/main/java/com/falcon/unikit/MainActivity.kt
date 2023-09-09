@@ -335,6 +335,9 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("select_college_screen")
                         }
                     }
+                    composable("my_notes") {
+
+                    }
                 }
             }
         }

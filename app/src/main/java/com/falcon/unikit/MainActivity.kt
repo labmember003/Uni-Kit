@@ -49,6 +49,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -69,6 +71,7 @@ import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
+import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.CollegeViewModel
 import com.falcon.unikit.viewmodels.ContentViewModel
@@ -80,6 +83,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
@@ -124,8 +128,20 @@ class MainActivity : ComponentActivity() {
                             Log.d("TAG", "Got ID token.")
                             val email = credential.id
                             Log.i("emailemail", email)
+                            val authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
+                            lifecycleScope.launch {
+                                authViewModel.getToken(idToken)
+                                authViewModel.jwtToken.collect { jwtToken ->
+                                    if (jwtToken != "") {
+                                        val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+                                        val editor = sharedPreferences.edit()
+                                        editor.putString(Utils.JWT_TOKEN, jwtToken)
+                                        editor.apply()
+                                        Toast.makeText(this@MainActivity, jwtToken, Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                            }
                             isSigninSuccess = true
-                            //                                    Toast.makeText(context, email, Toast.LENGTH_LONG).show()
                         }
 
                         else -> {
@@ -149,7 +165,7 @@ class MainActivity : ComponentActivity() {
                     context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                 }
 
-                NavHost(navController = navController, startDestination = "sign_in") {
+                NavHost(navController = navController, startDestination = "walk_through_screen") {
                     composable("walk_through_screen") {
                         BackHandler(
                             onBack = {
@@ -157,7 +173,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                         WalkThroughScreen {
-                            navController.navigate("select_college_screen")
+                            navController.navigate("sign_in")
                         }
                     }
                     composable("sign_in") {
@@ -395,9 +411,15 @@ class MainActivity : ComponentActivity() {
                     composable("settings") {
                         SettingsScreen ({
                             navController.popBackStack()
-                        }) {
+                        }, {
                             navController.navigate("select_college_screen")
-                        }
+                        },{
+                            isSigninSuccess = false
+                            navController.navigate("walk_through_screen")
+                            val editor = sharedPreferences.edit()
+                            editor.clear()
+                            editor.apply()
+                        })
                     }
                     composable("my_notes") {
 

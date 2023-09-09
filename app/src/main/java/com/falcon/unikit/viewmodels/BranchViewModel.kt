@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
-class BranchViewModel@Inject constructor(
+class BranchViewModel @Inject constructor(
     private val unikitRepository: UnikitRepository,
     private val savedStateHandle: SavedStateHandle
 ): ViewModel(){

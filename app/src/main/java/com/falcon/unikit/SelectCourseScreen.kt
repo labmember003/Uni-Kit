@@ -117,8 +117,8 @@ fun SelectCourseScreen(
                         course = it
 
                         val editor = sharedPreferences.edit()
-                        editor.putString(Utils.COLLEGE_NAME, course.courseName)
-                        editor.putString(Utils.COLLEGE_ID, course.courseID)
+                        editor.putString(Utils.COURSE_NAME, course.courseName)
+                        editor.putString(Utils.COURSE_ID, course.courseID)
                         editor.apply()
                     }) {
                         androidx.compose.material.Text(

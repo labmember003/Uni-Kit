@@ -30,7 +30,11 @@ import com.falcon.unikit.R
 import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
 
 @Composable
-fun SettingsScreen(onBackCLick: () -> Boolean, navigateToSelectCollegeScreen: () -> Unit) {
+fun SettingsScreen(
+    onBackCLick: () -> Boolean,
+    navigateToSelectCollegeScreen: () -> Unit,
+    onSignOut: () -> Unit
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -100,6 +104,7 @@ fun SettingsScreen(onBackCLick: () -> Boolean, navigateToSelectCollegeScreen: ()
             PreferenceCategory("General")
             RegularPreference("Start Over","Change College / Course", { performStartOver() })
             RegularPreference("Contact Us", "", {sendMail("Regarding App ")})
+            SignOutPreference({onSignOut()})
             PreferenceCategory("About")
             RegularPreference("Introducing \"Summarizer\" - a user-friendly app that streamlines your reading experience. Whether it's a PDF, an image from your gallery, or a real-time photo captured by your camera, this powerful tool swiftly extracts text and generates concise summaries. Select your preferred language for summarization, ensuring content is presented in a language you understand best. With \"Summarizer,\" effortlessly grasp the main ideas and key points, transforming the way you consume information and saving you valuable time.", "", {})
             PreferenceCategory("Developer")

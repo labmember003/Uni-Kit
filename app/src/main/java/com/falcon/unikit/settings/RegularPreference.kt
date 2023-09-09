@@ -71,3 +71,31 @@ private fun RegularPreferencePreview() {
         onClick = {  },
     )
 }
+
+@Composable
+fun SignOutPreference(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+) {
+    Column(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(
+                enabled = enabled,
+                onClick = onClick,
+            )
+            .padding(16.dp, 16.dp, 16.dp, 4.dp),
+    ) {
+        Text(
+            text = "Logout",
+            style = MaterialTheme.typography.body1,
+            color = Color.Red,
+        )
+        Text(
+            text = "",
+            style = MaterialTheme.typography.body2,
+            color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        )
+    }
+}

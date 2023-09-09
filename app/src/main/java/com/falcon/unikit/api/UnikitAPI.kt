@@ -35,6 +35,11 @@ interface UnikitAPI {
     @GET("college/data")
     suspend fun getContentOfSubject(@Query("subject_id") contentQueryParam: String): Response<List<Content>>
 
+    @POST("/users")
+    suspend fun getJwtToken(@Body token: String): Response<String>
+
+    @POST("/getMyNotes")
+    suspend fun getMyNotes(@Body token: String): Response<String>
 
     @POST("/getContent")
     suspend fun likeButtonPressed(@Body itemID: String)

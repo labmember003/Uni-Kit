@@ -36,6 +36,10 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     private val _content = MutableStateFlow<List<Content>>(emptyList())
     val content: StateFlow<List<Content>>
         get() = _content
+
+    private val _jwtToken = MutableStateFlow("")
+    val jwtToken: StateFlow<String>
+        get() = _jwtToken
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
         if (response.isSuccessful && response.body() != null) {
@@ -75,6 +79,13 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         val response = unikitAPI.getContentOfSubject(subjectID)
         if (response.isSuccessful && response.body() != null) {
             _content.emit(response.body()!!)
+        }
+    }
+
+    suspend fun getJwtToken(idToken: String) {
+        val response = unikitAPI.getJwtToken(idToken)
+        if (response.isSuccessful && response.body() != null) {
+            _jwtToken.emit(response.body()!!)
         }
     }
 

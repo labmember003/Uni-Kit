@@ -1,13 +1,18 @@
 package com.falcon.unikit
 
+import android.app.Activity
 import android.content.Context
+import android.content.IntentSender
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -33,6 +38,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -51,45 +57,87 @@ import androidx.navigation.navArgument
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
-import com.android.billingclient.api.BillingClient
 import com.falcon.unikit.Utils.COLLEGE_ID
 import com.falcon.unikit.Utils.COURSE_ID
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.models.item.BranchItem
-import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
+import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
-import com.falcon.unikit.ui.sign_in.GoogleAuthUiClient
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.CollegeViewModel
 import com.falcon.unikit.viewmodels.ContentViewModel
 import com.falcon.unikit.viewmodels.CourseViewModel
 import com.falcon.unikit.viewmodels.YearViewModel
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.common.api.ApiException
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import javax.inject.Inject
 
+
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private lateinit var oneTapClient: SignInClient
+    private lateinit var signUpRequest: BeginSignInRequest
+
+    private val REQ_ONE_TAP = 2  // Can be any integer unique to the Activity
+    private var showOneTapUI = true
+
+    private var isSigninSuccess by mutableStateOf(false)
 
     @Inject
     lateinit var unikitAPI: UnikitAPI
 
-    private val  googleAuthUiClient by lazy {
-        GoogleAuthUiClient(
-            context = applicationContext,
-            oneTapClient = Identity.getSignInClient(applicationContext)
-        )
-    }
-    private lateinit var billingClient: BillingClient
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        oneTapClient = Identity.getSignInClient(this)
+        signUpRequest = BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    // Your server's client ID, not your Android client ID.
+                    .setServerClientId(getString(R.string.web_client_id))
+                    // Show all accounts on the device.
+                    .setFilterByAuthorizedAccounts(false)
+                    .build())
+            .build()
+
+        val intentSenderLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
+            // Your code for handling the result goes here
+            if (result.resultCode == Activity.RESULT_OK) {
+                try {
+                    val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
+                    val idToken = credential.googleIdToken
+                    when {
+                        idToken != null -> {
+                            // Got an ID token from Google. Use it to authenticate
+                            // with your backend.
+                            Log.d("TAG", "Got ID token.")
+                            val email = credential.id
+                            Log.i("emailemail", email)
+                            isSigninSuccess = true
+                            //                                    Toast.makeText(context, email, Toast.LENGTH_LONG).show()
+                        }
+
+                        else -> {
+                            // Shouldn't happen.
+                            Log.d("TAG", "No ID token!")
+                        }
+                    }
+                } catch (e: ApiException) {
+                    e.printStackTrace()
+                }
+            }
+        }
         setContent {
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -101,23 +149,39 @@ class MainActivity : ComponentActivity() {
                     context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                 }
 
-                NavHost(navController = navController, startDestination = "walk_through_screen") {
-//                    composable("test") {
-//                        Test()
-//                    }
+                NavHost(navController = navController, startDestination = "sign_in") {
                     composable("walk_through_screen") {
                         BackHandler(
                             onBack = {
                                 finish()
                             }
                         )
-//                        LaunchedEffect(key1 = Unit) {
-//                            if(googleAuthUiClient.getSignedInUser() != null) {
-//                                navController.navigate("main_screen")
-//                            }
-//                        }
                         WalkThroughScreen {
                             navController.navigate("select_college_screen")
+                        }
+                    }
+                    composable("sign_in") {
+                        LaunchedEffect(isSigninSuccess) {
+                            if (isSigninSuccess) {
+                                navController.navigate("select_college_screen")
+                            }
+                        }
+                        GoogleSignInMainScreen {
+                            oneTapClient.beginSignIn(signUpRequest)
+                                .addOnSuccessListener(this@MainActivity) { result ->
+                                    try {
+                                        val intentSenderRequest = IntentSenderRequest
+                                            .Builder(result.pendingIntent.intentSender).build()
+                                        intentSenderLauncher.launch(intentSenderRequest)
+                                    } catch (e: IntentSender.SendIntentException) {
+                                        Log.e("TAG", "Couldn't start One Tap UI: ${e.localizedMessage}")
+                                        Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                                .addOnFailureListener(this@MainActivity) { e ->
+                                    // No Google Accounts found. Just continue presenting the signed-out UI.
+                                    Log.d("TAG", e.localizedMessage)
+                                }
                         }
                     }
                     composable("select_college_screen") {
@@ -496,9 +560,14 @@ fun ErrorPage(
         )
         Spacer(modifier = Modifier
             .size(20.dp))
-        Button(onClick = {
-            onClick()
-        },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
+        Button(
+            onClick = {
+                onClick()
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Black,
+                contentColor = Color.White
+            ),
         ) {
             Text(
                 text = "RETRY",

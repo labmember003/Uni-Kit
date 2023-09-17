@@ -15,11 +15,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
-import com.falcon.unikit.ui.sign_in.UserData
+import com.falcon.unikit.ui.sign_in.UserDataBase
 
 @Composable
 fun ProfileScreen(
-    userData: UserData?,
+    userData: UserDataBase?,
     onSignOut: () -> Unit
 ) {
     Column(

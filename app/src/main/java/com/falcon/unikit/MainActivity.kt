@@ -126,18 +126,22 @@ class MainActivity : ComponentActivity() {
                             // Got an ID token from Google. Use it to authenticate
                             // with your backend.
                             Log.d("TAG", "Got ID token.")
+                            Log.i("googleOneTap", idToken)
+                            Log.i("googleOneTap2", credential.toString())
                             val email = credential.id
                             Log.i("emailemail", email)
+                            Log.i("emailemail2", credential.googleIdToken.toString())
                             val authViewModel = ViewModelProvider(this)[AuthViewModel::class.java]
                             lifecycleScope.launch {
                                 authViewModel.getToken(idToken)
-                                authViewModel.jwtToken.collect { jwtToken ->
-                                    if (jwtToken != "") {
+                                authViewModel.jwtToken.collect { userData ->
+                                    if (userData.user != "") {
+                                        Log.i("googleOneTapJWT", userData.token)
                                         val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                                         val editor = sharedPreferences.edit()
-                                        editor.putString(Utils.JWT_TOKEN, jwtToken)
+                                        editor.putString(Utils.JWT_TOKEN, userData.token)
                                         editor.apply()
-                                        Toast.makeText(this@MainActivity, jwtToken, Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(this@MainActivity, userData.token, Toast.LENGTH_SHORT).show()
                                     }
                                 }
                             }

@@ -1,7 +1,10 @@
 package com.falcon.unikit.repository
 
+import android.util.Log
 import com.falcon.unikit.api.Content
+import com.falcon.unikit.api.JWTbody
 import com.falcon.unikit.api.UnikitAPI
+import com.falcon.unikit.api.UserData
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
@@ -37,8 +40,8 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     val content: StateFlow<List<Content>>
         get() = _content
 
-    private val _jwtToken = MutableStateFlow("")
-    val jwtToken: StateFlow<String>
+    private val _jwtToken = MutableStateFlow<UserData>(UserData("", "", ""))
+    val jwtToken: StateFlow<UserData>
         get() = _jwtToken
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
@@ -83,9 +86,14 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     }
 
     suspend fun getJwtToken(idToken: String) {
-        val response = unikitAPI.getJwtToken(idToken)
+        val response = unikitAPI.getJwtToken(JWTbody(idToken))
+        Log.i("catCatCatcatcat", response.body().toString())
+        Log.i("catCatCatcatcat2", idToken.toString())
         if (response.isSuccessful && response.body() != null) {
             _jwtToken.emit(response.body()!!)
+        } else {
+            // Handle unsuccessful response (e.g., log error message)
+            Log.e("NetworkError", "Unsuccessful response: ${response.code()}")
         }
     }
 

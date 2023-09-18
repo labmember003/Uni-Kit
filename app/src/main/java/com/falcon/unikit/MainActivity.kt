@@ -3,6 +3,7 @@ package com.falcon.unikit
 import android.app.Activity
 import android.content.Context
 import android.content.IntentSender
+import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
@@ -61,12 +62,15 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.unikit.Utils.COLLEGE_ID
 import com.falcon.unikit.Utils.COURSE_ID
+import com.falcon.unikit.Utils.USER_DATA
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.UnikitAPI
+import com.falcon.unikit.api.UserData
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
+import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
@@ -81,6 +85,7 @@ import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
 import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
+import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -127,7 +132,6 @@ class MainActivity : ComponentActivity() {
                             // with your backend.
                             Log.d("TAG", "Got ID token.")
                             Log.i("googleOneTap", idToken)
-                            Log.i("googleOneTap2", credential.toString())
                             val email = credential.id
                             Log.i("emailemail", email)
                             Log.i("emailemail2", credential.googleIdToken.toString())
@@ -135,14 +139,17 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 authViewModel.getToken(idToken)
                                 authViewModel.jwtToken.collect { userData ->
+                                    val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                                     if (userData.user != "") {
-                                        Log.i("googleOneTapJWT", userData.token)
-                                        val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                                         val editor = sharedPreferences.edit()
                                         editor.putString(Utils.JWT_TOKEN, userData.token)
                                         editor.apply()
                                         Toast.makeText(this@MainActivity, userData.token, Toast.LENGTH_SHORT).show()
                                     }
+                                    val editor = sharedPreferences.edit()
+                                    val gson = Gson()
+                                    editor.putString(USER_DATA, gson.toJson(userData))
+                                    editor.apply()
                                 }
                             }
                             isSigninSuccess = true
@@ -395,23 +402,20 @@ class MainActivity : ComponentActivity() {
 //                        )
 //                        LoginScreen { navController.navigate("main_screen") }
 //                    }
-//                    composable("profile") {
-//                        val sharedPreferences = remember {
-//                            context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-//                        }
-//                        ProfileScreen(
-//                            userData = googleAuthUiClient.getSignedInUser(),
-//                            onSignOut = {
-//                                lifecycleScope.launch {
-//                                    googleAuthUiClient.signOut()
-//                                    navController.navigate("walk_through_screen")
-//                                }
-//                                val editor = sharedPreferences.edit()
-//                                editor.clear()
-//                                editor.apply()
-//                            }
-//                        )
-//                    }
+                    composable("profile") {
+                        val gson = Gson()
+                        val userData = gson.fromJson(sharedPreferences.getString(USER_DATA, null), UserData::class.java)
+                        ProfileScreen(
+                            userData = userData,
+                            onSignOut = {
+                                isSigninSuccess = false
+                                navController.navigate("walk_through_screen")
+                                val editor = sharedPreferences.edit()
+                                editor.clear()
+                                editor.apply()
+                            }
+                        )
+                    }
                     composable("settings") {
                         SettingsScreen ({
                             navController.popBackStack()
@@ -600,4 +604,11 @@ fun ErrorPage(
             )
         }
     }
+}
+
+fun saveUserDataToSharedPreferences(context: Context, userData: UserData, sharedPreferences: SharedPreferences) {
+    val editor = sharedPreferences.edit()
+    val gson = Gson()
+    editor.putString("user_data_key", gson.toJson(userData))
+    editor.apply()
 }

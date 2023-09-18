@@ -7,4 +7,6 @@ object Utils {
     const val COURSE_ID = "COURSE_ID"
     const val COURSE_NAME = "COURSE_NAME"
     const val JWT_TOKEN = "JWT_TOKEN"
+    const val USER_DATA = "USER_DATA"
+
 }

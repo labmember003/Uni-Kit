@@ -15,11 +15,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import com.falcon.unikit.api.UserData
 import com.falcon.unikit.ui.sign_in.UserDataBase
 
 @Composable
 fun ProfileScreen(
-    userData: UserDataBase?,
+    userData: UserData?,
     onSignOut: () -> Unit
 ) {
     Column(
@@ -38,18 +39,16 @@ fun ProfileScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
-        if(userData?.userName != null) {
-            Text(
-                text = userData.userName,
-                textAlign = TextAlign.Center,
-                fontSize = 36.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-        }
+        Text(
+            text = userData?.user?: "INVALID USER",
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(text = "UserID: " + (userData?.id ?: "INVALID USER ID"))
+        Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onSignOut) {
             Text(text = "Sign out")
         }
-        Text(text = userData?.userId.toString())
     }
 }

@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.falcon.unikit.api.UserData
-import com.falcon.unikit.ui.sign_in.UserDataBase
 
 @Composable
 fun ProfileScreen(

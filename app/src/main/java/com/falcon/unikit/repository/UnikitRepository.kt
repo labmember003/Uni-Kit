@@ -2,7 +2,7 @@ package com.falcon.unikit.repository
 
 import android.util.Log
 import com.falcon.unikit.api.Content
-import com.falcon.unikit.api.JWTbody
+import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.api.UserData
 import com.falcon.unikit.models.item.BranchItem

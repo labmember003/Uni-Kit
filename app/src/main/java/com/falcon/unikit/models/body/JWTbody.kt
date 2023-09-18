@@ -1,4 +1,4 @@
-package com.falcon.unikit.api
+package com.falcon.unikit.models.body
 
 import com.google.gson.annotations.SerializedName
 

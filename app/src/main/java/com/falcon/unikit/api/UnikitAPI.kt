@@ -1,5 +1,6 @@
 package com.falcon.unikit.api
 
+import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem

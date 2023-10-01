@@ -1,11 +1,13 @@
 package com.falcon.unikit.api
 
+import com.falcon.unikit.models.body.GetMyNotesBody
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.models.item.YearItem
+import com.falcon.unikit.repository.UserNote
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -40,7 +42,7 @@ interface UnikitAPI {
     suspend fun getJwtToken(@Body googleToken: JWTbody): Response<UserData>
 
     @POST("/getMyNotes")
-    suspend fun getMyNotes(@Body token: String): Response<String>
+    suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<UserNote>>
 
     @POST("/getContent")
     suspend fun likeButtonPressed(@Body itemID: String)

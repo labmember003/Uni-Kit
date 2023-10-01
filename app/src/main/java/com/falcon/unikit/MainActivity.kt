@@ -39,6 +39,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -71,6 +72,7 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.repository.UserNote
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
@@ -430,6 +432,15 @@ class MainActivity : ComponentActivity() {
                         })
                     }
                     composable("my_notes") {
+                        val authViewModel : AuthViewModel = hiltViewModel()
+                        val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
+                        if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
+
+                        } else {
+                            authViewModel.getMyNotes(jwtToken)
+                            val myNotes = authViewModel.myNotes.collectAsState()
+                        }
+
 
                     }
                 }

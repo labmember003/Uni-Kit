@@ -48,11 +48,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -190,6 +192,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable("sign_in") {
+                        BackHandler(
+                            onBack = {
+                                navController.navigate("walk_through_screen")
+                            }
+                        )
                         LaunchedEffect(isSigninSuccess) {
                             if (isSigninSuccess) {
                                 navController.navigate("select_college_screen")
@@ -435,16 +442,50 @@ class MainActivity : ComponentActivity() {
                         val authViewModel : AuthViewModel = hiltViewModel()
                         val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
                         if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
-
+                            UserNotFound(navController)
                         } else {
                             authViewModel.getMyNotes(jwtToken)
                             val myNotes = authViewModel.myNotes.collectAsState()
+
                         }
 
 
                     }
                 }
             }
+        }
+    }
+    @Composable
+    private fun UserNotFound(
+        navController: NavHostController
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LottieAnimation(animationID = R.raw.error)
+            Text(
+                text = "Account Not Signined"
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(20.dp)
+            )
+            Button(
+                onClick = {
+                    navController.navigate("sign_in")
+                },
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.Black,
+                    contentColor = Color.White
+                ),
+            ) {
+                Text(
+                    text = "SIGN IN",
+                )
+            }
+
         }
     }
 }

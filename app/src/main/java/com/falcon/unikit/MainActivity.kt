@@ -1,6 +1,8 @@
 package com.falcon.unikit
 
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.IntentSender
 import android.content.SharedPreferences
@@ -45,12 +47,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -136,6 +140,22 @@ class MainActivity : ComponentActivity() {
                             // with your backend.
                             Log.d("TAG", "Got ID token.")
                             Log.i("googleOneTap", idToken)
+
+                            val clipboardManager = ContextCompat.getSystemService(
+                                this@MainActivity,
+                                ClipboardManager::class.java
+                            ) as ClipboardManager?
+                            clipboardManager?.let {
+                                val clipData = ClipData.newPlainText("label", idToken)
+                                it.setPrimaryClip(clipData)
+
+                                Toast.makeText(
+                                    this@MainActivity,
+                                    "idToken copied to clipboard",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+
                             val email = credential.id
                             Log.i("emailemail", email)
                             Log.i("emailemail2", credential.googleIdToken.toString())

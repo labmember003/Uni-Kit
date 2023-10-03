@@ -27,9 +27,9 @@ fun ProfileScreen(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        if(userData?.profilePicUrl != null) {
+        if(userData?.img != null) {
             AsyncImage(
-                model = userData.profilePicUrl,
+                model = userData.img,
                 contentDescription = "Profile picture",
                 modifier = Modifier
                     .size(150.dp)
@@ -44,7 +44,18 @@ fun ProfileScreen(
             fontSize = 24.sp,
             fontWeight = FontWeight.SemiBold
         )
-        Text(text = "UserID: " + (userData?.id ?: "INVALID USER ID"))
+        Text(
+            text = userData?.email?: "INVALID USER",
+            textAlign = TextAlign.Center,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.SemiBold
+        )
+        Text(
+            text = "UserID: " + (userData?.token ?: "INVALID USER ID"),
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(8.dp)
+        )
         Spacer(modifier = Modifier.height(16.dp))
         Button(onClick = onSignOut) {
             Text(text = "Sign out")

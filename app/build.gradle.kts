@@ -9,7 +9,14 @@ plugins {
 android {
     namespace = "com.falcon.unikit"
     compileSdk = 34
-
+//    signingConfigs {
+//        create("debug") {
+//            storeFile = file("${rootDir}/keystores/debug.keystore")
+//            keyAlias = "androiddebugkey"
+//            keyPassword = "android"
+//            storePassword = "android"
+//        }
+//    }
     defaultConfig {
         applicationId = "com.falcon.unikit"
         minSdk = 24
@@ -31,6 +38,9 @@ android {
                 "proguard-rules.pro"
             )
         }
+//        debug {
+//            signingConfig = signingConfigs.getByName("debug")
+//        }
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

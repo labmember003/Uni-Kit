@@ -42,7 +42,7 @@ interface UnikitAPI {
     @POST("users/googleOneTap")
     suspend fun getJwtToken(@Body googleToken: JWTbody): Response<UserData>
 
-    @GET("users/myNotes")
+    @POST("users/myNotes")
     suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<MyNoteItem>>
 
     @POST("/getContent")

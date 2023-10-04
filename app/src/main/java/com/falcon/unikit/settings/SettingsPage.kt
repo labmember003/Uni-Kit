@@ -59,6 +59,7 @@ fun SettingsScreen(
             )
         },
     ) { innerPadding ->
+        innerPadding
         val context = LocalContext.current
         val openUrlLauncher = rememberLauncherForActivityResult(
             contract = ActivityResultContracts.StartActivityForResult()
@@ -114,6 +115,5 @@ fun SettingsScreen(
             RegularPreference("Terms And Conditions", "",{openLink("https://sites.google.com/view/falcon-summarizer/terms-conditions")})
             RegularPreference("Privacy Policy", "",{openLink("https://sites.google.com/view/falcon-summarizer/home")})
         }
-        innerPadding
     }
 }

@@ -9,9 +9,12 @@ import com.falcon.unikit.models.item.YearItem
 data class MyNoteItem (
     val notesName: String? = null,
     val pdf: String? = null,
-    val college: CollegeItem? = null,
-    val course: CourseItem? = null,
-    val branch: BranchItem? = null,
-    val year: YearItem? = null,
-    val subject: SubjectItem? = null
+    val college: List<CollegeItem>? = null,
+    val course: List<CourseItem>? = null,
+    val branch: List<BranchItem>? = null,
+    val year: List<YearItem>? = null,
+    val subject: List<SubjectItem>? = null,
+
+    val likeCount: Int? = null,
+    val disLikeCount: Int? = null
 )

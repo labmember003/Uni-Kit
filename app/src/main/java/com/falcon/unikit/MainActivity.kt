@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -35,7 +36,10 @@ import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
@@ -465,7 +469,8 @@ class MainActivity : ComponentActivity() {
                                 val editor = sharedPreferences.edit()
                                 editor.clear()
                                 editor.apply()
-                            }
+                            },
+                            navController
                         )
                     }
                     composable("settings") {
@@ -482,21 +487,45 @@ class MainActivity : ComponentActivity() {
                         })
                     }
                     composable("my_notes") {
-                        val authViewModel : AuthViewModel = hiltViewModel()
-                        val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
-                        if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
-                            UserNotFound(navController)
-                        } else {
-                            authViewModel.getMyNotes(jwtToken)
-                            val myNotes = authViewModel.myNotes.collectAsState()
-                            LazyColumn(content = {
-                                items(myNotes.value) { myNote ->
-                                    MyNotesItem(myNote, R.drawable.baseline_sticky_note_2_24)
-                                }
-                            })
+                        Scaffold(
+                            topBar = {
+                                TopAppBar(
+                                    title = { androidx.compose.material.Text(text = "My Notes") },
+                                    contentColor = androidx.compose.material.MaterialTheme.colors.onSurface,
+                                    backgroundColor = Color.Transparent,
+                                    elevation = 0.dp,
+                                    navigationIcon = {
+                                        IconButton(
+                                            onClick = {
+                                                navController.popBackStack()
+                                            },
+                                            content = {
+                                                Icon(
+                                                    imageVector = Icons.Default.ArrowBack,
+                                                    contentDescription = null,
+                                                )
+                                            },
+                                        )
+                                    },
+                                    modifier = Modifier.statusBarsPadding(),
+                                )
+                            },
+                        ) { innerPadding ->
+                            innerPadding
+                            val authViewModel : AuthViewModel = hiltViewModel()
+                            val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
+                            if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
+                                UserNotFound(navController)
+                            } else {
+                                authViewModel.getMyNotes(jwtToken)
+                                val myNotes = authViewModel.myNotes.collectAsState()
+                                LazyColumn(content = {
+                                    items(myNotes.value) { myNote ->
+                                        MyNotesItem(myNote, R.drawable.baseline_sticky_note_2_24)
+                                    }
+                                })
+                            }
                         }
-
-
                     }
                 }
             }
@@ -510,11 +539,9 @@ class MainActivity : ComponentActivity() {
                 .fillMaxWidth()
                 .padding(16.dp)
                 .clickable {
-//                navController.navigate("content_screen/${subjectItem.subjectID}")
 //                Todo(download and view file)
 //                  download(contentItem.downloadURL)
                 },
-            verticalAlignment = Alignment.CenterVertically
         ) {
             Image(
                 painter = painterResource(id = icon),
@@ -534,31 +561,31 @@ class MainActivity : ComponentActivity() {
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.college?.collegeName.toString(),
+                    text = "College: s"+myNote.college?.get(0)?.collegeName.toString(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.course?.courseName.toString(),
+                    text = myNote.course?.get(0)?.courseName.toString(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.branch?.branchName.toString(),
+                    text = myNote.branch?.get(0)?.branchName.toString(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.year?.numofYear.toString(),
+                    text = myNote.year?.get(0)?.numofYear.toString(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.subject?.subjectName.toString(),
+                    text = myNote.subject?.get(0)?.subjectName.toString(),
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )

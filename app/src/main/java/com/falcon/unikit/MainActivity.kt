@@ -26,9 +26,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ThumbDown
+import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -41,17 +50,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -78,7 +86,6 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
-import com.falcon.unikit.repository.UserNote
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.settings.SettingsScreen
@@ -141,20 +148,20 @@ class MainActivity : ComponentActivity() {
                             Log.d("TAG", "Got ID token.")
                             Log.i("googleOneTap", idToken)
 
-                            val clipboardManager = ContextCompat.getSystemService(
-                                this@MainActivity,
-                                ClipboardManager::class.java
-                            ) as ClipboardManager?
-                            clipboardManager?.let {
-                                val clipData = ClipData.newPlainText("label", idToken)
-                                it.setPrimaryClip(clipData)
-
-                                Toast.makeText(
-                                    this@MainActivity,
-                                    "idToken copied to clipboard",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
+//                            val clipboardManager = ContextCompat.getSystemService(
+//                                this@MainActivity,
+//                                ClipboardManager::class.java
+//                            ) as ClipboardManager?
+//                            clipboardManager?.let {
+//                                val clipData = ClipData.newPlainText("label", idToken)
+//                                it.setPrimaryClip(clipData)
+//
+//                                Toast.makeText(
+//                                    this@MainActivity,
+//                                    "token copied to clipboard",
+//                                    Toast.LENGTH_SHORT
+//                                ).show()
+//                            }
 
                             val email = credential.id
                             Log.i("emailemail", email)
@@ -163,6 +170,22 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 authViewModel.getToken(idToken)
                                 authViewModel.jwtToken.collect { userData ->
+                                    val clipboardManager = ContextCompat.getSystemService(
+                                        this@MainActivity,
+                                        ClipboardManager::class.java
+                                    ) as ClipboardManager?
+                                    clipboardManager?.let {
+                                        val clipData = ClipData.newPlainText("label", userData.token)
+                                        it.setPrimaryClip(clipData)
+
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "token copied to clipboard",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+
+
                                     val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                                     if (userData.user != "") {
                                         val editor = sharedPreferences.edit()
@@ -466,7 +489,11 @@ class MainActivity : ComponentActivity() {
                         } else {
                             authViewModel.getMyNotes(jwtToken)
                             val myNotes = authViewModel.myNotes.collectAsState()
-
+                            LazyColumn(content = {
+                                items(myNotes.value) { myNote ->
+                                    MyNotesItem(myNote, R.drawable.baseline_sticky_note_2_24)
+                                }
+                            })
                         }
 
 
@@ -475,6 +502,106 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    fun MyNotesItem(myNote: MyNoteItem, icon: Int) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+                .clickable {
+//                navController.navigate("content_screen/${subjectItem.subjectID}")
+//                Todo(download and view file)
+//                  download(contentItem.downloadURL)
+                },
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(50.dp)
+                    .clip(CircleShape)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier.weight(1f)
+            ) {
+                Text(
+                    text = myNote.notesName.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = myNote.college?.collegeName.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = myNote.course?.courseName.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = myNote.branch?.branchName.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = myNote.year?.numofYear.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = myNote.subject?.subjectName.toString(),
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+            ) {
+                IconButton(
+                    modifier = Modifier,
+                    onClick = {
+
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
+                        contentDescription = "Thumbs Up",
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                Text(
+                    text = "0",
+                )
+                IconButton(
+                    modifier = Modifier,
+                    onClick = {
+
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
+                        contentDescription = "Thumbs Up",
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                Text(
+                    text = "0"
+                )
+            }
+
+        }
+    }
+
     @Composable
     private fun UserNotFound(
         navController: NavHostController

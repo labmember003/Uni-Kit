@@ -3,6 +3,7 @@ package com.falcon.unikit.viewmodels
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.UserData
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.repository.UnikitRepository
@@ -19,7 +20,7 @@ class AuthViewModel @Inject constructor(
     val jwtToken : StateFlow<UserData>
         get() = unikitRepository.jwtToken
 
-    val myNotes: StateFlow<List<UserNote>>
+    val myNotes: StateFlow<List<MyNoteItem>>
         get() = unikitRepository.myNotes
 
     suspend fun getToken(idToken: String) {

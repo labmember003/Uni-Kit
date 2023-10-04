@@ -1,5 +1,6 @@
 package com.falcon.unikit.api
 
+import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.models.body.GetMyNotesBody
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.models.item.BranchItem
@@ -41,8 +42,8 @@ interface UnikitAPI {
     @POST("users/googleOneTap")
     suspend fun getJwtToken(@Body googleToken: JWTbody): Response<UserData>
 
-    @POST("/getMyNotes")
-    suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<UserNote>>
+    @GET("users/myNotes")
+    suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<MyNoteItem>>
 
     @POST("/getContent")
     suspend fun likeButtonPressed(@Body itemID: String)

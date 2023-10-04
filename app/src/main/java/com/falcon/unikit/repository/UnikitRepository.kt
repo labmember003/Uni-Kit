@@ -2,6 +2,7 @@ package com.falcon.unikit.repository
 
 import android.provider.ContactsContract.CommonDataKinds.Note
 import android.util.Log
+import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.api.UnikitAPI
@@ -46,8 +47,8 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     val jwtToken: StateFlow<UserData>
         get() = _jwtToken
 
-    private val _myNotes = MutableStateFlow<List<UserNote>>(emptyList())
-    val myNotes: StateFlow<List<UserNote>>
+    private val _myNotes = MutableStateFlow<List<MyNoteItem>>(emptyList())
+    val myNotes: StateFlow<List<MyNoteItem>>
         get() = _myNotes
 
     suspend fun getCollege() {

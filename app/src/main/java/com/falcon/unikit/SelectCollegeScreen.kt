@@ -66,7 +66,7 @@ fun SelectCollegeScreen(
 
 
         var value by remember { mutableStateOf(sharedPrefTitle) }
-        var college by remember { mutableStateOf(CollegeItem("123", "USAR")) }
+        var college by remember { mutableStateOf(CollegeItem(null, "123", "USAR")) }
         var mExpanded by remember { mutableStateOf(false) }
         var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
         val icon = if (mExpanded)

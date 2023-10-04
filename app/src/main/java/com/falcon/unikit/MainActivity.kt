@@ -311,8 +311,12 @@ class MainActivity : ComponentActivity() {
                                     sharedPrefTitle = "COLLEGE",
                                     sharedPreferences = sharedPreferences
                                 ) { collegeID ->
-                                    navController.navigate("select_course_screen/${collegeID}")
-                                    Log.i("catcatcat", collegeID)
+                                    if (collegeID == null) {
+                                        Toast.makeText(this@MainActivity, "Please Select College", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        navController.navigate("select_course_screen/${collegeID}")
+                                    }
+
                                 }
                             } else {
                                 LoadingScreen()
@@ -360,7 +364,11 @@ class MainActivity : ComponentActivity() {
                                     sharedPrefTitle = "COURSE",
                                     sharedPreferences = sharedPreferences
                                 ) { courseID ->
-                                    navController.navigate("main_screen/${courseID}")
+                                    if (courseID == null) {
+                                        Toast.makeText(this@MainActivity, "Please Select Course", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        navController.navigate("main_screen/${courseID}")
+                                    }
                                 }
                             } else {
                                 LoadingScreen()

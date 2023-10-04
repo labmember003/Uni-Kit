@@ -45,7 +45,7 @@ fun SelectCollegeScreen(
     title: String,
     sharedPrefTitle: String,
     sharedPreferences: SharedPreferences,
-    onClick: (collegeID: String) -> Unit,
+    onClick: (collegeID: String?) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -66,7 +66,7 @@ fun SelectCollegeScreen(
 
 
         var value by remember { mutableStateOf(sharedPrefTitle) }
-        var college by remember { mutableStateOf(CollegeItem(null, "123", "USAR")) }
+        var college by remember { mutableStateOf(CollegeItem(null, null, null)) }
         var mExpanded by remember { mutableStateOf(false) }
         var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
         val icon = if (mExpanded)
@@ -145,7 +145,7 @@ fun SelectCollegeScreen(
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            onClick(college.collegeID ?: "ERROR: collegeID is NULL")
+            onClick(college.collegeID)
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
         ) {
             Text(

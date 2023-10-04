@@ -41,7 +41,7 @@ fun SelectCourseScreen(
     title: String,
     sharedPrefTitle: String,
     sharedPreferences: SharedPreferences,
-    onClick: (courseID: String) -> Unit,
+    onClick: (courseID: String?) -> Unit,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -61,7 +61,7 @@ fun SelectCourseScreen(
         LottieAnimation(animationID = R.raw.university)
 
 
-        var course by remember { mutableStateOf(CourseItem("123", "Btech"))}
+        var course by remember { mutableStateOf(CourseItem(null, null))}
         var value by remember { mutableStateOf(sharedPrefTitle) }
         var mExpanded by remember { mutableStateOf(false) }
         var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
@@ -133,7 +133,7 @@ fun SelectCourseScreen(
         Spacer(modifier = Modifier
             .size(20.dp))
         Button(onClick = {
-            onClick(course.courseID ?: "ERROR: courseID is NULL")
+            onClick(course.courseID)
         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
             ) {
             Text(

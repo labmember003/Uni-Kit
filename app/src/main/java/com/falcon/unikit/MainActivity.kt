@@ -458,14 +458,6 @@ class MainActivity : ComponentActivity() {
                             LoadingScreen()
                         }
                     }
-//                    composable("sign_in") {
-//                        BackHandler(
-//                            onBack = {
-//                                finish()
-//                            }
-//                        )
-//                        LoginScreen { navController.navigate("main_screen") }
-//                    }
                     composable("profile") {
                         val gson = Gson()
                         val userData = gson.fromJson(sharedPreferences.getString(USER_DATA, null), UserData::class.java)
@@ -615,7 +607,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 Text(
-                    text = "0",
+                    text = myNote.likeCount.toString(),
                 )
                 IconButton(
                     modifier = Modifier,
@@ -630,7 +622,7 @@ class MainActivity : ComponentActivity() {
                     )
                 }
                 Text(
-                    text = "0"
+                    text = myNote.dislikeCount.toString()
                 )
             }
 

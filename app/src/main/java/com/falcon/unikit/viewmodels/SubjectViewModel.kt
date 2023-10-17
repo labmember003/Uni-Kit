@@ -26,9 +26,14 @@ class SubjectViewModel @Inject constructor(
     fun setBranchID(newValue: String) {
         _branchID.value = newValue
     }
-    init {
+    fun getSubjects(branchId: String) {
         viewModelScope.launch {
-            unikitRepository.getSubject(branchID.value.toString())
+            unikitRepository.getSubject(branchId)
         }
     }
+//    init {
+//        viewModelScope.launch {
+//            unikitRepository.getSubject(branchID.value.toString())
+//        }
+//    }
 }

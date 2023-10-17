@@ -271,6 +271,7 @@ class MainActivity : ComponentActivity() {
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
                         LaunchedEffect(Unit) {
                             val collegeID = sharedPreferences.getString(COLLEGE_ID, "NO_COLLEGE_SELECTED")
+                            Log.i("collegeID", collegeID.toString())
                             if (collegeID != "NO_COLLEGE_SELECTED") {
                                 navController.navigate("select_course_screen/${collegeID}")
                             }

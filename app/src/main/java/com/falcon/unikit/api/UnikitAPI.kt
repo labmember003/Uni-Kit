@@ -19,24 +19,19 @@ interface UnikitAPI {
     @GET("/college")
     suspend fun getCollegeList(): Response<List<CollegeItem>>
 
-//    @GET("/getCourseList")
-    @GET("college/data")
+    @POST("college/data")
     suspend fun getCourseList(@Query("collegeId") courseQueryParam: String): Response<List<CourseItem>>
 
-//    @GET("/getYearList")
-    @GET("college/data")
+    @POST("college/data")
     suspend fun getYearList(@Query("courseId") yearListQueryParam: String): Response<List<YearItem>>
 
-//    @GET("/getBranchList")
-    @GET("college/data")
+    @POST("college/data")
     suspend fun getBranchList(@Query("year") branchQueryParam: String): Response<List<BranchItem>>
 
-//    @GET("/getSubjectList")
-    @GET("college/data")
+    @POST("college/data")
     suspend fun getSubjectList(@Query("branchId") subjectQueryParam: String): Response<List<SubjectItem>>
 
-//    @GET("/getContent")
-    @GET("college/data")
+    @POST("college/data")
     suspend fun getContentOfSubject(@Query("subject_id") contentQueryParam: String): Response<List<Content>>
 
     @POST("users/googleOneTap")

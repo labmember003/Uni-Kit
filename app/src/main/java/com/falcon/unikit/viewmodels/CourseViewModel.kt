@@ -1,5 +1,6 @@
 package com.falcon.unikit.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -22,6 +23,7 @@ class CourseViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val collegeID = savedStateHandle.get<String>("collegeID") ?: "123"
+            Log.i("meriyafiruskibilli", collegeID)
             unikitRepository.getCourse(collegeID)
         }
     }

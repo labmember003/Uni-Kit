@@ -20,6 +20,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -28,10 +29,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import coil.compose.rememberImagePainter
 import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.models.item.SubjectItem
@@ -103,26 +106,28 @@ fun SubjectList(
     navigateToContentScreen: (String) -> Unit
 ) {
     val subjectViewModel : SubjectViewModel = hiltViewModel()
+//    val subjectss = emptyList<State<List<SubjectItem>>>()
     val subjects by rememberUpdatedState(subjectViewModel.subjects.collectAsState())
+    val isLoading = subjects.value.isEmpty()
     LaunchedEffect(branch.branchID) {
-        subjectViewModel.getSubjects(branch.branchID.toString())
+        if (isLoading) {
+            subjectViewModel.getSubjects(branch.branchID.toString())
+        }
     }
-    if (subjects.value != emptyList<SubjectItem>()) {
+    if (isLoading) {
+        LoadingScreen()
+    } else {
         Column(
             modifier = Modifier
                 .fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = branch.branchName ?: "ERROR: branchName is NULL")
             LazyColumn(content = {
                 items(subjects.value) { subject ->
                     SubjectItemRow(subject, navigateToContentScreen)
                 }
             })
         }
-    } else {
-        LoadingScreen()
     }
 }
 
@@ -140,14 +145,25 @@ fun SubjectItemRow(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Image(
-            painter = rememberImagePainter(data = subjectItem.imageURL),
-            contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colors.primary)
-        )
+        if(subjectItem.imageURL != null) {
+            AsyncImage(
+                model = subjectItem.imageURL,
+                contentDescription = "Subject picture",
+                modifier = Modifier
+                    .size(45.dp)
+                    .clip(CircleShape),
+                contentScale = ContentScale.Crop
+            )
+        } else {
+            Image(
+                painter = rememberImagePainter(null),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(45.dp)
+                    .clip(CircleShape)
+                    .background(Color.Gray)
+            )
+        }
         Spacer(modifier = Modifier.width(16.dp))
         Text(
             text = subjectItem.subjectName ?: "ERROR: subjectName is NULL",

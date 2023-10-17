@@ -1,5 +1,6 @@
 package com.falcon.unikit
 
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -139,9 +140,10 @@ fun SubjectItemRow(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(16.dp, 8.dp)
             .clickable {
                 navigateToContentScreen(subjectItem.subjectID ?: "ERROR: Subject Id is NULL")
+                Log.i("subjectID", subjectItem.subjectID.toString())
             },
         verticalAlignment = Alignment.CenterVertically
     ) {

@@ -26,6 +26,9 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,11 +39,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.R
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.Item
+import com.falcon.unikit.models.item.BranchItem
+import com.falcon.unikit.viewmodels.BranchViewModel
+import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -124,26 +131,32 @@ fun getIcon(contentName: String): Int {
 
 @Composable
 fun ContentList(content: Content, navController: NavHostController, icon: Int) {
-    val items = content.items
-    Column(
-        modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        LazyColumn(content = {
-            val sortedItems = items.sortedByDescending { it.likeCount }
-            items(sortedItems) { content ->
-                ContentItemRow(content, icon)
-            }
-        })
+    val contentID = content.contentId
+
+    val itemViewModel : ItemViewModel = hiltViewModel()
+    LaunchedEffect(key1 = Unit) {
+        itemViewModel.getItem(contentID)
     }
+    val items: State<List<Item>> = itemViewModel.items.collectAsState()
+//    Column(
+//        modifier = Modifier
+//            .fillMaxSize(),
+//        verticalArrangement = Arrangement.Center,
+//        horizontalAlignment = Alignment.CenterHorizontally
+//    ) {
+//        LazyColumn(content = {
+//            val sortedItems = items.sortedByDescending { it.likeCount }
+//            items(sortedItems) { content ->
+//                ContentItemRow(content, icon)
+//            }
+//        })
+//    }
 }
 
 @Preview(showBackground = true)
 @Composable()
 fun test() {
-    ContentItemRow(Item("itemNAME", "f"), R.drawable.ic_goole)
+    ContentItemRow(Item("itemNAME", "f", 0, 0), R.drawable.ic_goole)
 }
 @Composable
 fun ContentItemRow(contentItem: Item, icon: Int) {

@@ -8,7 +8,6 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.models.item.YearItem
-import com.falcon.unikit.repository.UserNote
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -32,7 +31,10 @@ interface UnikitAPI {
     suspend fun getSubjectList(@Query("branchId") subjectQueryParam: String): Response<List<SubjectItem>>
 
     @POST("college/data")
-    suspend fun getContentOfSubject(@Query("subject_id") contentQueryParam: String): Response<List<Content>>
+    suspend fun getContent(@Query("subject_id") contentQueryParam: String): Response<List<Content>>
+
+    @POST("college/data")
+    suspend fun getItem(@Query("content_id") itemQueryParam: String): Response<List<Item>>
 
     @POST("users/googleOneTap")
     suspend fun getJwtToken(@Body googleToken: JWTbody): Response<UserData>

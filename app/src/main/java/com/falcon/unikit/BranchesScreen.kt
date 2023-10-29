@@ -112,6 +112,7 @@ fun SubjectList(
     val isLoading = subjects.value.isEmpty()
     LaunchedEffect(branch.branchID) {
         if (isLoading) {
+            Log.i("branchIDDDD", branch.branchID.toString())
             subjectViewModel.getSubjects(branch.branchID.toString())
         }
     }

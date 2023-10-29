@@ -1,9 +1,9 @@
 package com.falcon.unikit.repository
 
-import android.provider.ContactsContract.CommonDataKinds.Note
 import android.util.Log
 import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.Content
+import com.falcon.unikit.api.Item
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.api.UserData
@@ -42,6 +42,10 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     private val _content = MutableStateFlow<List<Content>>(emptyList())
     val content: StateFlow<List<Content>>
         get() = _content
+
+    private val _items = MutableStateFlow<List<Item>>(emptyList())
+    val items: StateFlow<List<Item>>
+        get() = _items
 
     private val _jwtToken = MutableStateFlow<UserData>(UserData())
     val jwtToken: StateFlow<UserData>
@@ -87,9 +91,16 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     }
 
     suspend fun getContent(subjectID: String) {
-        val response = unikitAPI.getContentOfSubject(subjectID)
+        val response = unikitAPI.getContent(subjectID)
         if (response.isSuccessful && response.body() != null) {
             _content.emit(response.body()!!)
+        }
+    }
+
+    suspend fun getItem(contentId: String) {
+        val response = unikitAPI.getItem(contentId)
+        if (response.isSuccessful && response.body() != null) {
+            _items.emit(response.body()!!)
         }
     }
 

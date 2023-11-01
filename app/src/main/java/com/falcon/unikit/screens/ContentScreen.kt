@@ -138,19 +138,19 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
         itemViewModel.getItem(contentID)
     }
     val items: State<List<Item>> = itemViewModel.items.collectAsState()
-//    Column(
-//        modifier = Modifier
-//            .fillMaxSize(),
-//        verticalArrangement = Arrangement.Center,
-//        horizontalAlignment = Alignment.CenterHorizontally
-//    ) {
-//        LazyColumn(content = {
-//            val sortedItems = items.sortedByDescending { it.likeCount }
-//            items(sortedItems) { content ->
-//                ContentItemRow(content, icon)
-//            }
-//        })
-//    }
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LazyColumn(content = {
+            val sortedItems = items.value.sortedByDescending { it.likeCount }
+            items(sortedItems) { content ->
+                ContentItemRow(content, icon)
+            }
+        })
+    }
 }
 
 @Preview(showBackground = true)
@@ -202,7 +202,7 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
                 )
             }
             Text(
-                text = "0",
+                text = contentItem.likeCount.toString(),
             )
             IconButton(
                 modifier = Modifier,
@@ -217,7 +217,7 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
                 )
             }
             Text(
-                text = "0"
+                text = contentItem.dislikeCount.toString()
             )
         }
 

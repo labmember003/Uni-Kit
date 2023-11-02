@@ -1,5 +1,7 @@
 package com.falcon.unikit.screens
 
+import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -34,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -45,10 +48,16 @@ import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.R
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.Item
-import com.falcon.unikit.models.item.BranchItem
-import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -153,18 +162,65 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
     }
 }
 
+suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, contentItem: Item) {
+    withContext(Dispatchers.IO) {
+        try {
+            val client = OkHttpClient()
+            val request = Request.Builder()
+                .url(pdfUrl)
+                .build()
+
+            val response = client.newCall(request).execute()
+
+            if (response.isSuccessful) {
+                val pdfFileName = contentItem.itemId + ".pdf" // Change this to the desired file name
+                val pdfFile = File(getAppStorageDirectory(context), pdfFileName)
+                val inputStream = response.body?.byteStream()
+                val outputStream = FileOutputStream(pdfFile)
+
+                inputStream?.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+
+                Log.d("PdfDownload", "PDF downloaded and stored at ${pdfFile.absolutePath}")
+            } else {
+                Log.e("PdfDownload", "Download failed")
+            }
+        } catch (e: IOException) {
+            e.printStackTrace()
+            Log.e("PdfDownload", "Error during download: ${e.message}")
+        }
+    }
+}
+
+private fun getAppStorageDirectory(context: Context): File {
+    return File(context.filesDir, "pdfs") // Change "pdfs" to the desired directory name
+}
+
 @Preview(showBackground = true)
 @Composable()
 fun test() {
-    ContentItemRow(Item("itemNAME", "f", 0, 0), R.drawable.ic_goole)
+    ContentItemRow(Item("itemNAME", "f", "",0, 0), R.drawable.ic_goole)
 }
 @Composable
 fun ContentItemRow(contentItem: Item, icon: Int) {
+    val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
+                if (isPdfFileInStorage(contentItem.itemId.toString(), context)) {
+                    openFile(contentItem.itemId.toString(), context)
+                } else {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        downloadAndStorePdf(contentItem.downloadURL, context, contentItem)
+                    }
+                    openFile(contentItem.itemId.toString(), context)
+                }
+
 //                navController.navigate("content_screen/${subjectItem.subjectID}")
 //                Todo(download and view file)
 //                  download(contentItem.downloadURL)
@@ -222,4 +278,13 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
         }
 
     }
+}
+
+fun openFile(toString: String, context: Context) {
+    TODO("Not yet implemented")
+}
+
+fun isPdfFileInStorage(fileName: String, context: Context): Boolean {
+    val pdfFile = File(getAppStorageDirectory(context), fileName)
+    return pdfFile.exists()
 }

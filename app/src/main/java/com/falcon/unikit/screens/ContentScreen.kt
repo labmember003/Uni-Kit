@@ -74,6 +74,25 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
             .fillMaxSize()
     ) {
         HeadingSummarizedPage()
+
+        HorizontalPager(
+            pageCount = list.size,
+            state = pageState,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f),
+            pageContent = { pageNumber ->
+//              0 -> notes = content[0]
+//                content[pageNumber], navController
+                Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
+//                val icon = getIcon(content[pageNumber].contentType)
+                Text(
+                    text = pageNumber.toString(),
+                    modifier = Modifier.fillMaxSize()
+                )
+//                ContentList(content[pageNumber], navController, icon)
+            }
+        )
         TabRow(
             selectedTabIndex = pageState.currentPage,
             modifier = Modifier
@@ -130,24 +149,6 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
                 )
             }
         }
-        HorizontalPager(
-            pageCount = list.size,
-            state = pageState,
-            modifier = Modifier
-                .fillMaxSize()
-                .weight(1f),
-            pageContent = { pageNumber ->
-//              0 -> notes = content[0]
-//                content[pageNumber], navController
-                Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
-//                val icon = getIcon(content[pageNumber].contentType)
-                Text(
-                    text = pageNumber.toString(),
-                    modifier = Modifier.fillMaxSize()
-                )
-//                ContentList(content[pageNumber], navController, icon)
-            }
-        )
     }
 }
 

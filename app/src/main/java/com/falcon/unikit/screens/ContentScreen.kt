@@ -63,8 +63,8 @@ import java.io.IOException
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController) {
     val list = content.map { content ->
-        content.contentName
-    }
+        content.contentType
+    }.distinct()
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
     Column(
@@ -110,7 +110,7 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
             pageContent = { pageNumber ->
 //              0 -> notes = content[0]
 //                content[pageNumber], navController
-                val icon = getIcon(content[pageNumber].contentName)
+                val icon = getIcon(content[pageNumber].contentType)
                 ContentList(content[pageNumber], navController, icon)
             }
         )

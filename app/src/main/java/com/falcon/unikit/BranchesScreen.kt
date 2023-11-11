@@ -148,6 +148,7 @@ fun SubjectItemRow(
             },
         verticalAlignment = Alignment.CenterVertically
     ) {
+        Log.i("diwali", subjectItem.subjectID.toString())
         if(subjectItem.imageURL != null) {
             AsyncImage(
                 model = subjectItem.imageURL,

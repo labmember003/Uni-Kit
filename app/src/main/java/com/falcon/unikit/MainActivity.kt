@@ -450,7 +450,7 @@ class MainActivity : ComponentActivity() {
                     ) {
                         val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
-                        if (content.value != emptyList<BranchItem>()) {
+                        if (content.value != emptyList<Content>()) {
                             ContentScreen(
                                 content.value,
                                 navController

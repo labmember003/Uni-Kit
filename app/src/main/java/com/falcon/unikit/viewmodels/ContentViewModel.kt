@@ -1,5 +1,6 @@
 package com.falcon.unikit.viewmodels
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -23,6 +24,7 @@ class ContentViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val subjectID = savedStateHandle.get<String>("subjectID") ?: "123"
+            Log.i("diwaliiii", subjectID.toString())
             unikitRepository.getContent(subjectID)
         }
     }

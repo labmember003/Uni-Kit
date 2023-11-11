@@ -28,9 +28,6 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,13 +40,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.R
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.Item
-import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -86,11 +81,10 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
 //                content[pageNumber], navController
                 Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
 //                val icon = getIcon(content[pageNumber].contentType)
-                Text(
-                    text = pageNumber.toString(),
-                    modifier = Modifier.fillMaxSize()
-                )
-//                ContentList(content[pageNumber], navController, icon)
+                val specificContent = content.filter {
+                    it.contentType == list[pageNumber]
+                }
+                ContentList(specificContent, navController, getIcon(list[pageNumber], true))
             }
         )
         TabRow(
@@ -196,14 +190,7 @@ fun getIcon(contentName: String, selected: Boolean): Int {
 }
 
 @Composable
-fun ContentList(content: Content, navController: NavHostController, icon: Int) {
-    val contentID = content.contentId
-
-    val itemViewModel : ItemViewModel = hiltViewModel()
-    LaunchedEffect(key1 = Unit) {
-        itemViewModel.getItem(contentID)
-    }
-    val items: State<List<Item>> = itemViewModel.items.collectAsState()
+fun ContentList(content: List<Content>, navController: NavHostController, icon: Int) {
     Column(
         modifier = Modifier
             .fillMaxSize(),
@@ -211,7 +198,7 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         LazyColumn(content = {
-            val sortedItems = items.value.sortedByDescending { it.likeCount }
+            val sortedItems = content.sortedByDescending { it.likeCount }
             items(sortedItems) { content ->
                 ContentItemRow(content, icon)
             }
@@ -219,7 +206,7 @@ fun ContentList(content: Content, navController: NavHostController, icon: Int) {
     }
 }
 
-suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, contentItem: Item) {
+suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) {
     withContext(Dispatchers.IO) {
         try {
             val client = OkHttpClient()
@@ -230,7 +217,7 @@ suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, contentItem: I
             val response = client.newCall(request).execute()
 
             if (response.isSuccessful) {
-                val pdfFileName = contentItem.itemId + ".pdf" // Change this to the desired file name
+                val pdfFileName = "$name.pdf" // Change this to the desired file name
                 val pdfFile = File(getAppStorageDirectory(context), pdfFileName)
                 val inputStream = response.body?.byteStream()
                 val outputStream = FileOutputStream(pdfFile)
@@ -256,26 +243,21 @@ private fun getAppStorageDirectory(context: Context): File {
     return File(context.filesDir, "pdfs") // Change "pdfs" to the desired directory name
 }
 
-@Preview(showBackground = true)
-@Composable()
-fun test() {
-    ContentItemRow(Item("itemNAME", "f", "",0, 0), R.drawable.ic_goole)
-}
 @Composable
-fun ContentItemRow(contentItem: Item, icon: Int) {
+fun ContentItemRow(contentItem: Content, icon: Int) {
     val context = LocalContext.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
-                if (isPdfFileInStorage(contentItem.itemId.toString(), context)) {
-                    openFile(contentItem.itemId.toString(), context)
+                if (isPdfFileInStorage(contentItem._id.toString(), context)) {
+                    openFile(contentItem._id.toString(), context)
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        downloadAndStorePdf(contentItem.downloadURL, context, contentItem)
+                        downloadAndStorePdf(contentItem.downloadURL.toString(), context, contentItem._id.toString())
                     }
-                    openFile(contentItem.itemId.toString(), context)
+                    openFile(contentItem._id.toString(), context)
                 }
 
 //                navController.navigate("content_screen/${subjectItem.subjectID}")
@@ -293,7 +275,7 @@ fun ContentItemRow(contentItem: Item, icon: Int) {
         )
         Spacer(modifier = Modifier.width(16.dp))
         Text(
-            text = contentItem.itemName,
+            text = contentItem.contentName.toString(),
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             modifier = Modifier.weight(1f)

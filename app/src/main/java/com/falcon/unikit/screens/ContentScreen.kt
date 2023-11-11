@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,9 +63,10 @@ import java.io.IOException
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController) {
-    val list = content.map { content ->
-        content.contentType
-    }.distinct()
+//    val list2 = content.map { content ->
+//        content.contentType
+//    }.distinct()
+    val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
     Column(
@@ -75,17 +77,42 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
         TabRow(
             selectedTabIndex = pageState.currentPage,
             modifier = Modifier
+                .fillMaxWidth()
         ) {
             list.forEachIndexed { index, _ ->
                 // on below line we are creating a tab.
                 Tab(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedContentColor = Color(R.color.teal_200),
+                    unselectedContentColor = Color(R.color.teal_200),
                     text = {
-                        Text(
-                            list[index],
-                            // on below line we are specifying the text color
-                            // for the text in that tab
-                            color = if (pageState.currentPage == index) Color(R.color.custom_color_tab_bar) else Color.Black
-                        )
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
+                                contentDescription = "Icon",
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
+                            Text(
+                                list[index],
+                                fontSize = 13.sp,
+                                // on below line we are specifying the text color
+                                // for the text in that tab
+                                color = if (pageState.currentPage == index) Color(R.color.teal_200) else Color.Black,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(bottom = 10.dp)
+                            )
+                            if (pageState.currentPage == index) {
+
+                            }
+                        }
+
                     },
                     // on below line we are specifying
                     // the tab which is selected.
@@ -94,47 +121,76 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
                     // on click for the tab which is selected.
                     onClick = {
                         // on below line we are specifying the scope.
+                        Log.i("happppy", pageState.currentPage.toString())
+                        Log.i("happppy2", index.toString())
                         scope.launch {
-                            pageState.animateScrollToPage(index)
+                            pageState.scrollToPage(index)
                         }
                     }
                 )
             }
         }
         HorizontalPager(
-            pageCount = content.size,
+            pageCount = list.size,
             state = pageState,
             modifier = Modifier
-                .fillMaxWidth()
-                .weight(0.6f),
+                .fillMaxSize()
+                .weight(1f),
             pageContent = { pageNumber ->
 //              0 -> notes = content[0]
 //                content[pageNumber], navController
-                val icon = getIcon(content[pageNumber].contentType)
-                ContentList(content[pageNumber], navController, icon)
+                Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
+//                val icon = getIcon(content[pageNumber].contentType)
+                Text(
+                    text = pageNumber.toString(),
+                    modifier = Modifier.fillMaxSize()
+                )
+//                ContentList(content[pageNumber], navController, icon)
             }
         )
     }
 }
 
-fun getIcon(contentName: String): Int {
-    when (contentName) {
-        "notes" -> {
-            return R.drawable.ic_goole
+fun getIcon(contentName: String, selected: Boolean): Int {
+    if (selected) {
+        when (contentName) {
+            "Notes" -> {
+                return R.drawable.notes
+            }
+            "Books" -> {
+                return R.drawable.book
+            }
+            "Papers" -> {
+                return R.drawable.exam
+            }
+            "Playlists" -> {
+                return R.drawable.playlisticon
+            }
+            "Syllabus" -> {
+                return R.drawable.syllabusicon
+            }
+            else -> return R.drawable.ic_goole
         }
-        "books" -> {
-            return R.drawable.ic_goole
+    }
+    else {
+        when (contentName) {
+            "Notes" -> {
+                return R.drawable.notes_unseleted
+            }
+            "Books" -> {
+                return R.drawable.book_unseleted
+            }
+            "Papers" -> {
+                return R.drawable.exam_unseleted
+            }
+            "Playlists" -> {
+                return R.drawable.playlisticon_unseleted
+            }
+            "Syllabus" -> {
+                return R.drawable.syllabusicon_unseleted
+            }
+            else -> return R.drawable.ic_goole
         }
-        "papers" -> {
-            return R.drawable.ic_goole
-        }
-        "playlist" -> {
-            return R.drawable.ic_goole
-        }
-        "syllabus" -> {
-            return R.drawable.ic_goole
-        }
-        else -> return R.drawable.ic_goole
     }
 }
 

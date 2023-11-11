@@ -522,7 +522,7 @@ class MainActivity : ComponentActivity() {
                                 val myNotes = authViewModel.myNotes.collectAsState()
                                 LazyColumn(content = {
                                     items(myNotes.value) { myNote ->
-                                        MyNotesItem(myNote, R.drawable.baseline_sticky_note_2_24)
+                                        MyNotesItem(myNote)
                                     }
                                 })
                             }
@@ -532,101 +532,164 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+    private fun getIcon(contentName: String): Int {
+        when (contentName) {
+            "Notes" -> {
+                return R.drawable.notes
+            }
+            "Books" -> {
+                return R.drawable.book
+            }
+            "Papers" -> {
+                return R.drawable.exam
+            }
+            "Playlists" -> {
+                return R.drawable.playlisticon
+            }
+            "Syllabus" -> {
+                return R.drawable.syllabusicon
+            }
+            else -> return R.drawable.error
+        }
 
+    }
     @Composable
-    fun MyNotesItem(myNote: MyNoteItem, icon: Int) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-                .clickable {
+    fun MyNotesItem(myNote: MyNoteItem) {
+        Column {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+                    .clickable {
 //                Todo(download and view file)
 //                  download(contentItem.downloadURL)
-                },
-        ) {
-            Image(
-                painter = painterResource(id = icon),
-                contentDescription = null,
-                modifier = Modifier
-                    .size(50.dp)
-                    .clip(CircleShape)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
+                    },
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Image(
+                        painter = painterResource(id = getIcon(myNote.itemType.toString())),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(50.dp)
+                            .clip(CircleShape)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(
+                        text = myNote.notesName.toString(),
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    IconButton(
+                        modifier = Modifier,
+                        onClick = {
+
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
+                            contentDescription = "Thumbs Up",
+                            modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                        )
+                    }
+                    Text(
+                        text = myNote.likeCount.toString(),
+                    )
+                    IconButton(
+                        modifier = Modifier,
+                        onClick = {
+
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
+                            contentDescription = "Thumbs Up",
+                            modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                        )
+                    }
+                    Text(
+                        text = myNote.dislikeCount.toString()
+                    )
+                }
+            }
             Column(
                 modifier = Modifier.weight(1f)
             ) {
+                Spacer(modifier = Modifier.size(10.dp))
+                val collegeList = remember {
+                    mutableStateOf(
+                        myNote.college?.map { myNote ->
+                            myNote.collegeName
+                        }
+                    )
+                }
+                val courseList = remember {
+                    mutableStateOf(
+                        myNote.course?.map { myNote ->
+                            myNote.courseName
+                        }
+                    )
+                }
+                val branchList = remember {
+                    mutableStateOf(
+                        myNote.branch?.map { myNote ->
+                            myNote.branchName
+                        }
+                    )
+                }
+                val yearList = remember {
+                    mutableStateOf(
+                        myNote.year?.map { myNote ->
+                            myNote.numofYear
+                        }
+                    )
+                }
+                val subjectList = remember {
+                    mutableStateOf(
+                        myNote.subject?.map { myNote ->
+                            myNote.subjectName
+                        }
+                    )
+                }
                 Text(
-                    text = myNote.notesName.toString(),
+                    text = "College: ",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = "College: s"+myNote.college?.get(0)?.collegeName.toString(),
+                    text = "course",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.course?.get(0)?.courseName.toString(),
+                    text = "branch",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.branch?.get(0)?.branchName.toString(),
+                    text = "year",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = myNote.year?.get(0)?.numofYear.toString(),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    text = myNote.subject?.get(0)?.subjectName.toString(),
+                    text = "subject",
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                 )
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-            ) {
-                IconButton(
-                    modifier = Modifier,
-                    onClick = {
-
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
-                        contentDescription = "Thumbs Up",
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
-                    )
-                }
-                Text(
-                    text = myNote.likeCount.toString(),
-                )
-                IconButton(
-                    modifier = Modifier,
-                    onClick = {
-
-                    }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
-                        contentDescription = "Thumbs Up",
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
-                    )
-                }
-                Text(
-                    text = myNote.dislikeCount.toString()
-                )
-            }
-
         }
     }
 

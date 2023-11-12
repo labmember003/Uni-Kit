@@ -1,7 +1,10 @@
 package com.falcon.unikit.screens
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -28,7 +31,6 @@ import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.FloatingActionButton
@@ -45,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.LottieAnimation
@@ -250,7 +253,7 @@ fun ComingSoonScreen() {
         )
     }
 }
-suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) {
+suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, _id: String) {
     withContext(Dispatchers.IO) {
         try {
             val client = OkHttpClient()
@@ -261,7 +264,7 @@ suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) 
             val response = client.newCall(request).execute()
 
             if (response.isSuccessful) {
-                val pdfFileName = "$name.pdf" // Change this to the desired file name
+                val pdfFileName = "$_id.pdf" // Change this to the desired file name
                 val pdfFile = File(getAppStorageDirectory(context), pdfFileName)
                 val inputStream = response.body?.byteStream()
                 val outputStream = FileOutputStream(pdfFile)
@@ -271,7 +274,9 @@ suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) 
                         input.copyTo(output)
                     }
                 }
-
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, pdfFile.absolutePath, Toast.LENGTH_SHORT).show()
+                }
                 Log.d("PdfDownload", "PDF downloaded and stored at ${pdfFile.absolutePath}")
             } else {
                 Log.e("PdfDownload", "Download failed")
@@ -284,6 +289,8 @@ suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) 
 }
 
 private fun getAppStorageDirectory(context: Context): File {
+    val file = File(context.filesDir, "pdfs") // Change "pdfs" to the desired directory name
+    file.mkdir()
     return File(context.filesDir, "pdfs") // Change "pdfs" to the desired directory name
 }
 
@@ -296,16 +303,19 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
             .padding(16.dp)
             .clickable {
                 if (isPdfFileInStorage(contentItem._id.toString(), context)) {
-                    openFile(contentItem._id.toString(), context)
+                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
+                    Log.i("filefilefile", "openFIle")
                 } else {
+                    Log.i("filefilefile", "downloadFile")
+                    Log.i("filefilefile", contentItem.pdfFile.toString())
                     CoroutineScope(Dispatchers.IO).launch {
                         downloadAndStorePdf(
-                            contentItem.downloadURL.toString(),
+                            contentItem.pdfFile.toString(),
                             context,
                             contentItem._id.toString()
                         )
                     }
-                    openFile(contentItem._id.toString(), context)
+                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
                 }
 
 //                navController.navigate("content_screen/${subjectItem.subjectID}")
@@ -367,8 +377,19 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
     }
 }
 
-fun openFile(toString: String, context: Context) {
-    TODO("Not yet implemented")
+fun openFile(fileName: String, context: Context, appStorageDirectory: File) {
+    val file = File(appStorageDirectory, fileName)
+    if (file.exists()) {
+        val pdfUri = Uri.fromFile(file)
+        val pdfIntent = Intent(Intent.ACTION_VIEW).apply {
+            data = pdfUri
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+
+        ContextCompat.startActivity(context, pdfIntent, null)
+    } else {
+        Toast.makeText(context, "PDF file not found", Toast.LENGTH_SHORT).show()
+    }
 }
 
 fun isPdfFileInStorage(fileName: String, context: Context): Boolean {

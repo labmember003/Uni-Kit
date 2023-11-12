@@ -10,5 +10,5 @@ data class Content (
     val dislikeCount: String? = null,
     val subjectID: String? = null,
 
-    val downloadURL: String? = null
+    val pdfFile: String? = null
 )

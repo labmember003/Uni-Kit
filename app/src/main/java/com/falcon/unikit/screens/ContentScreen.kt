@@ -40,9 +40,13 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,9 +62,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.LottieAnimation
 import com.falcon.unikit.R
+import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.api.Content
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -86,11 +94,14 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
         confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
         skipHalfExpanded = true
     )
+    val currentType = remember {
+        mutableStateOf("Type")
+    }
     ModalBottomSheetLayout(
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            BottomSheetContent(modalSheetState)
+            BottomSheetContent(modalSheetState, currentType)
         }
     ) {
         Column(
@@ -112,6 +123,10 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
                     val specificContent = content.filter {
                         it.contentType == list[pageNumber]
                     }
+
+                    currentType.value = list[pageNumber]
+//                    TODO(TRIGGER RECOMPOSITION OF BOTTOM SHEET)
+
                     ContentList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
                 }
             )
@@ -537,9 +552,12 @@ fun isPdfFileInStorage(fileName: String, context: Context): Boolean {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BottomSheetContent(modalSheetState: ModalBottomSheetState) {
+fun BottomSheetContent(modalSheetState: ModalBottomSheetState, currentType: MutableState<String>) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
+    val uploaded = remember {
+        mutableStateOf(true)
+//        TODO(make it false)
+    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -568,7 +586,60 @@ fun BottomSheetContent(modalSheetState: ModalBottomSheetState) {
                     }
             )
         }
-        Text(text = "Coming Soon")
+        TextWithBorder(headingValue = "Subject", descriptionValue = "College")
+        TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable {
+                    uploadFile()
+                }
+        ) {
+            Column {
+                UploadIcon()
+                Text(text = "(Upload Your PDF)")
+                if (uploaded.value) {
+                    SubmitButton()
+                }
+            }
+        }
     }
 
+}
+
+@Composable
+fun SubmitButton() {
+    Button(
+        onClick = {
+            submitPDF()
+        },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = Color.Black,
+            contentColor = Color.White
+        ),
+    ) {
+        androidx.compose.material3.Text(
+            text = "SUBMIT",
+        )
+    }
+}
+
+fun submitPDF() {
+    TODO("Not yet implemented")
+}
+
+fun uploadFile() {
+    TODO("Not yet implemented")
+}
+
+@Composable
+fun UploadIcon() {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.upload_pdf))
+    com.airbnb.lottie.compose.LottieAnimation(
+        composition = composition,
+        iterations = LottieConstants.IterateForever,
+        modifier = Modifier
+            .size(100.dp)
+    )
 }

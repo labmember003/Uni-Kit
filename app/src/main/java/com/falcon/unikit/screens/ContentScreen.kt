@@ -36,6 +36,8 @@ import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -62,6 +64,9 @@ import okhttp3.Request
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -253,6 +258,99 @@ fun ComingSoonScreen() {
         )
     }
 }
+
+private suspend fun downloadPdf(
+    downloadLink: String,
+    fileName: String,
+    statusCallback: (String) -> Unit,
+    context: Context
+) {
+    withContext(Dispatchers.IO) {
+        try {
+            val url = URL(downloadLink)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connect()
+
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val inputStream: InputStream = connection.inputStream
+
+                // Use a relative path within the private storage
+                val relativeFilePath = "pdfs/$fileName"
+                val file = File(getAppStorageDirectory(context), relativeFilePath)
+
+                val fileOutputStream = FileOutputStream(file)
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead)
+                }
+
+                fileOutputStream.close()
+                inputStream.close()
+
+                // Notify the UI about the download status
+                statusCallback("PDF downloaded successfully. Path: $relativeFilePath")
+
+                // Display a Toast indicating successful download
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(context, "PDF downloaded successfully.", Toast.LENGTH_SHORT).show()
+                }
+            } else {
+                statusCallback("Failed to download PDF. Response code: ${connection.responseCode}")
+            }
+        } catch (e: Exception) {
+            statusCallback("Error: ${e.message}")
+        }
+    }
+}
+
+private suspend fun downloadPdf2(
+    downloadLink: String,
+    fileName: String,
+    statusCallback: (String) -> Unit,
+    context: Context
+) {
+    withContext(Dispatchers.IO) {
+        try {
+            val url = URL(downloadLink)
+            val connection = url.openConnection() as HttpURLConnection
+            connection.requestMethod = "GET"
+            connection.connect()
+
+            if (connection.responseCode == HttpURLConnection.HTTP_OK) {
+                val inputStream: InputStream = connection.inputStream
+                val file = File(getAppStorageDirectory(context), fileName)
+                val fileOutputStream = FileOutputStream(file)
+                val buffer = ByteArray(1024)
+                var bytesRead: Int
+
+                while (inputStream.read(buffer).also { bytesRead = it } != -1) {
+                    fileOutputStream.write(buffer, 0, bytesRead)
+                }
+
+                fileOutputStream.close()
+                inputStream.close()
+
+                // Notify the UI about the download status
+
+                Toast.makeText(context, "PDF downloaded successfully.", Toast.LENGTH_SHORT).show()
+//                statusCallback("PDF downloaded successfully. Path: ${file.absolutePath}")
+//                Toast.makeText(context, file.absolutePath, Toast.LENGTH_SHORT).show()
+//                if (file.exists()) {
+//                    withContext(Dispatchers.Main) {
+//                        Toast.makeText(context, "trueeeeee", Toast.LENGTH_SHORT).show()
+//                    }
+//                }
+            } else {
+                statusCallback("Failed to download PDF. Response code: ${connection.responseCode}")
+            }
+        } catch (e: Exception) {
+            statusCallback("Error: ${e.message}")
+        }
+    }
+}
 suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, _id: String) {
     withContext(Dispatchers.IO) {
         try {
@@ -297,25 +395,35 @@ private fun getAppStorageDirectory(context: Context): File {
 @Composable
 fun ContentItemRow(contentItem: Content, icon: Int) {
     val context = LocalContext.current
+    var downloadStatus = remember { mutableStateOf<String?>(null) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp)
             .clickable {
                 if (isPdfFileInStorage(contentItem._id.toString(), context)) {
-                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
+//                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
                     Log.i("filefilefile", "openFIle")
                 } else {
                     Log.i("filefilefile", "downloadFile")
                     Log.i("filefilefile", contentItem.pdfFile.toString())
                     CoroutineScope(Dispatchers.IO).launch {
-                        downloadAndStorePdf(
+//                        downloadAndStorePdf(
+//                            contentItem.pdfFile.toString(),
+//                            context,
+//                            contentItem._id.toString()
+//                        )
+                        downloadPdf(
                             contentItem.pdfFile.toString(),
-                            context,
-                            contentItem._id.toString()
+                            contentItem._id.toString(),
+                            { status ->
+                                downloadStatus.value = status
+                            },
+                            context
                         )
                     }
-                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
+//                    Toast.makeText(context, isPdfFileInStorage(contentItem._id.toString(), context).toString(), Toast.LENGTH_SHORT).show()
+//                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
                 }
 
 //                navController.navigate("content_screen/${subjectItem.subjectID}")

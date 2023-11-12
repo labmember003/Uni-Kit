@@ -6,6 +6,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,13 +20,18 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,14 +43,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.falcon.unikit.HeadingSummarizedPage
+import com.falcon.unikit.LottieAnimation
 import com.falcon.unikit.R
 import com.falcon.unikit.api.Content
-import com.falcon.unikit.api.Item
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -58,9 +63,6 @@ import java.io.IOException
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController) {
-//    val list2 = content.map { content ->
-//        content.contentType
-//    }.distinct()
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -184,28 +186,70 @@ fun getIcon(contentName: String, selected: Boolean): Int {
             "Syllabus" -> {
                 return R.drawable.syllabusicon_unseleted
             }
-            else -> return R.drawable.ic_goole
+            else -> return R.drawable.error
         }
     }
 }
 
 @Composable
 fun ContentList(content: List<Content>, navController: NavHostController, icon: Int) {
-    Column(
+    if (content.isEmpty()) {
+        ComingSoonScreen()
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LazyColumn(content = {
+                val sortedItems = content.sortedByDescending { it.likeCount }
+                items(sortedItems) { content ->
+                    ContentItemRow(content, icon)
+                }
+            })
+        }
+    }
+    AddNotesFAB()
+}
+
+@Composable
+fun AddNotesFAB() {
+    Box(
         modifier = Modifier
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+            .fillMaxSize()
     ) {
-        LazyColumn(content = {
-            val sortedItems = content.sortedByDescending { it.likeCount }
-            items(sortedItems) { content ->
-                ContentItemRow(content, icon)
-            }
-        })
+        FloatingActionButton(
+            onClick = {
+
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(24.dp)
+                .size(56.dp),
+            shape = RoundedCornerShape(percent = 30),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.Add,
+                contentDescription = "Add",
+                tint = MaterialTheme.colors.primary,
+            )
+        }
     }
 }
 
+@Composable
+fun ComingSoonScreen() {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LottieAnimation(animationID = R.raw.coming_soon_cat)
+        androidx.compose.material3.Text(
+            text = "No Notes"
+        )
+    }
+}
 suspend fun downloadAndStorePdf(pdfUrl: String, context: Context, name: String) {
     withContext(Dispatchers.IO) {
         try {
@@ -255,7 +299,11 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     openFile(contentItem._id.toString(), context)
                 } else {
                     CoroutineScope(Dispatchers.IO).launch {
-                        downloadAndStorePdf(contentItem.downloadURL.toString(), context, contentItem._id.toString())
+                        downloadAndStorePdf(
+                            contentItem.downloadURL.toString(),
+                            context,
+                            contentItem._id.toString()
+                        )
                     }
                     openFile(contentItem._id.toString(), context)
                 }

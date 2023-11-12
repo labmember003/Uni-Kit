@@ -7,6 +7,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,15 +25,21 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -68,92 +75,105 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController) {
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    val modalSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
+        skipHalfExpanded = true
+    )
+    ModalBottomSheetLayout(
+        sheetState = modalSheetState,
+        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        sheetContent = {
+            BottomSheetContent(modalSheetState)
+        }
     ) {
-        HeadingSummarizedPage()
-
-        HorizontalPager(
-            pageCount = list.size,
-            state = pageState,
+        Column(
             modifier = Modifier
                 .fillMaxSize()
-                .weight(1f),
-            pageContent = { pageNumber ->
+        ) {
+            HeadingSummarizedPage()
+            HorizontalPager(
+                pageCount = list.size,
+                state = pageState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f),
+                pageContent = { pageNumber ->
 //              0 -> notes = content[0]
 //                content[pageNumber], navController
-                Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
+                    Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
 //                val icon = getIcon(content[pageNumber].contentType)
-                val specificContent = content.filter {
-                    it.contentType == list[pageNumber]
+                    val specificContent = content.filter {
+                        it.contentType == list[pageNumber]
+                    }
+                    ContentList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
                 }
-                ContentList(specificContent, navController, getIcon(list[pageNumber], true))
-            }
-        )
-        TabRow(
-            selectedTabIndex = pageState.currentPage,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            list.forEachIndexed { index, _ ->
-                // on below line we are creating a tab.
-                Tab(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedContentColor = Color(R.color.teal_200),
-                    unselectedContentColor = Color(R.color.teal_200),
-                    text = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Image(
-                                painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
-                                contentDescription = "Icon",
+            )
+            TabRow(
+                selectedTabIndex = pageState.currentPage,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                list.forEachIndexed { index, _ ->
+                    // on below line we are creating a tab.
+                    Tab(
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedContentColor = Color(R.color.teal_200),
+                        unselectedContentColor = Color(R.color.teal_200),
+                        text = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
                                 modifier = Modifier
-                                    .size(20.dp)
-                            )
-                            Text(
-                                list[index],
-                                fontSize = 13.sp,
-                                // on below line we are specifying the text color
-                                // for the text in that tab
-                                color = if (pageState.currentPage == index) Color(R.color.teal_200) else Color.Black,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(bottom = 10.dp)
-                            )
-                            if (pageState.currentPage == index) {
+                                    .fillMaxWidth()
+                            ) {
+                                Image(
+                                    painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
+                                    contentDescription = "Icon",
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                                Text(
+                                    list[index],
+                                    fontSize = 13.sp,
+                                    // on below line we are specifying the text color
+                                    // for the text in that tab
+                                    color = if (pageState.currentPage == index) Color(R.color.teal_200) else Color.Black,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier.padding(bottom = 10.dp)
+                                )
+                                if (pageState.currentPage == index) {
 
+                                }
+                            }
+
+                        },
+                        // on below line we are specifying
+                        // the tab which is selected.
+                        selected = pageState.currentPage == index,
+                        // on below line we are specifying the
+                        // on click for the tab which is selected.
+                        onClick = {
+                            // on below line we are specifying the scope.
+                            Log.i("happppy", pageState.currentPage.toString())
+                            Log.i("happppy2", index.toString())
+                            scope.launch {
+                                pageState.scrollToPage(index)
                             }
                         }
-
-                    },
-                    // on below line we are specifying
-                    // the tab which is selected.
-                    selected = pageState.currentPage == index,
-                    // on below line we are specifying the
-                    // on click for the tab which is selected.
-                    onClick = {
-                        // on below line we are specifying the scope.
-                        Log.i("happppy", pageState.currentPage.toString())
-                        Log.i("happppy2", index.toString())
-                        scope.launch {
-                            pageState.scrollToPage(index)
-                        }
-                    }
-                )
+                    )
+                }
             }
         }
     }
+
 }
 
 fun getIcon(contentName: String, selected: Boolean): Int {
@@ -199,8 +219,14 @@ fun getIcon(contentName: String, selected: Boolean): Int {
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun ContentList(content: List<Content>, navController: NavHostController, icon: Int) {
+fun ContentList(
+    content: List<Content>,
+    navController: NavHostController,
+    icon: Int,
+    modalSheetState: ModalBottomSheetState
+) {
     if (content.isEmpty()) {
         ComingSoonScreen()
     } else {
@@ -217,18 +243,22 @@ fun ContentList(content: List<Content>, navController: NavHostController, icon: 
             })
         }
     }
-    AddNotesFAB()
+    AddNotesFAB(modalSheetState)
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun AddNotesFAB() {
+fun AddNotesFAB(modalSheetState: ModalBottomSheetState) {
+    val scope = rememberCoroutineScope()
     Box(
         modifier = Modifier
             .fillMaxSize()
     ) {
         FloatingActionButton(
             onClick = {
-
+                scope.launch {
+                    modalSheetState.show()
+                }
             },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -503,4 +533,42 @@ fun openFile(fileName: String, context: Context, appStorageDirectory: File) {
 fun isPdfFileInStorage(fileName: String, context: Context): Boolean {
     val pdfFile = File(getAppStorageDirectory(context), fileName)
     return pdfFile.exists()
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun BottomSheetContent(modalSheetState: ModalBottomSheetState) {
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(Color.White)
+            .padding(16.dp, 24.dp, 16.dp, 16.dp)
+
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp)
+            ,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            androidx.compose.material3.Text(
+                text = "Upload Notes",
+                style = MaterialTheme.typography.subtitle1,
+                fontSize = 20.sp
+            )
+            androidx.compose.material.Icon(
+                Icons.Filled.Close,
+                contentDescription = "Close",
+                modifier = Modifier
+                    .clickable {
+                        scope.launch { modalSheetState.hide() }
+                    }
+            )
+        }
+        Text(text = "Coming Soon")
+    }
+
 }

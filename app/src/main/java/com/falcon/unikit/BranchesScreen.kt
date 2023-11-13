@@ -21,7 +21,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
@@ -47,7 +46,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun BranchesScreen(
     branchList: List<BranchItem>,
-    navigateToContentScreen: (String) -> Unit
+    navigateToContentScreen: (String, String) -> Unit
 ) {
     val list = branchList.map { branch ->
         branch.branchName
@@ -104,7 +103,7 @@ fun BranchesScreen(
 @Composable
 fun SubjectList(
     branch: BranchItem,
-    navigateToContentScreen: (String) -> Unit
+    navigateToContentScreen: (String, String) -> Unit
 ) {
     val subjectViewModel : SubjectViewModel = hiltViewModel()
 //    val subjectss = emptyList<State<List<SubjectItem>>>()
@@ -136,14 +135,14 @@ fun SubjectList(
 @Composable
 fun SubjectItemRow(
     subjectItem: SubjectItem,
-    navigateToContentScreen: (String) -> Unit
+    navigateToContentScreen: (String, String) -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(16.dp, 8.dp)
             .clickable {
-                navigateToContentScreen(subjectItem.subjectID ?: "ERROR: Subject Id is NULL")
+                navigateToContentScreen(subjectItem.subjectID ?: "ERROR: Subject Id is NULL", subjectItem.subjectName ?: "ERROR: Subject Name is NULL")
                 Log.i("subjectID", subjectItem.subjectID.toString())
             },
         verticalAlignment = Alignment.CenterVertically

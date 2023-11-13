@@ -432,28 +432,33 @@ class MainActivity : ComponentActivity() {
                         if (branches.value != emptyList<BranchItem>()) {
                             BranchesScreen(
                                 branches.value
-                            ) { subjectID ->
-                                navController.navigate("content_screen/${subjectID}")
+                            ) { subjectID, subjectName ->
+                                navController.navigate("content_screen/${subjectID}/${subjectName}")
                             }
                         } else {
                             LoadingScreen()
                         }
                     }
                     composable(
-                        "content_screen" + "/{subjectID}",
+                        "content_screen" + "/{subjectID}" + "/{subjectName}",
                         arguments = listOf(
                             navArgument("subjectID") {
                                 type = NavType.StringType
                                 nullable = false
+                            },
+                            navArgument("subjectName") {
+                                type = NavType.StringType
+                                nullable = false
                             }
                         )
-                    ) {
+                    ) { entry ->
                         val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
                         if (content.value != emptyList<Content>()) {
                             ContentScreen(
                                 content.value,
-                                navController
+                                navController,
+                                entry.arguments?.getString("subjectName")
                             )
                         } else {
                             LoadingScreen()

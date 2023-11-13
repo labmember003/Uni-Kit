@@ -85,7 +85,7 @@ import java.net.URL
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun ContentScreen(content: List<Content>, navController: NavHostController) {
+fun ContentScreen(content: List<Content>, navController: NavHostController, subjectName: String?) {
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
@@ -97,11 +97,14 @@ fun ContentScreen(content: List<Content>, navController: NavHostController) {
     val currentType = remember {
         mutableStateOf("Type")
     }
+    val currentSubject = remember {
+        mutableStateOf(subjectName)
+    }
     ModalBottomSheetLayout(
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            BottomSheetContent(modalSheetState, currentType)
+            BottomSheetContent(modalSheetState, currentType, currentSubject)
         }
     ) {
         Column(
@@ -552,7 +555,11 @@ fun isPdfFileInStorage(fileName: String, context: Context): Boolean {
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
-fun BottomSheetContent(modalSheetState: ModalBottomSheetState, currentType: MutableState<String>) {
+fun BottomSheetContent(
+    modalSheetState: ModalBottomSheetState,
+    currentType: MutableState<String>,
+    currentSubject: MutableState<String?>
+) {
     val scope = rememberCoroutineScope()
     val uploaded = remember {
         mutableStateOf(true)
@@ -586,7 +593,7 @@ fun BottomSheetContent(modalSheetState: ModalBottomSheetState, currentType: Muta
                     }
             )
         }
-        TextWithBorder(headingValue = "Subject", descriptionValue = "College")
+        TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
         Row(
             horizontalArrangement = Arrangement.Center,

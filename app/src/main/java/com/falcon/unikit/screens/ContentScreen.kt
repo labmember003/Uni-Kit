@@ -72,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -84,6 +85,7 @@ import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.Utils
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.uploadfile.FileUploadViewModel
+import com.falcon.unikit.uploadfile.UploadFileBody
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -705,7 +707,8 @@ fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType
     if (content.isNotEmpty()) {
         subjectID = content[0].subjectID
     }
-    val viewModel: FileUploadViewModel = viewModel()
+
+    val viewModel: FileUploadViewModel = hiltViewModel()
     val context = LocalContext.current
     val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
@@ -733,8 +736,11 @@ fun submitPDF(
 ) {
     val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
-    pdfURI.value?.let { viewModel.uploadFile(contentResolver = contentResolver, uri = it) }
-    viewModel.uploadResult
+    pdfURI.value?.let {
+        viewModel.uploadFile(contentResolver = contentResolver, uri = it,
+            UploadFileBody(token?:"", subjectID?:"", currentType))
+    }
+    val cat = viewModel.uploadResult.value
 }
 
 @Composable

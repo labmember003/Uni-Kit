@@ -51,8 +51,6 @@ interface UnikitAPI {
     suspend fun likeButtonPressed(@Body itemID: String)
 
     @Multipart
-    @POST("upload") // Replace with your actual endpoint
+    @POST("/content/upload")
     suspend fun uploadFile(@Part file: MultipartBody.Part, @Body tokenSubjectidType: UploadFileBody): UploadResponse
 }
-
-///college/

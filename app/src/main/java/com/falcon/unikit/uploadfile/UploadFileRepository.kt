@@ -7,10 +7,10 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import java.io.File
+import javax.inject.Inject
 
-class FileUploadRepository(private val api: UnikitAPI) {
-
-    suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri): UploadResponse {
+class FileUploadRepository @Inject constructor (private val api: UnikitAPI) {
+    suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody): UploadResponse {
         val inputStream = contentResolver.openInputStream(uri)
         val file = inputStream?.let {
             val tempFile = File.createTempFile("upload", null)
@@ -24,6 +24,6 @@ class FileUploadRepository(private val api: UnikitAPI) {
         val requestFile = RequestBody.create("application/pdf".toMediaTypeOrNull(), file)
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        return api.uploadFile(body, UploadFileBody("", "", ""))
+        return api.uploadFile(body, uploadFileBody)
     }
 }

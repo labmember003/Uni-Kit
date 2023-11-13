@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.toSize
 
 @Composable
 fun TextWithBorder(headingValue: String, descriptionValue: String){
-    var mSelectedText by remember { mutableStateOf(descriptionValue) }
+    var mSelectedText by remember(descriptionValue) { mutableStateOf(descriptionValue) }
     var mExpanded by remember { mutableStateOf(false) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     Column(

@@ -5,9 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.UserData
-import com.falcon.unikit.models.item.BranchItem
 import com.falcon.unikit.repository.UnikitRepository
-import com.falcon.unikit.repository.UserNote
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch

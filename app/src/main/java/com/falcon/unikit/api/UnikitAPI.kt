@@ -1,6 +1,7 @@
 package com.falcon.unikit.api
 
 import com.falcon.unikit.MyNoteItem
+import com.falcon.unikit.uploadfile.UploadResponse
 import com.falcon.unikit.models.body.GetMyNotesBody
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.models.item.BranchItem
@@ -8,10 +9,14 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.models.item.YearItem
+import com.falcon.unikit.uploadfile.UploadFileBody
+import okhttp3.MultipartBody
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.Multipart
 import retrofit2.http.POST
+import retrofit2.http.Part
 import retrofit2.http.Query
 
 interface UnikitAPI {
@@ -44,6 +49,10 @@ interface UnikitAPI {
 
     @POST("/getContent")
     suspend fun likeButtonPressed(@Body itemID: String)
+
+    @Multipart
+    @POST("upload") // Replace with your actual endpoint
+    suspend fun uploadFile(@Part file: MultipartBody.Part, @Body tokenSubjectidType: UploadFileBody): UploadResponse
 }
 
 ///college/

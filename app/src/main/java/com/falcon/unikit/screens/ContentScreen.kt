@@ -1,5 +1,6 @@
 package com.falcon.unikit.screens
 
+import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
 import android.database.Cursor
@@ -71,6 +72,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -79,7 +81,9 @@ import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.LottieAnimation
 import com.falcon.unikit.R
 import com.falcon.unikit.TextWithBorder
+import com.falcon.unikit.Utils
 import com.falcon.unikit.api.Content
+import com.falcon.unikit.uploadfile.FileUploadViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -701,9 +705,12 @@ fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType
     if (content.isNotEmpty()) {
         subjectID = content[0].subjectID
     }
+    val viewModel: FileUploadViewModel = viewModel()
+    val context = LocalContext.current
+    val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
         onClick = {
-            submitPDF(pdfURI, currentType, subjectID)
+            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context)
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Black,
@@ -716,8 +723,18 @@ fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType
     }
 }
 
-fun submitPDF(pdfURI: MutableState<Uri?>, currentType: String, subjectID: String?) {
-    TODO("Not yet implemented")
+fun submitPDF(
+    pdfURI: MutableState<Uri?>,
+    currentType: String,
+    subjectID: String?,
+    viewModel: FileUploadViewModel,
+    contentResolver: ContentResolver,
+    context: Context
+) {
+    val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+    val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
+    pdfURI.value?.let { viewModel.uploadFile(contentResolver = contentResolver, uri = it) }
+    viewModel.uploadResult
 }
 
 @Composable

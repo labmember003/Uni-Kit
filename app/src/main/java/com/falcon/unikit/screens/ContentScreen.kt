@@ -2,9 +2,13 @@ package com.falcon.unikit.screens
 
 import android.content.Context
 import android.content.Intent
+import android.database.Cursor
 import android.net.Uri
+import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -32,6 +36,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -45,21 +50,26 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -126,8 +136,13 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
                     val specificContent = content.filter {
                         it.contentType == list[pageNumber]
                     }
+                    LaunchedEffect(key1 = pageNumber) {
+                        currentType.value = list[pageNumber]
+                        Log.i("catcatcatwty2", pageNumber.toString())
+                    }
 
-                    currentType.value = list[pageNumber]
+                    Log.i("catcatcatwty", pageNumber.toString())
+
 //                    TODO(TRIGGER RECOMPOSITION OF BOTTOM SHEET)
 
                     ContentList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
@@ -553,6 +568,37 @@ fun isPdfFileInStorage(fileName: String, context: Context): Boolean {
     return pdfFile.exists()
 }
 
+@Composable
+fun EditTextWithBorder(fileName: String) {
+    var mSelectedText by remember(fileName) { mutableStateOf(fileName) }
+    var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
+    Column(
+        Modifier
+            .padding(10.dp, 5.dp)
+    ) {
+        OutlinedTextField(
+            readOnly = false,
+            value = mSelectedText,
+            onValueChange = {
+                mSelectedText = it
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { coordinates ->
+                    // This value is used to assign to
+                    // the DropDown the same width
+                    mTextFieldSize = coordinates.size.toSize()
+                }
+            ,
+            label = {
+                Text(
+                    "Name"
+                )
+            }
+        )
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomSheetContent(
@@ -560,11 +606,35 @@ fun BottomSheetContent(
     currentType: MutableState<String>,
     currentSubject: MutableState<String?>
 ) {
+    val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val uploaded = remember {
-        mutableStateOf(true)
-//        TODO(make it false)
+    val uploaded = remember (modalSheetState.currentValue) {
+        mutableStateOf(false)
     }
+    val fileName = remember() {
+        mutableStateOf("FileName")
+    }
+    val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+        uploaded.value = true
+        val contentResolver = context.contentResolver  // Assuming you have access to the context
+        val cursor: Cursor? = uri?.let { contentResolver.query(it, null, null, null, null) }
+        cursor.use { cursor ->
+            if (cursor != null && cursor.moveToFirst()) {
+                val displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
+                Toast.makeText(context, displayName, Toast.LENGTH_SHORT).show()
+                if (fileName.value == "FileName") {
+                    fileName.value = displayName
+                }
+                // Now displayName contains the name of the selected PDF file
+                // You can use it as needed
+            }
+        }
+
+    }
+
+//    LaunchedEffect(key1 = modalSheetState.currentValue) {
+//        uploaded
+//    }
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -595,17 +665,22 @@ fun BottomSheetContent(
         }
         TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
+        if (uploaded.value) {
+            EditTextWithBorder(fileName = fileName.value)
+        }
         Row(
             horizontalArrangement = Arrangement.Center,
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
-                    uploadFile()
+                    launcher.launch("application/pdf")
                 }
         ) {
             Column {
-                UploadIcon()
-                Text(text = "(Upload Your PDF)")
+                if (!uploaded.value) {
+                    UploadIcon()
+                    Text(text = "(Upload Your PDF)")
+                }
                 if (uploaded.value) {
                     SubmitButton()
                 }
@@ -633,10 +708,6 @@ fun SubmitButton() {
 }
 
 fun submitPDF() {
-    TODO("Not yet implemented")
-}
-
-fun uploadFile() {
     TODO("Not yet implemented")
 }
 

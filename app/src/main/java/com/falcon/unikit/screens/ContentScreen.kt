@@ -114,7 +114,7 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            BottomSheetContent(modalSheetState, currentType, currentSubject)
+            BottomSheetContent(modalSheetState, currentType, currentSubject, content)
         }
     ) {
         Column(
@@ -604,7 +604,8 @@ fun EditTextWithBorder(fileName: String) {
 fun BottomSheetContent(
     modalSheetState: ModalBottomSheetState,
     currentType: MutableState<String>,
-    currentSubject: MutableState<String?>
+    currentSubject: MutableState<String?>,
+    content: List<Content>
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -614,7 +615,11 @@ fun BottomSheetContent(
     val fileName = remember() {
         mutableStateOf("FileName")
     }
+    val pdfURI: MutableState<Uri?> = remember {
+        mutableStateOf(null)
+    }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+        pdfURI.value = uri
         uploaded.value = true
         val contentResolver = context.contentResolver  // Assuming you have access to the context
         val cursor: Cursor? = uri?.let { contentResolver.query(it, null, null, null, null) }
@@ -682,7 +687,7 @@ fun BottomSheetContent(
                     Text(text = "(Upload Your PDF)")
                 }
                 if (uploaded.value) {
-                    SubmitButton()
+                    SubmitButton(pdfURI, content, currentType.value)
                 }
             }
         }
@@ -691,10 +696,14 @@ fun BottomSheetContent(
 }
 
 @Composable
-fun SubmitButton() {
+fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType: String) {
+    var subjectID : String? = null
+    if (content.isNotEmpty()) {
+        subjectID = content[0].subjectID
+    }
     Button(
         onClick = {
-            submitPDF()
+            submitPDF(pdfURI, currentType, subjectID)
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Black,
@@ -707,7 +716,7 @@ fun SubmitButton() {
     }
 }
 
-fun submitPDF() {
+fun submitPDF(pdfURI: MutableState<Uri?>, currentType: String, subjectID: String?) {
     TODO("Not yet implemented")
 }
 

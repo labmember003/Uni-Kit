@@ -52,5 +52,11 @@ interface UnikitAPI {
 
     @Multipart
     @POST("/content/upload")
-    suspend fun uploadFile(@Part file: MultipartBody.Part, @Body tokenSubjectidType: UploadFileBody): UploadResponse
+    suspend fun uploadFile(
+        @Part file: MultipartBody.Part,
+        @Query("token") token: String,
+        @Query("subjectid") subjectid: String,
+        @Query("type") type: String,
+    ): UploadResponse
+
 }

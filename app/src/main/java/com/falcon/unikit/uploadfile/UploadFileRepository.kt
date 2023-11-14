@@ -24,6 +24,6 @@ class FileUploadRepository @Inject constructor (private val api: UnikitAPI) {
         val requestFile = RequestBody.create("application/pdf".toMediaTypeOrNull(), file)
         val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
 
-        return api.uploadFile(body, uploadFileBody)
+        return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType)
     }
 }

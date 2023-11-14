@@ -86,6 +86,7 @@ import com.falcon.unikit.Utils
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
+import com.falcon.unikit.uploadfile.UploadResult
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -736,11 +737,14 @@ fun submitPDF(
 ) {
     val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
+    Toast.makeText(context, token.toString(), Toast.LENGTH_SHORT).show()
     pdfURI.value?.let {
         viewModel.uploadFile(contentResolver = contentResolver, uri = it,
             UploadFileBody(token?:"", subjectID?:"", currentType))
     }
-    val cat = viewModel.uploadResult.value
+    if (viewModel.uploadResult.value is UploadResult.Success) {
+        Toast.makeText(context, "ho gya upload", Toast.LENGTH_SHORT).show()
+    }
 }
 
 @Composable

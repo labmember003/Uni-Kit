@@ -2,6 +2,7 @@ package com.falcon.unikit.uploadfile
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.webkit.MimeTypeMap
 import com.falcon.unikit.api.UnikitAPI
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -10,20 +11,34 @@ import java.io.File
 import javax.inject.Inject
 
 class FileUploadRepository @Inject constructor (private val api: UnikitAPI) {
-    suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody): UploadResponse {
-        val inputStream = contentResolver.openInputStream(uri)
-        val file = inputStream?.let {
-            val tempFile = File.createTempFile("upload", null)
-            tempFile.deleteOnExit()
-            tempFile.outputStream().use { output ->
-                it.copyTo(output)
-            }
-            tempFile
-        } ?: throw IllegalArgumentException("Invalid URI")
+suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody): UploadResponse {
+    val inputStream = contentResolver.openInputStream(uri)
+    val fileExtension = getFileExtension(contentResolver, uri)
+    val mimeType = getMimeType(fileExtension)
 
-        val requestFile = RequestBody.create("application/pdf".toMediaTypeOrNull(), file)
-        val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+    val file = inputStream?.let {
+        val tempFile = File.createTempFile("upload", ".$fileExtension")
+        tempFile.deleteOnExit()
+        tempFile.outputStream().use { output ->
+            it.copyTo(output)
+        }
+        tempFile
+    } ?: throw IllegalArgumentException("Invalid URI")
 
-        return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType)
+    val requestFile = RequestBody.create(mimeType?.toMediaTypeOrNull(), file)
+    val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+
+    return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType)
+}
+
+    private fun getFileExtension(contentResolver: ContentResolver, uri: Uri): String {
+        val mimeType = contentResolver.getType(uri)
+        return MimeTypeMap.getSingleton().getExtensionFromMimeType(mimeType) ?: "pdf"
     }
+
+    private fun getMimeType(fileExtension: String): String? {
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(fileExtension)
+    }
+
+
 }

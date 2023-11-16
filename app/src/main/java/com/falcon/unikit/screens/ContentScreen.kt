@@ -73,7 +73,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
@@ -616,7 +615,10 @@ fun BottomSheetContent(
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val uploaded = remember (modalSheetState.currentValue) {
+    val startUpload = remember (modalSheetState.currentValue) {
+        mutableStateOf(false)
+    }
+    val isUploading = remember (modalSheetState.currentValue) {
         mutableStateOf(false)
     }
     val fileName = remember() {
@@ -627,7 +629,7 @@ fun BottomSheetContent(
     }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
         pdfURI.value = uri
-        uploaded.value = true
+        startUpload.value = true
         val contentResolver = context.contentResolver  // Assuming you have access to the context
         val cursor: Cursor? = uri?.let { contentResolver.query(it, null, null, null, null) }
         cursor.use { cursor ->
@@ -677,7 +679,7 @@ fun BottomSheetContent(
         }
         TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
-        if (uploaded.value) {
+        if (startUpload.value) {
             EditTextWithBorder(fileName = fileName.value)
         }
         Row(
@@ -689,12 +691,26 @@ fun BottomSheetContent(
                 }
         ) {
             Column {
-                if (!uploaded.value) {
-                    UploadIcon()
+                if (!startUpload.value) {
+                    UploadIcon(R.raw.upload_pdf)
                     Text(text = "(Upload Your PDF)")
                 }
-                if (uploaded.value) {
-                    SubmitButton(pdfURI, content, currentType.value)
+                if (isUploading.value) {
+                    UploadIcon(R.raw.loader)
+                }
+                if (startUpload.value) {
+                    SubmitButton(pdfURI, content, currentType.value, {
+                        scope.launch { modalSheetState.hide() }
+                        Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
+                    } ,{
+                        Toast.makeText(
+                            context,
+                            "Upload Failed Please Try Again Later",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }, {
+                        isUploading.value = true
+                    })
                 }
             }
         }
@@ -703,7 +719,14 @@ fun BottomSheetContent(
 }
 
 @Composable
-fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType: String) {
+fun SubmitButton(
+    pdfURI: MutableState<Uri?>,
+    content: List<Content>,
+    currentType: String,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit,
+    displayLoader: () -> Unit
+) {
     var subjectID : String? = null
     if (content.isNotEmpty()) {
         subjectID = content[0].subjectID
@@ -714,7 +737,8 @@ fun SubmitButton(pdfURI: MutableState<Uri?>, content: List<Content>, currentType
     val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
         onClick = {
-            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context)
+            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure)
+            displayLoader()
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Black,
@@ -733,23 +757,26 @@ fun submitPDF(
     subjectID: String?,
     viewModel: FileUploadViewModel,
     contentResolver: ContentResolver,
-    context: Context
+    context: Context,
+    onSuccess: () -> Unit,
+    onFailure: () -> Unit
 ) {
     val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
-    Toast.makeText(context, token.toString(), Toast.LENGTH_SHORT).show()
     pdfURI.value?.let {
         viewModel.uploadFile(contentResolver = contentResolver, uri = it,
             UploadFileBody(token?:"", subjectID?:"", currentType))
     }
     if (viewModel.uploadResult.value is UploadResult.Success) {
-        Toast.makeText(context, "ho gya upload", Toast.LENGTH_SHORT).show()
+        onSuccess()
+    } else {
+        onFailure()
     }
 }
 
 @Composable
-fun UploadIcon() {
-    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.upload_pdf))
+fun UploadIcon(animationId: Int) {
+    val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(animationId))
     com.airbnb.lottie.compose.LottieAnimation(
         composition = composition,
         iterations = LottieConstants.IterateForever,

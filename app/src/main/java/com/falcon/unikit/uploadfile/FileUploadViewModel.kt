@@ -1,21 +1,15 @@
 package com.falcon.unikit.uploadfile
 
-import android.app.Application
 import android.content.ContentResolver
-import android.content.Context
 import android.net.Uri
 import android.util.Log
-import android.widget.Toast
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
-import java.lang.Exception
 import javax.inject.Inject
 
 sealed class UploadResult {

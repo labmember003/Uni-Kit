@@ -10,16 +10,9 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -37,6 +30,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -45,6 +39,7 @@ import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.RadioButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
@@ -77,8 +72,8 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -98,7 +93,6 @@ import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.ItemViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -614,11 +608,14 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                         modifier = Modifier.padding(8.dp) // Adjust padding as needed
                     )
                 }
+                val reportDialogueVisibility = remember {
+                    mutableStateOf(false)
+                }
                 IconButton(
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-
+                        reportDialogueVisibility.value = !reportDialogueVisibility.value
                     }
                 ) {
                     Icon(
@@ -627,6 +624,9 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                         tint = Color.Black, //,
                         modifier = Modifier.padding(8.dp) // Adjust padding as needed
                     )
+                }
+                if (reportDialogueVisibility.value) {
+                    AlertExample()
                 }
             }
         }
@@ -724,10 +724,7 @@ fun BottomSheetContent(
         }
 
     }
-
-//    LaunchedEffect(key1 = modalSheetState.currentValue) {
-//        uploaded
-//    }
+    
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -863,7 +860,81 @@ fun UploadIcon(animationId: Int) {
             .size(100.dp)
     )
 }
+object Report {
+    const val Sexuality = "sexuality"
+    const val Pornography = "Pornography"
+    const val Plagrism = "Plagrism"
+}
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun AlertExample() {
+    var dialogVisibility by remember { mutableStateOf(true) }
+    val selectedOption = remember {
+        mutableStateOf("Report")
+    }
+    val context = LocalContext.current
+    if (dialogVisibility) {
+        AlertDialog(
+            onDismissRequest = {
+                dialogVisibility = false
+            },
+            title = {
+                Text(
+                    text = "Report",
+                    modifier = Modifier
+                        .padding(start = 8.dp, bottom = 16.dp)
+                )
+            },
+            text = {
+                Column {
+                    RadioButtonWithText(selectedOption, Report.Sexuality)
+                    RadioButtonWithText(selectedOption, Report.Pornography)
+                    RadioButtonWithText(selectedOption, Report.Plagrism)
+                }
+            },
+            confirmButton = {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Button(
+                        onClick = {
+                            dialogVisibility = false
+                            Toast.makeText(context, selectedOption.value, Toast.LENGTH_SHORT).show()
+                        },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
 
+                    ) {
+                        androidx.compose.material3.Text("Okay")
+
+                    }
+                }
+            }
+        )
+    }
+}
+
+@Composable
+private fun RadioButtonWithText(selectedOption: MutableState<String>, option: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceAround,
+        modifier = Modifier
+            .clickable {
+                selectedOption.value = option
+            }
+    ) {
+        RadioButton(
+            selected = selectedOption.value == option,
+            onClick = {
+                selectedOption.value = option
+            }
+        )
+        Spacer(modifier = Modifier.padding(0.dp, 2.dp))
+        Text(text = option)
+    }
+}
 
 
 //@Composable

@@ -179,7 +179,7 @@ class MainActivity : ComponentActivity() {
                                         val editor = sharedPreferences.edit()
                                         editor.putString(Utils.JWT_TOKEN, userData.token)
                                         editor.apply()
-                                        Toast.makeText(this@MainActivity, userData.token, Toast.LENGTH_SHORT).show()
+//                                        Toast.makeText(this@MainActivity, userData.token, Toast.LENGTH_SHORT).show()
                                     }
                                     val editor = sharedPreferences.edit()
                                     val gson = Gson()

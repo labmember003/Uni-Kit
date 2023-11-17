@@ -151,22 +151,6 @@ class MainActivity : ComponentActivity() {
                             // with your backend.
                             Log.d("TAG", "Got ID token.")
                             Log.i("googleOneTap", idToken)
-
-//                            val clipboardManager = ContextCompat.getSystemService(
-//                                this@MainActivity,
-//                                ClipboardManager::class.java
-//                            ) as ClipboardManager?
-//                            clipboardManager?.let {
-//                                val clipData = ClipData.newPlainText("label", idToken)
-//                                it.setPrimaryClip(clipData)
-//
-//                                Toast.makeText(
-//                                    this@MainActivity,
-//                                    "token copied to clipboard",
-//                                    Toast.LENGTH_SHORT
-//                                ).show()
-//                            }
-
                             val email = credential.id
                             Log.i("emailemail", email)
                             Log.i("emailemail2", credential.googleIdToken.toString())

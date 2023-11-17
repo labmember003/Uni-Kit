@@ -10,9 +10,16 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,6 +50,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.Report
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
@@ -67,6 +77,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -86,6 +97,7 @@ import com.falcon.unikit.api.Content
 import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
+import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -465,92 +477,159 @@ private fun getAppStorageDirectory(context: Context): File {
 fun ContentItemRow(contentItem: Content, icon: Int) {
     val context = LocalContext.current
     var downloadStatus = remember { mutableStateOf<String?>(null) }
-    Row(
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    val scope = rememberCoroutineScope()
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp)
+            .padding(2.dp)
             .clickable {
-                if (isPdfFileInStorage(contentItem._id.toString(), context)) {
-//                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
-                    Log.i("filefilefile", "openFIle")
-                } else {
-                    Log.i("filefilefile", "downloadFile")
-                    Log.i("filefilefile", contentItem.pdfFile.toString())
-                    CoroutineScope(Dispatchers.IO).launch {
-//                        downloadAndStorePdf(
-//                            contentItem.pdfFile.toString(),
-//                            context,
-//                            contentItem._id.toString()
-//                        )
-                        downloadPdf(
-                            contentItem.pdfFile.toString(),
-                            contentItem._id.toString(),
-                            { status ->
-                                downloadStatus.value = status
-                            },
-                            context
-                        )
-                    }
-//                    Toast.makeText(context, isPdfFileInStorage(contentItem._id.toString(), context).toString(), Toast.LENGTH_SHORT).show()
-//                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
-                }
-
-//                navController.navigate("content_screen/${subjectItem.subjectID}")
-//                Todo(download and view file)
-//                  download(contentItem.downloadURL)
+                expanded.value = !expanded.value
             },
-        verticalAlignment = Alignment.CenterVertically
+        verticalArrangement = Arrangement.Center
     ) {
-        Image(
-            painter = painterResource(id = icon),
-            contentDescription = null,
-            modifier = Modifier
-                .size(50.dp)
-                .clip(CircleShape)
-        )
-        Spacer(modifier = Modifier.width(16.dp))
-        Text(
-            text = contentItem.contentName.toString(),
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.weight(1f)
-        )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-        ) {
-            IconButton(
-                modifier = Modifier,
-                onClick = {
-
-                }
+        Row {
+            val itemViewModel : ItemViewModel = hiltViewModel()
+            val sharedPreferences = remember {
+                context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+            }
+            val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
+            Image(
+                painter = painterResource(id = icon),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = contentItem.contentName.toString(),
+                fontSize = 16.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.weight(1f)
+            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
             ) {
-                Icon(
-                    imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
-                    contentDescription = "Thumbs Up",
-                    modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                IconButton(
+                    modifier = Modifier,
+                    onClick = {
+                        scope.launch {
+                            itemViewModel.likeButtonPressed(contentItem.contentId.toString(),
+                                token.toString()
+                            )
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
+                        contentDescription = "Thumbs Up",
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                Text(
+                    text = contentItem.likeCount.toString(),
+                )
+                IconButton(
+                    modifier = Modifier,
+                    onClick = {
+                        scope.launch {
+                            itemViewModel.dislikeButtonPressed(contentItem.contentId.toString(),
+                                token.toString()
+                            )
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
+                        contentDescription = "Thumbs Up",
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                Text(
+                    text = contentItem.dislikeCount.toString()
                 )
             }
-            Text(
-                text = contentItem.likeCount.toString(),
-            )
-            IconButton(
-                modifier = Modifier,
-                onClick = {
-
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
-                    contentDescription = "Thumbs Up",
-                    modifier = Modifier.padding(8.dp) // Adjust padding as needed
-                )
-            }
-            Text(
-                text = contentItem.dislikeCount.toString()
-            )
         }
+        if (expanded.value) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                IconButton(
+                    modifier = Modifier
+                        .padding(8.dp) ,
+                    onClick = {
+//                if (isPdfFileInStorage(contentItem._id.toString(), context)) {
+////                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
+//                    Log.i("filefilefile", "openFIle")
+//                } else {
+//                    Log.i("filefilefile", "downloadFile")
+//                    Log.i("filefilefile", contentItem.pdfFile.toString())
+//                    CoroutineScope(Dispatchers.IO).launch {
+////                        downloadAndStorePdf(
+////                            contentItem.pdfFile.toString(),
+////                            context,
+////                            contentItem._id.toString()
+////                        )
+//                        downloadPdf(
+//                            contentItem.pdfFile.toString(),
+//                            contentItem._id.toString(),
+//                            { status ->
+//                                downloadStatus.value = status
+//                            },
+//                            context
+//                        )
+//                    }
+////                    Toast.makeText(context, isPdfFileInStorage(contentItem._id.toString(), context).toString(), Toast.LENGTH_SHORT).show()
+////                    openFile(contentItem._id.toString(), context, getAppStorageDirectory(context))
+//                }
+//
+////                navController.navigate("content_screen/${subjectItem.subjectID}")
+////                Todo(download and view file)
+////                  download(contentItem.downloadURL)
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Download,
+                        contentDescription = "Download",
+                        tint = Color.Black, //,
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                IconButton(
+                    modifier = Modifier
+                        .padding(8.dp) ,
+                    onClick = {
 
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Download",
+                        tint = Color.Black, //,
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+                IconButton(
+                    modifier = Modifier
+                        .padding(8.dp) ,
+                    onClick = {
+
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Report,
+                        contentDescription = "Download",
+                        tint = Color.Black, //,
+                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -784,3 +863,39 @@ fun UploadIcon(animationId: Int) {
             .size(100.dp)
     )
 }
+
+
+
+//@Composable
+//fun ExpandableContent(
+//    isExpanded: Boolean
+//) {
+//    val enterTransition = remember {
+//        expandVertically(
+//            expandFrom = Alignment.Top,
+//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
+//        ) + fadeIn(
+//            initialAlpha = 1f,
+//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
+//        )
+//    }
+//    val exitTransition = remember {
+//        shrinkVertically(
+//            shrinkTowards = Alignment.Top,
+//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
+//        ) + fadeOut(
+//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
+//        )
+//    }
+//
+//    AnimatedVisibility(
+//        visible = isExpanded,
+//        enter = enterTransition,
+//        exit = exitTransition
+//    ) {
+//        Text (
+//            text = isExpanded.toString(),
+//            textAlign = TextAlign.Justify
+//        )
+//    }
+//}

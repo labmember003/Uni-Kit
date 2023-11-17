@@ -124,7 +124,11 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         }
     }
 
-    suspend fun likeButtonPressed(itemID: String) {
-        unikitAPI.likeButtonPressed(itemID)
+    suspend fun likeButtonPressed(itemID: String, userId: String) {
+        unikitAPI.likeButtonPressed(itemID, userId)
+    }
+
+    suspend fun dislikeButtonPressed(itemID: String, userId: String) {
+        unikitAPI.dislikeButtonPressed(itemID, userId)
     }
 }

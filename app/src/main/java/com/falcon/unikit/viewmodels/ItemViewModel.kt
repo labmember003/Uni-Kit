@@ -18,23 +18,11 @@ class ItemViewModel @Inject constructor(
     private val savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
-    val items : StateFlow<List<Item>>
-        get() = unikitRepository.items
-
-    suspend fun getItem(contentID: String) {
-//        val contentId = savedStateHandle.get<String>(contentID) ?: "123"
-        unikitRepository.getItem(contentID)
+    suspend fun likeButtonPressed(itemID: String, userId: String) {
+        unikitRepository.likeButtonPressed(itemID, userId)
     }
-
-    init {
-//        viewModelScope.launch {
-//            val contentId = savedStateHandle.get<String>("subjectID") ?: "123"
-//            unikitRepository.getItem(contentId)
-//        }
-    }
-
-    suspend fun likeButtonPressed(itemID: String) {
-        unikitRepository.likeButtonPressed(itemID)
+    suspend fun dislikeButtonPressed(itemID: String, userId: String) {
+        unikitRepository.dislikeButtonPressed(itemID, userId)
     }
 
 }

@@ -1,17 +1,22 @@
 package com.falcon.unikit.screens
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.DownloadManager
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
-import android.content.Intent
+import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -49,9 +54,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Download
-import androidx.compose.material.icons.filled.Report
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
@@ -59,7 +61,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CardElevation
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -71,14 +72,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -86,7 +86,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
+import androidx.core.app.ActivityCompat
+import androidx.core.app.ComponentActivity
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -103,26 +108,23 @@ import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.OkHttpClient
-import okhttp3.Request
-import java.io.File
-import java.io.FileOutputStream
-import java.io.IOException
-import java.io.InputStream
-import java.net.HttpURLConnection
-import java.net.URL
+import java.util.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController, subjectName: String?) {
-    downloadPdfToday(LocalContext.current, "https://github.com/labmember003/usar_data/raw/master/YEAR_1/Sem1/CommunicationSkills/Exam/MinorExam.pdf")
-
-
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    val notificationId = Random().nextInt()
+    LaunchedEffect(key1 = Unit) {
+        downloadPdfNotifination(context, "https://github.com/labmember003/usar_data/raw/master/YEAR_1/Sem1/CommunicationSkills/Exam/MinorExam.pdf", notificationId )
+    }
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
-    val scope = rememberCoroutineScope()
+
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
         confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
@@ -154,10 +156,6 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
                     .weight(1f)
                     .padding(bottom = 8.dp),
                 pageContent = { pageNumber ->
-//              0 -> notes = content[0]
-//                content[pageNumber], navController
-                    Log.d("Pager", "Current Page: ${pageState.currentPage}, Requested Page: $pageNumber")
-//                val icon = getIcon(content[pageNumber].contentType)
                     val specificContent = content.filter {
                         it.contentType == list[pageNumber]
                     }
@@ -165,11 +163,6 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
                         currentType.value = list[pageNumber]
                         Log.i("catcatcatwty2", pageNumber.toString())
                     }
-
-                    Log.i("catcatcatwty", pageNumber.toString())
-
-//                    TODO(TRIGGER RECOMPOSITION OF BOTTOM SHEET)
-
                     ContentList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
                 }
             )
@@ -793,13 +786,10 @@ private fun RadioButtonWithText(selectedOption: MutableState<String>, option: St
         Text(text = option)
     }
 }
-@SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun downloadPdfToday(context: Context, pdfUrl: String) {
-    val downloadManager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
 
+suspend fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: Int) {
+    val downloadManager = context.getSystemService<DownloadManager>()!!
     val uri = Uri.parse(pdfUrl)
-
     val request = DownloadManager.Request(uri)
         .setTitle("Sample PDF")
         .setDescription("Downloading")
@@ -809,14 +799,11 @@ fun downloadPdfToday(context: Context, pdfUrl: String) {
             Environment.DIRECTORY_DOWNLOADS,
             "sample.pdf"
         )
-
     val downloadId = downloadManager.enqueue(request)
-
     val query = DownloadManager.Query().setFilterById(downloadId)
-
-    val scope = rememberCoroutineScope()
-
-    scope.launch {
+    withContext(Dispatchers.Main) {
+        val notificationManager = NotificationManagerCompat.from(context)
+        createNotificationChannel(context)
         while (true) {
             val cursor = downloadManager.query(query)
             if (cursor.moveToFirst()) {
@@ -826,19 +813,82 @@ fun downloadPdfToday(context: Context, pdfUrl: String) {
                         // Download completed
                         val localUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
                         Toast.makeText(context, localUri, Toast.LENGTH_SHORT).show()
+                        notificationManager.cancel(notificationId)
                         break
                     }
                     DownloadManager.STATUS_FAILED -> {
+                        // Download failed
                         Toast.makeText(context, "Download failed", Toast.LENGTH_SHORT).show()
+                        notificationManager.cancel(notificationId)
                         break
+                    }
+                    else -> {
+                        // Download in progress
+                        val bytesDownloaded =
+                            cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
+                        val bytesTotal =
+                            cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+                        showDownloadNotification(
+                            context,
+                            notificationManager,
+                            notificationId,
+                            bytesDownloaded,
+                            bytesTotal
+                        )
                     }
                 }
             }
             cursor.close()
+            delay(1000) // Update the notification every second
         }
     }
 }
 
+private fun createNotificationChannel(context: Context) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            "download_channel",
+            "Download Channel",
+            NotificationManager.IMPORTANCE_LOW
+        )
+        val notificationManager = context.getSystemService(NotificationManager::class.java)
+        notificationManager.createNotificationChannel(channel)
+    }
+}
+
+private fun showDownloadNotification(
+    context: Context,
+    notificationManager: NotificationManagerCompat,
+    notificationId: Int,
+    bytesDownloaded: Int,
+    bytesTotal: Int
+) {
+    val progress = (bytesDownloaded.toFloat() / bytesTotal.toFloat() * 100).toInt()
+
+    val builder = NotificationCompat.Builder(context, "download_channel")
+        .setSmallIcon(android.R.drawable.stat_sys_download)
+        .setContentTitle("Downloading PDF")
+        .setContentText("$progress% downloaded")
+        .setPriority(NotificationCompat.PRIORITY_LOW)
+        .setOnlyAlertOnce(true)
+        .setProgress(100, progress, false)
+
+    if (ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        // TODO: Consider calling
+        //    ActivityCompat#requestPermissions
+        // here to request the missing permissions, and then overriding
+        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+        //                                          int[] grantResults)
+        // to handle the case where the user grants the permission. See the documentation
+        // for ActivityCompat#requestPermissions for more details.
+        return
+    }
+    notificationManager.notify(notificationId, builder.build())
+}
 //@Composable
 //fun ExpandableContent(
 //    isExpanded: Boolean

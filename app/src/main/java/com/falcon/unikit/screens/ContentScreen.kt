@@ -16,7 +16,6 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -72,7 +71,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
@@ -87,10 +85,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
 import androidx.core.app.ActivityCompat
-import androidx.core.app.ComponentActivity
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -107,10 +103,8 @@ import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.ItemViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.util.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -119,9 +113,7 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val notificationId = Random().nextInt()
-    LaunchedEffect(key1 = Unit) {
-        downloadPdfNotifination(context, "https://github.com/labmember003/usar_data/raw/master/YEAR_1/Sem1/CommunicationSkills/Exam/MinorExam.pdf", notificationId )
-    }
+    downloadPdfNotifination(context, "https://github.com/labmember003/usar_data/raw/master/YEAR_1/Sem1/CommunicationSkills/Exam/MinorExam.pdf", notificationId )
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
 
@@ -787,7 +779,9 @@ private fun RadioButtonWithText(selectedOption: MutableState<String>, option: St
     }
 }
 
-suspend fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: Int) {
+@SuppressLint("CoroutineCreationDuringComposition")
+@Composable
+fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: Int) {
     val downloadManager = context.getSystemService<DownloadManager>()!!
     val uri = Uri.parse(pdfUrl)
     val request = DownloadManager.Request(uri)
@@ -801,14 +795,18 @@ suspend fun downloadPdfNotifination(context: Context, pdfUrl: String, notificati
         )
     val downloadId = downloadManager.enqueue(request)
     val query = DownloadManager.Query().setFilterById(downloadId)
-    withContext(Dispatchers.Main) {
-        val notificationManager = NotificationManagerCompat.from(context)
+    val scope = rememberCoroutineScope()
+
+    val notificationManager = NotificationManagerCompat.from(context)
+    val activity = LocalContext.current as? androidx.activity.ComponentActivity
+
+    scope.launch {
+
         createNotificationChannel(context)
         while (true) {
             val cursor = downloadManager.query(query)
             if (cursor.moveToFirst()) {
-                val status = cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))
-                when (status) {
+                when (cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_STATUS))) {
                     DownloadManager.STATUS_SUCCESSFUL -> {
                         // Download completed
                         val localUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
@@ -833,7 +831,8 @@ suspend fun downloadPdfNotifination(context: Context, pdfUrl: String, notificati
                             notificationManager,
                             notificationId,
                             bytesDownloaded,
-                            bytesTotal
+                            bytesTotal,
+                            activity
                         )
                     }
                 }
@@ -856,13 +855,16 @@ private fun createNotificationChannel(context: Context) {
     }
 }
 
+@Composable
 private fun showDownloadNotification(
     context: Context,
     notificationManager: NotificationManagerCompat,
     notificationId: Int,
     bytesDownloaded: Int,
-    bytesTotal: Int
+    bytesTotal: Int,
+    activity: androidx.activity.ComponentActivity?
 ) {
+
     val progress = (bytesDownloaded.toFloat() / bytesTotal.toFloat() * 100).toInt()
 
     val builder = NotificationCompat.Builder(context, "download_channel")
@@ -878,6 +880,22 @@ private fun showDownloadNotification(
             Manifest.permission.POST_NOTIFICATIONS
         ) != PackageManager.PERMISSION_GRANTED
     ) {
+
+        val launcher = remember(activity) {
+            activity?.activityResultRegistry?.register(
+                "requestPermissionKey",
+                ActivityResultContracts.RequestPermission()
+            ) { isGranted: Boolean ->
+                if (isGranted) {
+                    // Permission granted, now we can send the notification
+                    notificationManager.notify(notificationId, builder.build())
+                } else {
+                    // Permission denied, handle accordingly (e.g., show a message)
+                    Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+        launcher?.launch(Manifest.permission.POST_NOTIFICATIONS)
         // TODO: Consider calling
         //    ActivityCompat#requestPermissions
         // here to request the missing permissions, and then overriding
@@ -889,6 +907,7 @@ private fun showDownloadNotification(
     }
     notificationManager.notify(notificationId, builder.build())
 }
+
 //@Composable
 //fun ExpandableContent(
 //    isExpanded: Boolean

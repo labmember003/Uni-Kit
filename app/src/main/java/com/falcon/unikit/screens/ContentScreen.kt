@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -53,6 +54,9 @@ import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CardElevation
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -66,10 +70,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -139,7 +145,8 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
                 state = pageState,
                 modifier = Modifier
                     .fillMaxSize()
-                    .weight(1f),
+                    .weight(1f)
+                    .padding(bottom = 8.dp),
                 pageContent = { pageNumber ->
 //              0 -> notes = content[0]
 //                content[pageNumber], navController
@@ -475,16 +482,21 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         mutableStateOf(false)
     }
     val scope = rememberCoroutineScope()
-    Column(
+    Card(
+        elevation = CardDefaults.cardElevation(8.dp),
+        colors = CardDefaults.cardColors(Color.White),
+        border = BorderStroke(0.5.dp, Color.Black),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(2.dp)
             .clickable {
                 expanded.value = !expanded.value
-            },
-        verticalArrangement = Arrangement.Center
+            }
+            .padding(12.dp)
     ) {
-        Row {
+        Row(
+            modifier = Modifier
+                .padding(16.dp),
+        ) {
             val itemViewModel : ItemViewModel = hiltViewModel()
             val sharedPreferences = remember {
                 context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -587,11 +599,15 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
 ////                  download(contentItem.downloadURL)
                     }
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Download,
-                        contentDescription = "Download",
-                        tint = Color.Black, //,
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    Icon(
+//                        imageVector = Icons.Default.Download,
+//                        contentDescription = "Download",
+//                        tint = Color.Black, //,
+//                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.download),
+                        contentDescription = ""
                     )
                 }
                 IconButton(
@@ -601,11 +617,15 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
 
                     }
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = "Download",
-                        tint = Color.Black, //,
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    Icon(
+//                        imageVector = Icons.Default.Share,
+//                        contentDescription = "Download",
+//                        tint = Color.Black, //,
+//                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.send),
+                        contentDescription = ""
                     )
                 }
                 val reportDialogueVisibility = remember {
@@ -618,11 +638,15 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                         reportDialogueVisibility.value = !reportDialogueVisibility.value
                     }
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Report,
-                        contentDescription = "Download",
-                        tint = Color.Black, //,
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    Icon(
+//                        imageVector = Icons.Default.Report,
+//                        contentDescription = "Download",
+//                        tint = Color.Black, //,
+//                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+//                    )
+                    Image(
+                        painter = painterResource(id = R.drawable.warning),
+                        contentDescription = ""
                     )
                 }
                 if (reportDialogueVisibility.value) {
@@ -879,11 +903,18 @@ fun AlertExample() {
                 dialogVisibility = false
             },
             title = {
-                Text(
-                    text = "Report",
+                Row(
                     modifier = Modifier
-                        .padding(start = 8.dp, bottom = 16.dp)
-                )
+                        .fillMaxWidth()
+                        .padding(bottom = 32.dp),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Report",
+                        fontSize = 24.sp
+                    )
+                }
             },
             text = {
                 Column {
@@ -906,8 +937,7 @@ fun AlertExample() {
                         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
 
                     ) {
-                        androidx.compose.material3.Text("Okay")
-
+                        androidx.compose.material3.Text("Report")
                     }
                 }
             }

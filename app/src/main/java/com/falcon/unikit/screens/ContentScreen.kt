@@ -56,6 +56,8 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -277,7 +279,7 @@ fun ContentList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyColumn(content = {
-                val sortedItems = content.sortedByDescending { it.likeCount }
+                val sortedItems = content.sortedByDescending { it.like?.size }
                 items(sortedItems) { content ->
                     ContentItemRow(content, icon)
                 }
@@ -343,7 +345,21 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
     val sharedPreferences = remember {
         context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     }
-    val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
+    val token = sharedPreferences.getString(Utils.JWT_TOKEN, "").toString()
+    val liked = remember {
+        mutableStateOf(false)
+    }
+    val disliked = remember {
+        mutableStateOf(false)
+    }
+    if (contentItem.like?.contains(token) == true) {
+        liked.value = true
+    }
+    if (contentItem.dislike?.contains(token) == true) {
+        disliked.value = true
+    }
+    val likeIcon = if (liked.value) Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
+    val dislikeIcon = if (disliked.value)  Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(Color.White),
@@ -390,13 +406,22 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ThumbUp, // Use the thumbs-up icon from Icons.Default
+                        imageVector = likeIcon, // Use the thumbs-up icon from Icons.Default
                         contentDescription = "Thumbs Up",
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                scope.launch {
+                                    itemViewModel.likeButtonPressed(
+                                        contentItem.contentId.toString(),
+                                        token.toString()
+                                    )
+                                }
+                            }// Adjust padding as needed
                     )
                 }
                 Text(
-                    text = contentItem.likeCount.toString(),
+                    text = contentItem.like?.size.toString()
                 )
                 IconButton(
                     modifier = Modifier,
@@ -410,13 +435,22 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     }
                 ) {
                     Icon(
-                        imageVector = Icons.Default.ThumbDown, // Use the thumbs-up icon from Icons.Default
+                        imageVector = dislikeIcon, // Use the thumbs-up icon from Icons.Default
                         contentDescription = "Thumbs Up",
-                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
+                        modifier = Modifier
+                            .padding(8.dp)
+                            .clickable {
+                                scope.launch {
+                                    itemViewModel.dislikeButtonPressed(
+                                        contentItem.contentId.toString(),
+                                        token.toString()
+                                    )
+                                }
+                            }
                     )
                 }
                 Text(
-                    text = contentItem.dislikeCount.toString()
+                    text = contentItem.dislike?.size.toString()
                 )
             }
         }

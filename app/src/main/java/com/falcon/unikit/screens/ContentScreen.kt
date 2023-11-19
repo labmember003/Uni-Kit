@@ -15,6 +15,7 @@ import android.os.Environment
 import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -103,6 +104,7 @@ import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.ItemViewModel
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.util.Random
@@ -111,9 +113,6 @@ import java.util.Random
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController, subjectName: String?) {
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
-    val notificationId = Random().nextInt()
-    downloadPdfNotifination(context, "https://github.com/labmember003/usar_data/raw/master/YEAR_1/Sem1/CommunicationSkills/Exam/MinorExam.pdf", notificationId )
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState()
 
@@ -419,6 +418,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                 )
             }
         }
+        val activity = LocalContext.current as? androidx.activity.ComponentActivity
         if (expanded.value) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -428,7 +428,16 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-
+                        val notificationId = Random().nextInt()
+                        Toast.makeText(context, contentItem.pdfFile.toString(), Toast.LENGTH_SHORT).show()
+                        Log.i("caatcatcatcatcatfcat", contentItem.pdfFile.toString())
+                        downloadPdfNotifination (
+                            context,
+                            contentItem.pdfFile.toString(),
+                            notificationId,
+                            scope,
+                            activity
+                        )
                     }
                 ) {
 //                    Icon(
@@ -780,8 +789,13 @@ private fun RadioButtonWithText(selectedOption: MutableState<String>, option: St
 }
 
 @SuppressLint("CoroutineCreationDuringComposition")
-@Composable
-fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: Int) {
+fun downloadPdfNotifination(
+    context: Context,
+    pdfUrl: String,
+    notificationId: Int,
+    scope: CoroutineScope,
+    activity: ComponentActivity?
+) {
     val downloadManager = context.getSystemService<DownloadManager>()!!
     val uri = Uri.parse(pdfUrl)
     val request = DownloadManager.Request(uri)
@@ -795,10 +809,9 @@ fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: In
         )
     val downloadId = downloadManager.enqueue(request)
     val query = DownloadManager.Query().setFilterById(downloadId)
-    val scope = rememberCoroutineScope()
+
 
     val notificationManager = NotificationManagerCompat.from(context)
-    val activity = LocalContext.current as? androidx.activity.ComponentActivity
 
     scope.launch {
 
@@ -826,6 +839,7 @@ fun downloadPdfNotifination(context: Context, pdfUrl: String, notificationId: In
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR))
                         val bytesTotal =
                             cursor.getInt(cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES))
+
                         showDownloadNotification(
                             context,
                             notificationManager,
@@ -855,7 +869,6 @@ private fun createNotificationChannel(context: Context) {
     }
 }
 
-@Composable
 private fun showDownloadNotification(
     context: Context,
     notificationManager: NotificationManagerCompat,
@@ -881,20 +894,33 @@ private fun showDownloadNotification(
         ) != PackageManager.PERMISSION_GRANTED
     ) {
 
-        val launcher = remember(activity) {
-            activity?.activityResultRegistry?.register(
-                "requestPermissionKey",
-                ActivityResultContracts.RequestPermission()
-            ) { isGranted: Boolean ->
-                if (isGranted) {
-                    // Permission granted, now we can send the notification
-                    notificationManager.notify(notificationId, builder.build())
-                } else {
-                    // Permission denied, handle accordingly (e.g., show a message)
-                    Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
-                }
+//        val launcher = remember(activity) {
+//            activity?.activityResultRegistry?.register(
+//                "requestPermissionKey",
+//                ActivityResultContracts.RequestPermission()
+//            ) { isGranted: Boolean ->
+//                if (isGranted) {
+//                    // Permission granted, now we can send the notification
+//                    notificationManager.notify(notificationId, builder.build())
+//                } else {
+//                    // Permission denied, handle accordingly (e.g., show a message)
+//                    Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
+//                }
+//            }
+//        }
+        val launcher = activity?.activityResultRegistry?.register(
+            "requestPermissionKey",
+            ActivityResultContracts.RequestPermission()
+        ) { isGranted: Boolean ->
+            if (isGranted) {
+                // Permission granted, now we can send the notification
+                notificationManager.notify(notificationId, builder.build())
+            } else {
+                // Permission denied, handle accordingly (e.g., show a message)
+                Toast.makeText(activity, "Notification permission denied", Toast.LENGTH_SHORT).show()
             }
         }
+
         launcher?.launch(Manifest.permission.POST_NOTIFICATIONS)
         // TODO: Consider calling
         //    ActivityCompat#requestPermissions

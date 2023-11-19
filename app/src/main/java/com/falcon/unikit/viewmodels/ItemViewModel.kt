@@ -25,4 +25,8 @@ class ItemViewModel @Inject constructor(
         unikitRepository.dislikeButtonPressed(itemID, userId)
     }
 
+    suspend fun reportContent(token: String, contentID: String, parameter: String) {
+        unikitRepository.reportContent(token, contentID, parameter)
+    }
+
 }

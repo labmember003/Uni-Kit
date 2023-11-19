@@ -81,7 +81,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -340,6 +339,11 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         mutableStateOf(false)
     }
     val scope = rememberCoroutineScope()
+    val itemViewModel : ItemViewModel = hiltViewModel()
+    val sharedPreferences = remember {
+        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+    }
+    val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(Color.White),
@@ -355,11 +359,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
             modifier = Modifier
                 .padding(16.dp),
         ) {
-            val itemViewModel : ItemViewModel = hiltViewModel()
-            val sharedPreferences = remember {
-                context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
-            }
-            val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
+
             Image(
                 painter = painterResource(id = icon),
                 contentDescription = null,
@@ -382,7 +382,8 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier,
                     onClick = {
                         scope.launch {
-                            itemViewModel.likeButtonPressed(contentItem.contentId.toString(),
+                            itemViewModel.likeButtonPressed(
+                                contentItem.contentId.toString(),
                                 token.toString()
                             )
                         }
@@ -401,7 +402,8 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier,
                     onClick = {
                         scope.launch {
-                            itemViewModel.dislikeButtonPressed(contentItem.contentId.toString(),
+                            itemViewModel.dislikeButtonPressed(
+                                contentItem.contentId.toString(),
                                 token.toString()
                             )
                         }
@@ -491,7 +493,11 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     )
                 }
                 if (reportDialogueVisibility.value) {
-                    AlertExample()
+                    AlertExample { parameter ->
+                        scope.launch {
+                            itemViewModel.reportContent(token.toString(), contentItem.contentId.toString(), parameter)
+                        }
+                    }
                 }
             }
         }
@@ -530,6 +536,7 @@ fun EditTextWithBorder(fileName: String) {
     }
 }
 
+@SuppressLint("Range")
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun BottomSheetContent(
@@ -707,13 +714,12 @@ fun UploadIcon(animationId: Int) {
     )
 }
 object Report {
-    const val Sexuality = "sexuality"
-    const val Pornography = "Pornography"
-    const val Plagrism = "Plagrism"
+    const val Sexuality = "Sexuality"
+    const val Plagiarism = "Plagiarism"
+    const val Irrelevant = "Irrelevant"
 }
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun AlertExample() {
+fun AlertExample(onSubmit: (String) -> Unit) {
     var dialogVisibility by remember { mutableStateOf(true) }
     val selectedOption = remember {
         mutableStateOf("Report")
@@ -740,9 +746,9 @@ fun AlertExample() {
             },
             text = {
                 Column {
+                    RadioButtonWithText(selectedOption, Report.Irrelevant)
                     RadioButtonWithText(selectedOption, Report.Sexuality)
-                    RadioButtonWithText(selectedOption, Report.Pornography)
-                    RadioButtonWithText(selectedOption, Report.Plagrism)
+                    RadioButtonWithText(selectedOption, Report.Plagiarism)
                 }
             },
             confirmButton = {
@@ -756,6 +762,7 @@ fun AlertExample() {
                         onClick = {
                             dialogVisibility = false
                             Toast.makeText(context, selectedOption.value, Toast.LENGTH_SHORT).show()
+                            onSubmit(selectedOption.value)
                         },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
 
                     ) {
@@ -788,7 +795,7 @@ private fun RadioButtonWithText(selectedOption: MutableState<String>, option: St
     }
 }
 
-@SuppressLint("CoroutineCreationDuringComposition")
+@SuppressLint("CoroutineCreationDuringComposition", "Range")
 fun downloadPdfNotifination(
     context: Context,
     pdfUrl: String,
@@ -893,21 +900,6 @@ private fun showDownloadNotification(
             Manifest.permission.POST_NOTIFICATIONS
         ) != PackageManager.PERMISSION_GRANTED
     ) {
-
-//        val launcher = remember(activity) {
-//            activity?.activityResultRegistry?.register(
-//                "requestPermissionKey",
-//                ActivityResultContracts.RequestPermission()
-//            ) { isGranted: Boolean ->
-//                if (isGranted) {
-//                    // Permission granted, now we can send the notification
-//                    notificationManager.notify(notificationId, builder.build())
-//                } else {
-//                    // Permission denied, handle accordingly (e.g., show a message)
-//                    Toast.makeText(context, "Notification permission denied", Toast.LENGTH_SHORT).show()
-//                }
-//            }
-//        }
         val launcher = activity?.activityResultRegistry?.register(
             "requestPermissionKey",
             ActivityResultContracts.RequestPermission()
@@ -922,13 +914,6 @@ private fun showDownloadNotification(
         }
 
         launcher?.launch(Manifest.permission.POST_NOTIFICATIONS)
-        // TODO: Consider calling
-        //    ActivityCompat#requestPermissions
-        // here to request the missing permissions, and then overriding
-        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-        //                                          int[] grantResults)
-        // to handle the case where the user grants the permission. See the documentation
-        // for ActivityCompat#requestPermissions for more details.
         return
     }
     notificationManager.notify(notificationId, builder.build())

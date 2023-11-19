@@ -48,10 +48,10 @@ interface UnikitAPI {
     suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<MyNoteItem>>
 
     @POST("/content/likeCount")
-    suspend fun likeButtonPressed(@Query("contentid") contentid: String, @Query("userID") userId: String): Response<List<String>>
+    suspend fun likeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<String>
 
     @POST("/content/dislikeCount")
-    suspend fun dislikeButtonPressed(@Query("contentid") contentid: String, @Query("userID") userId: String): Response<List<String>>
+    suspend fun dislikeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<String>
 
     @Multipart
     @POST("/content/upload")

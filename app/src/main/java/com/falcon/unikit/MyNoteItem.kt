@@ -15,8 +15,8 @@ data class MyNoteItem (
     val year: List<YearItem>? = null,
     val subject: List<SubjectItem>? = null,
 
-    val likeCount: Int? = null,
-    val dislikeCount: Int? = null,
+    val like: List<String>? = null,
+    val dislike: List<String>? = null,
 
     val itemType: String? = null
 )

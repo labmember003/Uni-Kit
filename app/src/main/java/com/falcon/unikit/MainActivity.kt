@@ -580,7 +580,7 @@ class MainActivity : ComponentActivity() {
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start,
+                    horizontalArrangement = Arrangement.End,
                     modifier = Modifier
                         .weight(0.4f)
                         .fillMaxSize()
@@ -598,7 +598,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     Text(
-                        text = myNote.likeCount.toString(),
+                        text = myNote.like?.size.toString(),
                     )
                     IconButton(
                         modifier = Modifier,
@@ -613,7 +613,7 @@ class MainActivity : ComponentActivity() {
                         )
                     }
                     Text(
-                        text = myNote.dislikeCount.toString()
+                        text = myNote.dislike?.size.toString()
                     )
                 }
             }

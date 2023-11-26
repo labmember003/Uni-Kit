@@ -2,6 +2,7 @@ package com.falcon.unikit.uploadfile
 
 import android.content.ContentResolver
 import android.net.Uri
+import android.util.Log
 import android.webkit.MimeTypeMap
 import com.falcon.unikit.api.UnikitAPI
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -27,8 +28,7 @@ suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBod
 
     val requestFile = RequestBody.create(mimeType?.toMediaTypeOrNull(), file)
     val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
-
-    return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType)
+    return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType, uploadFileBody.name)
 }
 
     private fun getFileExtension(contentResolver: ContentResolver, uri: Uri): String {

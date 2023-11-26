@@ -60,6 +60,7 @@ interface UnikitAPI {
         @Query("token") token: String,
         @Query("subjectid") subjectid: String,
         @Query("type") type: String,
+        @Query("name") name: String
     ): UploadResponse
 
     @POST("content/report")

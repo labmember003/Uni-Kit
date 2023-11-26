@@ -8,5 +8,7 @@ data class UploadFileBody (
     @SerializedName("subjectid")
     val subjectid: String,
     @SerializedName("type")
-    val contentType: String
+    val contentType: String,
+    @SerializedName("name")
+    val name: String
 )

@@ -202,7 +202,6 @@ class MainActivity : ComponentActivity() {
                 val sharedPreferences = remember {
                     context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
                 }
-
                 NavHost(navController = navController, startDestination = "walk_through_screen") {
                     composable("walk_through_screen") {
                         BackHandler(
@@ -502,11 +501,15 @@ class MainActivity : ComponentActivity() {
                             innerPadding
                             val authViewModel : AuthViewModel = hiltViewModel()
                             val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
+                            Log.i("JWT_TOKEN", jwtToken.toString())
                             if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
                                 UserNotFound(navController)
                             } else {
                                 authViewModel.getMyNotes(jwtToken)
-                                val myNotes = authViewModel.myNotes.collectAsState()
+                                val myNotes: State<List<MyNoteItem>> = authViewModel.myNotes.collectAsState()
+                                if (myNotes.value.isEmpty()) {
+                                    LoadingScreen()
+                                }
                                 LazyColumn(content = {
                                     items(myNotes.value) { myNote ->
                                         MyNotesItem(myNote)
@@ -556,7 +559,10 @@ class MainActivity : ComponentActivity() {
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .weight(0.6f)
+                        .fillMaxSize()
                 ) {
                     Image(
                         painter = painterResource(id = getIcon(myNote.itemType.toString())),
@@ -574,7 +580,10 @@ class MainActivity : ComponentActivity() {
                 }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.Start,
+                    modifier = Modifier
+                        .weight(0.4f)
+                        .fillMaxSize()
                 ) {
                     IconButton(
                         modifier = Modifier,

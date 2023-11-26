@@ -54,9 +54,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -540,7 +538,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
 
 
 @Composable
-fun EditTextWithBorder(fileName: String) {
+fun EditTextWithBorder(fileName: String, omChangeValue: (String) -> Unit) {
     var mSelectedText by remember(fileName) { mutableStateOf(fileName) }
     var mTextFieldSize by remember { mutableStateOf(Size.Zero)}
     Column(
@@ -552,6 +550,7 @@ fun EditTextWithBorder(fileName: String) {
             value = mSelectedText,
             onValueChange = {
                 mSelectedText = it
+                omChangeValue(it)
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -642,8 +641,13 @@ fun BottomSheetContent(
         }
         TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
+        val finalFileName = remember {
+            mutableStateOf("")
+        }
         if (startUpload.value) {
-            EditTextWithBorder(fileName = fileName.value)
+            EditTextWithBorder(fileName = fileName.value, omChangeValue = { newName ->
+                finalFileName.value = newName
+            })
         }
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -673,7 +677,7 @@ fun BottomSheetContent(
                         ).show()
                     }, {
                         isUploading.value = true
-                    })
+                    }, finalFileName.value)
                 }
             }
         }
@@ -688,7 +692,8 @@ fun SubmitButton(
     currentType: String,
     onSuccess: () -> Unit,
     onFailure: () -> Unit,
-    displayLoader: () -> Unit
+    displayLoader: () -> Unit,
+    fileName: String
 ) {
     var subjectID : String? = null
     if (content.isNotEmpty()) {
@@ -700,7 +705,7 @@ fun SubmitButton(
     val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
         onClick = {
-            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure)
+            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure, fileName)
             displayLoader()
         },
         colors = ButtonDefaults.buttonColors(
@@ -722,13 +727,14 @@ fun submitPDF(
     contentResolver: ContentResolver,
     context: Context,
     onSuccess: () -> Unit,
-    onFailure: () -> Unit
+    onFailure: () -> Unit,
+    fileName: String
 ) {
     val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
     pdfURI.value?.let {
         viewModel.uploadFile(contentResolver = contentResolver, uri = it,
-            UploadFileBody(token?:"", subjectID?:"", currentType))
+            UploadFileBody(token?:"", subjectID?:"", currentType, fileName))
     }
     if (viewModel.uploadResult.value is UploadResult.Success) {
         onSuccess()

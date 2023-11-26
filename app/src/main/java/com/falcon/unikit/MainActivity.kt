@@ -116,12 +116,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var oneTapClient: SignInClient
     private lateinit var signUpRequest: BeginSignInRequest
-
-    private val REQ_ONE_TAP = 2  // Can be any integer unique to the Activity
-    private var showOneTapUI = true
-
     private var isSigninSuccess by mutableStateOf(false)
-
     @Inject
     lateinit var unikitAPI: UnikitAPI
 
@@ -132,15 +127,12 @@ class MainActivity : ComponentActivity() {
             .setGoogleIdTokenRequestOptions(
                 BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
                     .setSupported(true)
-                    // Your server's client ID, not your Android client ID.
                     .setServerClientId(getString(R.string.web_client_id))
-                    // Show all accounts on the device.
                     .setFilterByAuthorizedAccounts(false)
                     .build())
             .build()
 
         val intentSenderLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
-            // Your code for handling the result goes here
             if (result.resultCode == Activity.RESULT_OK) {
                 try {
                     val credential = oneTapClient.getSignInCredentialFromIntent(result.data)
@@ -218,6 +210,12 @@ class MainActivity : ComponentActivity() {
                                 finish()
                             }
                         )
+                        LaunchedEffect(key1 = Unit) {
+                            val userDataJson = sharedPreferences.getString(USER_DATA, "NO_USER_FOUND")
+                            if (userDataJson != "NO_USER_FOUND") {
+                                navController.navigate("select_college_screen")
+                            }
+                        }
                         WalkThroughScreen {
                             navController.navigate("sign_in")
                         }

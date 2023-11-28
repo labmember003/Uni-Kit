@@ -28,5 +28,4 @@ class ItemViewModel @Inject constructor(
     suspend fun reportContent(token: String, contentID: String, parameter: String) {
         unikitRepository.reportContent(token, contentID, parameter)
     }
-
 }

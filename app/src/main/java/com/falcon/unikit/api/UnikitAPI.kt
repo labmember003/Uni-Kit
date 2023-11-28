@@ -63,6 +63,9 @@ interface UnikitAPI {
         @Query("name") name: String
     ): UploadResponse
 
+    @POST("/content/download")
+    suspend fun getDownloadableURL(@Body contentid: GetDownloadableUrlBody): Response<DownloadableURL>
+
     @POST("content/report")
     suspend fun reportContent(@Query("userid") token: String, @Query("contentid") contentid: String, @Query("parameter") parameter: String) : Response<List<String>>
 }

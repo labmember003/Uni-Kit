@@ -66,6 +66,8 @@ import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,12 +91,14 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.unikit.HeadingSummarizedPage
 import com.falcon.unikit.LottieAnimation
+import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.R
 import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.Utils
@@ -102,6 +106,7 @@ import com.falcon.unikit.api.Content
 import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.uploadfile.UploadResult
+import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -453,6 +458,8 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
             }
         }
         val activity = LocalContext.current as? androidx.activity.ComponentActivity
+        val authViewModel : AuthViewModel = hiltViewModel()
+        val downloadableURL = authViewModel.downloadableURL.collectAsState()
         if (expanded.value) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -462,16 +469,21 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-                        val notificationId = Random().nextInt()
-                        Toast.makeText(context, contentItem.pdfFile.toString(), Toast.LENGTH_SHORT).show()
-                        Log.i("caatcatcatcatcatfcat", contentItem.pdfFile.toString())
-                        downloadPdfNotifination (
-                            context,
-                            contentItem.pdfFile.toString(),
-                            notificationId,
-                            scope,
-                            activity
-                        )
+                        Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
+                        scope.launch {
+                            authViewModel.getDownloadableURL(contentItem.contentId.toString())
+                            val notificationId = Random().nextInt()
+                            Toast.makeText(context, downloadableURL.value.githuburl.toString(), Toast.LENGTH_SHORT).show()
+                            Log.i("caatcatcatcatcatfcat", downloadableURL.value.githuburl.toString())
+                            Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
+                            downloadPdfNotifination (
+                                context,
+                                downloadableURL.value.githuburl.toString(),
+                                notificationId,
+                                scope,
+                                activity
+                            )
+                        }
                     }
                 ) {
 //                    Icon(

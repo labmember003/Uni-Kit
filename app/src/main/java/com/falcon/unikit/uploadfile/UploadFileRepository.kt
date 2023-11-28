@@ -28,6 +28,7 @@ suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBod
 
     val requestFile = RequestBody.create(mimeType?.toMediaTypeOrNull(), file)
     val body = MultipartBody.Part.createFormData("file", file.name, requestFile)
+    Log.i("sexxxxxxxx", uploadFileBody.name)
     return api.uploadFile(body, uploadFileBody.jwtToken, uploadFileBody.subjectid, uploadFileBody.contentType, uploadFileBody.name)
 }
 

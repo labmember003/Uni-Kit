@@ -3,6 +3,8 @@ package com.falcon.unikit.repository
 import android.util.Log
 import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.Content
+import com.falcon.unikit.api.DownloadableURL
+import com.falcon.unikit.api.GetDownloadableUrlBody
 import com.falcon.unikit.api.Item
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.api.UnikitAPI
@@ -47,13 +49,18 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     val items: StateFlow<List<Item>>
         get() = _items
 
-    private val _jwtToken = MutableStateFlow<UserData>(UserData())
+    private val _jwtToken = MutableStateFlow(UserData())
     val jwtToken: StateFlow<UserData>
         get() = _jwtToken
 
     private val _myNotes = MutableStateFlow<List<MyNoteItem>>(emptyList())
     val myNotes: StateFlow<List<MyNoteItem>>
         get() = _myNotes
+
+    private val _downloadableLink = MutableStateFlow(DownloadableURL())
+    val downloadableLink:  StateFlow<DownloadableURL>
+        get() = _downloadableLink
+
 
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
@@ -134,5 +141,15 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
 
     suspend fun reportContent(token: String, contentId: String, parameter: String) {
         unikitAPI.reportContent(token, contentId, parameter)
+    }
+
+    suspend fun getDownloadableURL(contentId: String) {
+        val response = unikitAPI.getDownloadableURL(GetDownloadableUrlBody(contentId))
+        if (response.isSuccessful && response.body() != null) {
+            _downloadableLink.emit(response.body()!!)
+        } else {
+            // Handle unsuccessful response (e.g., log error message)
+            Log.e("NetworkError", "Unsuccessful response: ${response.code()}")
+        }
     }
 }

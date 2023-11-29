@@ -34,8 +34,8 @@ import com.falcon.unikit.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 
 val walkThroughPagerContent = listOf(
-    WalkThroughPager(R.raw.animation_comic, "Welcome to Unikit", "Empowering Academic Excellence."),
-    WalkThroughPager(R.raw.translate_animation, "Streamlined Resources", "Effortless Access to Notes, Books, and More."),
+    WalkThroughPager(R.raw.welcome, "Welcome to Unikit", "Empowering Academic Excellence."),
+    WalkThroughPager(R.raw.resources, "Streamlined Resources", "Effortless Access to Notes, Books, and More."),
     WalkThroughPager(R.raw.multiple_inputs, "Bridging the Knowledge Gap", "Access, Discuss, Learn, Grow.")
 )
 @Preview

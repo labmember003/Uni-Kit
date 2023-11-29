@@ -608,17 +608,21 @@ fun BottomSheetContent(
         mutableStateOf(null)
     }
     val launcher = rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) { uri ->
+        Log.i("merimausikhayeande", fileName.value)
         pdfURI.value = uri
         startUpload.value = true
         val contentResolver = context.contentResolver  // Assuming you have access to the context
         val cursor: Cursor? = uri?.let { contentResolver.query(it, null, null, null, null) }
+        Log.i("merimausikhayeande", fileName.value)
         cursor.use { cursor ->
             if (cursor != null && cursor.moveToFirst()) {
                 val displayName = cursor.getString(cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME))
                 Toast.makeText(context, displayName, Toast.LENGTH_SHORT).show()
+                Log.i("merimausikhayeande", fileName.value)
                 if (fileName.value == "FileName") {
                     fileName.value = displayName
                 }
+                Log.i("merimausikhayeande2", fileName.value)
                 // Now displayName contains the name of the selected PDF file
                 // You can use it as needed
             }
@@ -656,7 +660,7 @@ fun BottomSheetContent(
         }
         TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
-        val finalFileName = remember {
+        val finalFileName = remember(fileName.value) {
             mutableStateOf(fileName.value)
         }
         if (startUpload.value) {
@@ -685,11 +689,6 @@ fun BottomSheetContent(
                         scope.launch { modalSheetState.hide() }
                         Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
                     } ,{
-//                        Toast.makeText(
-//                            context,
-//                            "Upload Failed Please Try Again Later",
-//                            Toast.LENGTH_SHORT
-//                        ).show()
                         scope.launch { modalSheetState.hide() }
                         Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
                     }, {

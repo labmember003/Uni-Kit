@@ -1,5 +1,6 @@
 package com.falcon.unikit.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -122,7 +123,7 @@ fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) 
             )
             .clickable {
                 navigateToBranchScreen(
-                    year.yearID?: "Error: yearID is NULL"
+                    year.yearID ?: "Error: yearID is NULL"
                 )
             },
     ) {
@@ -162,21 +163,43 @@ private fun TopBar(
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Start,
+        horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        IconButton(onClick = {
-            scope.launch {
-                drawerState.open()
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            IconButton(onClick = {
+                scope.launch {
+                    drawerState.open()
+                }
+            }) {
+                Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
             }
-        }) {
-            Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
+            Text(
+                text = "UniKit",
+                modifier = Modifier,
+                style = MaterialTheme.typography.subtitle1
+            )
         }
-        Text(
-            text = "UniKit",
-            modifier = Modifier,
-            style = MaterialTheme.typography.subtitle1
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Image(
+                painter = painterResource(R.drawable.token),
+                contentDescription = "Your Image",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .size(32.dp)
+            )
+            Spacer(modifier = Modifier.size(2.dp))
+            Text(
+                text = "100₹",
+                modifier = Modifier
+                    .padding(0.dp, 10.dp, 10.dp, 10.dp)
+            )
+        }
+
     }
 }
 
@@ -205,6 +228,12 @@ fun DrawerContent(navController: NavHostController) {
         Spacer(modifier = Modifier.height(2.dp))
         NavDrawerContent("Settings", R.drawable.baseline_settings_24) {
             navController.navigate("settings")
+        }
+        NavDrawerContent("Community", R.drawable.baseline_people_alt_24) {
+            navController.navigate("community")
+        }
+        NavDrawerContent("Redeem", R.drawable.baseline_redeem_24) {
+            navController.navigate("redeem")
         }
     }
 

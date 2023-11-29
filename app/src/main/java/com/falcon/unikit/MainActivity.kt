@@ -227,6 +227,9 @@ class MainActivity : ComponentActivity() {
                             navController.navigate("sign_in")
                         }
                     }
+                    composable("redeem") {
+                        Redeem()
+                    }
                     composable("sign_in") {
                         BackHandler(
                             onBack = {
@@ -473,6 +476,9 @@ class MainActivity : ComponentActivity() {
                         } else {
                             LoadingScreen()
                         }
+                    }
+                    composable("community") {
+                        Community()
                     }
                     composable("profile") {
                         val gson = Gson()
@@ -1029,4 +1035,25 @@ fun OTPSignInCard(
             }
         }
 
+}
+
+@Composable
+fun Community() {
+    HeadingSummarizedPage()
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun Redeem() {
+    val context = LocalContext.current
+    Image(
+        painter = painterResource(id = R.drawable.redeem),
+        contentDescription = "",
+        modifier = Modifier
+            .fillMaxSize()
+            .clickable {
+                Toast.makeText(context, "Insufficient Coins", Toast.LENGTH_SHORT).show()
+            }
+    )
+    
 }

@@ -66,6 +66,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
@@ -94,6 +95,7 @@ import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
+import com.falcon.unikit.screens.OtpComp
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.AuthViewModel
@@ -263,6 +265,12 @@ class MainActivity : ComponentActivity() {
                             }
                         }
                         OtpSignIn {
+                            navController.navigate("get_otp")
+
+                        }
+                    }
+                    composable("get_otp") {
+                        OTPScreen {
                             navController.navigate("select_college_screen")
                         }
                     }
@@ -770,6 +778,43 @@ fun GoogleSignInMainScreen(
         Spacer(modifier = Modifier.padding(32.dp))
         GoogleSignInCard(onClick = onClick)
     }
+}
+
+@Composable
+fun OTPScreen(onClick: () -> Unit) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        Text(
+            text = "ENTER OTP",
+            fontWeight = FontWeight.Bold,
+            fontSize = 28.sp
+        )
+        LottieAnimation(R.raw.otp)
+        Spacer(modifier = Modifier.padding(32.dp))
+        OtpComp()
+        Spacer(modifier = Modifier
+            .size(30.dp))
+        FloatingActionButton(
+            onClick = {
+                onClick()
+            },
+            modifier = Modifier
+                .padding(4.dp)
+                .size(56.dp),
+            shape = RoundedCornerShape(percent = 30),
+        ) {
+            Icon(
+                imageVector = Icons.Filled.NavigateNext,
+                contentDescription = "Go",
+                tint = androidx.compose.material.MaterialTheme.colors.primary,
+            )
+        }
+    }
+    
 }
 
 @Composable

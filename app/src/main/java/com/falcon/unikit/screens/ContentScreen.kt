@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -40,9 +41,11 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
+import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -51,6 +54,7 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
+import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -63,6 +67,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
@@ -76,15 +81,23 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusProperties
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
@@ -596,6 +609,58 @@ fun EditTextWithBorder(fileName: String, omChangeValue: (String) -> Unit) {
                     "Name"
                 )
             }
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun OtpComp() {
+    val modifier = Modifier
+        .size(90.dp)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.Center
+    ) {
+        OtpCell(modifier, " ")
+        Spacer(modifier = Modifier.size(10.dp))
+        OtpCell(modifier, " ")
+        Spacer(modifier = Modifier.size(10.dp))
+        OtpCell(modifier, " ")
+        Spacer(modifier = Modifier.size(10.dp))
+        OtpCell(modifier, " ")
+    }
+
+}
+
+@Composable
+fun OtpCell(
+    modifier: Modifier,
+    value: String,
+    isCursorVisible: Boolean = false
+) {
+    val scope = rememberCoroutineScope()
+    val (cursorSymbol, setCursorSymbol) = remember { mutableStateOf("") }
+
+    LaunchedEffect(key1 = cursorSymbol, isCursorVisible) {
+        if (isCursorVisible) {
+            scope.launch {
+                delay(350)
+                setCursorSymbol(if (cursorSymbol.isEmpty()) "|" else "")
+            }
+        }
+    }
+
+    Card(
+        modifier = modifier
+            .padding(15.dp)
+            .shadow(elevation = 8.dp, shape = RoundedCornerShape(20.dp))
+    ) {
+        Text(
+            text = if (isCursorVisible) cursorSymbol else value,
+            style = MaterialTheme.typography.body1,
+            modifier = Modifier.padding(5.dp)
         )
     }
 }

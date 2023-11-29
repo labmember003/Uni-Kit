@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -41,11 +40,9 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
-import androidx.compose.material.Divider
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
-import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
@@ -54,7 +51,6 @@ import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.RadioButton
 import androidx.compose.material.Tab
 import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -67,13 +63,11 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -81,21 +75,15 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusProperties
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Color.Companion.White
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -106,22 +94,18 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.unikit.HeadingSummarizedPage
-import com.falcon.unikit.LoadingScreen
 import com.falcon.unikit.LottieAnimation
-import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.R
 import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.Utils
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
-import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -506,7 +490,8 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                                     downloadableURL.githuburl.toString(),
                                     notificationId,
                                     scope,
-                                    activity
+                                    activity,
+                                    contentItem
                                 )
                                 Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
                             }
@@ -947,7 +932,8 @@ fun downloadPdfNotifination(
     pdfUrl: String,
     notificationId: Int,
     scope: CoroutineScope,
-    activity: ComponentActivity?
+    activity: ComponentActivity?,
+    contentItem: Content
 ) {
     val downloadManager = context.getSystemService<DownloadManager>()!!
     val uri = Uri.parse(pdfUrl)
@@ -958,7 +944,7 @@ fun downloadPdfNotifination(
         .setDestinationInExternalFilesDir(
             context,
             Environment.DIRECTORY_DOWNLOADS,
-            "sample.pdf"
+            contentItem.contentID
         )
     val downloadId = downloadManager.enqueue(request)
     val query = DownloadManager.Query().setFilterById(downloadId)

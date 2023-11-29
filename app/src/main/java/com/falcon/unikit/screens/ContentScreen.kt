@@ -287,6 +287,7 @@ fun ContentList(
             LazyColumn(content = {
                 val sortedItems = content.sortedByDescending { it.like?.size }
                 items(sortedItems) { content ->
+                    Log.i("happy sex", content.toString())
                     ContentItemRow(content, icon)
                 }
             })
@@ -341,6 +342,7 @@ fun ComingSoonScreen() {
 
 @Composable
 fun ContentItemRow(contentItem: Content, icon: Int) {
+    Log.i("happy sex", contentItem.contentID.toString())
     val context = LocalContext.current
     var downloadStatus = remember { mutableStateOf<String?>(null) }
     val expanded = remember {
@@ -405,7 +407,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     onClick = {
                         scope.launch {
                             itemViewModel.likeButtonPressed(
-                                contentItem.contentId.toString(),
+                                contentItem.contentID.toString(),
                                 token.toString()
                             )
                         }
@@ -419,7 +421,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                             .clickable {
                                 scope.launch {
                                     itemViewModel.likeButtonPressed(
-                                        contentItem.contentId.toString(),
+                                        contentItem.contentID.toString(),
                                         token.toString()
                                     )
                                 }
@@ -434,7 +436,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     onClick = {
                         scope.launch {
                             itemViewModel.dislikeButtonPressed(
-                                contentItem.contentId.toString(),
+                                contentItem.contentID.toString(),
                                 token.toString()
                             )
                         }
@@ -448,7 +450,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                             .clickable {
                                 scope.launch {
                                     itemViewModel.dislikeButtonPressed(
-                                        contentItem.contentId.toString(),
+                                        contentItem.contentID.toString(),
                                         token.toString()
                                     )
                                 }
@@ -474,18 +476,30 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     onClick = {
                         Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
                         scope.launch {
-                            authViewModel.getDownloadableURL(contentItem.contentId.toString())
-                            val notificationId = Random().nextInt()
-                            Toast.makeText(context, downloadableURL.value.githuburl.toString(), Toast.LENGTH_SHORT).show()
+                            authViewModel.getDownloadableURL("d6826137-c722-41d4-aea1-50d061387d64")
+                            authViewModel.downloadableURL.collect { downloadableURL ->
+
+
+//                                CONTENT ID NHI MIIIL RHI
+
+                                contentItem
+
+
+                                val notificationId = Random().nextInt()
+                                downloadPdfNotifination (
+                                    context,
+                                    downloadableURL.githuburl.toString(),
+                                    notificationId,
+                                    scope,
+                                    activity
+                                )
+                                Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
+                            }
+
+
                             Log.i("caatcatcatcatcatfcat", downloadableURL.value.githuburl.toString())
-                            Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
-                            downloadPdfNotifination (
-                                context,
-                                downloadableURL.value.githuburl.toString(),
-                                notificationId,
-                                scope,
-                                activity
-                            )
+
+
                         }
                     }
                 ) {
@@ -542,7 +556,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                 if (reportDialogueVisibility.value) {
                     AlertExample { parameter ->
                         scope.launch {
-                            itemViewModel.reportContent(token.toString(), contentItem.contentId.toString(), parameter)
+                            itemViewModel.reportContent(token.toString(), contentItem.contentID.toString(), parameter)
                         }
                     }
                 }

@@ -5,7 +5,7 @@ data class Content (
     val contentName: String? = null,
     val contentType: String? = null,      // Example notes, papers etc
     val author: String? = null,
-    val contentId: String? = null,
+    val contentID: String? = null,
     val like: List<String>? = null,
     val dislike: List<String>? = null,
     val report: List<String>? = null,

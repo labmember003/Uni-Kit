@@ -33,6 +33,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.OutlinedTextField
@@ -40,6 +41,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
@@ -117,6 +119,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var oneTapClient: SignInClient
     private lateinit var signUpRequest: BeginSignInRequest
     private var isSigninSuccess by mutableStateOf(false)
+    private var isSigninSuccess2 by mutableStateOf(false)
     @Inject
     lateinit var unikitAPI: UnikitAPI
 
@@ -227,7 +230,7 @@ class MainActivity : ComponentActivity() {
                         )
                         LaunchedEffect(isSigninSuccess) {
                             if (isSigninSuccess) {
-                                navController.navigate("select_college_screen")
+                                navController.navigate("sign_in_otp")
                             }
                         }
                         GoogleSignInMainScreen {
@@ -246,6 +249,21 @@ class MainActivity : ComponentActivity() {
                                     // No Google Accounts found. Just continue presenting the signed-out UI.
                                     Log.d("TAG", e.localizedMessage)
                                 }
+                        }
+                    }
+                    composable("sign_in_otp") {
+                        BackHandler(
+                            onBack = {
+                                navController.navigate("walk_through_screen")
+                            }
+                        )
+                        LaunchedEffect(isSigninSuccess2) {
+                            if (isSigninSuccess2) {
+                                navController.navigate("select_college_screen")
+                            }
+                        }
+                        OtpSignIn {
+                            navController.navigate("select_college_screen")
                         }
                     }
                     composable("select_college_screen") {
@@ -473,6 +491,7 @@ class MainActivity : ComponentActivity() {
                             editor.apply()
                         })
                     }
+
                     composable("my_notes") {
                         Scaffold(
                             topBar = {
@@ -897,4 +916,67 @@ fun saveUserDataToSharedPreferences(context: Context, userData: UserData, shared
     val gson = Gson()
     editor.putString("user_data_key", gson.toJson(userData))
     editor.apply()
+}
+
+@Composable
+fun OtpSignIn(
+    onClick: () -> Unit
+) {
+    Column(
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        LottieAnimation(R.raw.login_animation)
+        Spacer(modifier = Modifier.padding(32.dp))
+        OTPSignInCard(onClick = onClick)
+    }
+}
+
+
+
+
+
+@Composable
+fun OTPSignInCard(
+    onClick: () -> Unit
+) {
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            val content = remember {
+                mutableStateOf("")
+            }
+            OutlinedTextField(
+                value = content.value,
+                onValueChange = {
+                    content.value = it
+                },
+                label = { androidx.compose.material.Text("Mobile Number") },
+                modifier = Modifier
+                    .padding(16.dp)
+                    .weight(0.75f),
+                visualTransformation = VisualTransformation.None,
+            )
+            FloatingActionButton(
+                onClick = {
+                    onClick()
+                },
+                modifier = Modifier
+                    .weight(0.25f)
+                    .padding(4.dp)
+                    .size(56.dp),
+                shape = RoundedCornerShape(percent = 30),
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.NavigateNext,
+                    contentDescription = "Go",
+                    tint = androidx.compose.material.MaterialTheme.colors.primary,
+                )
+            }
+        }
+
 }

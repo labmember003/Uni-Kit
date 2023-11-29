@@ -54,7 +54,9 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
 import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
@@ -367,7 +369,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         disliked.value = true
     }
     val likeIcon = if (liked.value) Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
-    val dislikeIcon = if (disliked.value)  Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
+    val dislikeIcon = if (disliked.value)  Icons.Default.ThumbDown else Icons.Outlined.ThumbDown
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(Color.White),

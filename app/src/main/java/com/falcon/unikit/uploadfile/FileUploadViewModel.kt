@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -23,22 +24,22 @@ class FileUploadViewModel @Inject constructor(
 
 
 
-    private val _uploadResult = MutableStateFlow<UploadResult?>(null)
-    val uploadResult: StateFlow<UploadResult?> = _uploadResult
+    private val _uploadResult = MutableStateFlow("")
+    val uploadResult: StateFlow<String> = _uploadResult
 
-    fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody) {
-        viewModelScope.launch(Dispatchers.IO) {
+    suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody) {
+        viewModelScope.async (Dispatchers.IO) {
             try {
                 val response = repository.uploadFile(contentResolver, uri, uploadFileBody)
-                _uploadResult.value = UploadResult.Success(response.message)
+                _uploadResult.value = response
 //                Toast.makeText(application, "Success", Toast.LENGTH_SHORT).show()
                 Log.i("fileupload", "Success")
             } catch (e: Exception) {
-                _uploadResult.value = UploadResult.Failure("File upload failed: ${e.message}")
+                _uploadResult.value = e.message.toString()
 //                Toast.makeText(application, "Failure", Toast.LENGTH_SHORT).show()
                 Log.i("fileupload", "Failure")
                 Log.i("fileupload", e.message.toString())
             }
-        }
+        }.await()
     }
 }

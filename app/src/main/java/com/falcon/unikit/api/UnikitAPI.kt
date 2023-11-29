@@ -1,7 +1,6 @@
 package com.falcon.unikit.api
 
 import com.falcon.unikit.MyNoteItem
-import com.falcon.unikit.uploadfile.UploadResponse
 import com.falcon.unikit.models.body.GetMyNotesBody
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.models.item.BranchItem
@@ -61,7 +60,7 @@ interface UnikitAPI {
         @Query("subjectid") subjectid: String,
         @Query("type") type: String,
         @Query("name") name: String
-    ): UploadResponse
+    ): String
 
     @POST("/content/download")
     suspend fun getDownloadableURL(@Body contentid: GetDownloadableUrlBody): Response<DownloadableURL>

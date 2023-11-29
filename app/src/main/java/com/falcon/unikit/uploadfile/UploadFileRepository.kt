@@ -12,7 +12,7 @@ import java.io.File
 import javax.inject.Inject
 
 class FileUploadRepository @Inject constructor (private val api: UnikitAPI) {
-suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody): UploadResponse {
+suspend fun uploadFile(contentResolver: ContentResolver, uri: Uri, uploadFileBody: UploadFileBody): String {
     val inputStream = contentResolver.openInputStream(uri)
     val fileExtension = getFileExtension(contentResolver, uri)
     val mimeType = getMimeType(fileExtension)

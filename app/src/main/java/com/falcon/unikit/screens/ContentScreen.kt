@@ -97,6 +97,7 @@ import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.falcon.unikit.HeadingSummarizedPage
+import com.falcon.unikit.LoadingScreen
 import com.falcon.unikit.LottieAnimation
 import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.R
@@ -109,8 +110,10 @@ import com.falcon.unikit.uploadfile.UploadResult
 import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -620,8 +623,8 @@ fun BottomSheetContent(
                 // You can use it as needed
             }
         }
-
     }
+    Toast.makeText(context,fileName.value.toString() , Toast.LENGTH_SHORT).show()
     
     Column(
         modifier = Modifier
@@ -654,7 +657,7 @@ fun BottomSheetContent(
         TextWithBorder(headingValue = "Subject", descriptionValue = currentSubject.value.toString())
         TextWithBorder(headingValue = "Type", descriptionValue = currentType.value)
         val finalFileName = remember {
-            mutableStateOf("")
+            mutableStateOf(fileName.value)
         }
         if (startUpload.value) {
             EditTextWithBorder(fileName = fileName.value, omChangeValue = { newName ->
@@ -682,11 +685,13 @@ fun BottomSheetContent(
                         scope.launch { modalSheetState.hide() }
                         Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
                     } ,{
-                        Toast.makeText(
-                            context,
-                            "Upload Failed Please Try Again Later",
-                            Toast.LENGTH_SHORT
-                        ).show()
+//                        Toast.makeText(
+//                            context,
+//                            "Upload Failed Please Try Again Later",
+//                            Toast.LENGTH_SHORT
+//                        ).show()
+                        scope.launch { modalSheetState.hide() }
+                        Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
                     }, {
                         isUploading.value = true
                     }, finalFileName.value)
@@ -711,14 +716,18 @@ fun SubmitButton(
     if (content.isNotEmpty()) {
         subjectID = content[0].subjectID
     }
+    val scope = rememberCoroutineScope()
 
     val viewModel: FileUploadViewModel = hiltViewModel()
     val context = LocalContext.current
     val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
         onClick = {
-            submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure, fileName)
-            displayLoader()
+            scope.launch{
+                submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure, fileName)
+                displayLoader()
+            }
+
         },
         colors = ButtonDefaults.buttonColors(
             containerColor = Color.Black,
@@ -731,7 +740,7 @@ fun SubmitButton(
     }
 }
 
-fun submitPDF(
+suspend fun submitPDF(
     pdfURI: MutableState<Uri?>,
     currentType: String,
     subjectID: String?,
@@ -745,14 +754,19 @@ fun submitPDF(
     val sharedPreferences = context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
     val token = sharedPreferences.getString(Utils.JWT_TOKEN, "")
     pdfURI.value?.let {
-        viewModel.uploadFile(contentResolver = contentResolver, uri = it,
-            UploadFileBody(token?:"", subjectID?:"", currentType, fileName))
+        withContext(Dispatchers.IO) {
+            viewModel.uploadFile(contentResolver = contentResolver, uri = it,
+                UploadFileBody(token?:"", subjectID?:"", currentType, fileName))
+        }
     }
-    if (viewModel.uploadResult.value is UploadResult.Success) {
-        onSuccess()
-    } else {
-        onFailure()
-    }
+    onSuccess()
+//    if (viewModel.uploadResult.value == "success") {
+//        onSuccess()
+//    } else if (viewModel.uploadResult.value == "failure") {
+//        onFailure()
+//    } else {
+////        LoadingScreen()
+//    }
 }
 
 @Composable

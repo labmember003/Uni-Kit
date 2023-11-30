@@ -235,6 +235,9 @@ fun DrawerContent(navController: NavHostController) {
         NavDrawerContent("Redeem", R.drawable.baseline_redeem_24) {
             navController.navigate("redeem")
         }
+        NavDrawerContent("Book To Story", R.drawable.baseline_menu_book_24) {
+            navController.navigate("comicify")
+        }
     }
 
 }

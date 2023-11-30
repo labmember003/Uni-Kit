@@ -11,6 +11,9 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.util.Log
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
@@ -70,6 +73,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.ContextCompat.getSystemService
@@ -279,6 +283,9 @@ class MainActivity : ComponentActivity() {
                         OTPScreen {
                             navController.navigate("select_college_screen")
                         }
+                    }
+                    composable("comicify") {
+                        FullWebView("https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")
                     }
                     composable("select_college_screen") {
 //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
@@ -1056,4 +1063,27 @@ fun Redeem() {
             }
     )
     
+}
+
+
+@Composable
+fun FullWebView(url: String) {
+    val context = LocalContext.current
+    val webView = remember { WebView(context) }
+
+    // Configure the WebView
+    webView.settings.javaScriptEnabled = true
+    webView.webViewClient = WebViewClient()
+    webView.webChromeClient = WebChromeClient()
+
+    // Load the URL
+    webView.loadUrl(url)
+
+    // Create AndroidView to display WebView
+    AndroidView(
+        factory = { webView },
+        modifier = Modifier.fillMaxSize()
+    ) { webView ->
+        // WebView is configured and loaded with the provided URL
+    }
 }

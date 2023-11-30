@@ -7,6 +7,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.content.ContentResolver
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
 import android.net.Uri
@@ -16,6 +17,7 @@ import android.provider.OpenableColumns
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -92,6 +94,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
@@ -113,6 +116,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.File
 import java.util.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -463,7 +467,6 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         }
         val activity = LocalContext.current as? androidx.activity.ComponentActivity
         val authViewModel : AuthViewModel = hiltViewModel()
-        val downloadableURL = authViewModel.downloadableURL.collectAsState()
         if (expanded.value) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -473,17 +476,34 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
+//                        val fileName = contentItem.contentName + ".pdf"
+                        val fileName = "sample" + ".pdf"
+                        val file = File(
+                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            fileName
+                        )
                         Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
                         scope.launch {
-                            authViewModel.getDownloadableURL("d6826137-c722-41d4-aea1-50d061387d64")
+                            authViewModel.getDownloadableURL(contentItem.contentID.toString())
                             authViewModel.downloadableURL.collect { downloadableURL ->
+                            if (file.exists()) {
+                                Toast.makeText(context, "exosts", Toast.LENGTH_SHORT).show()
+//                            openFile(fileName)
+                                val fileName = contentItem.contentName
 
+                                val file = File(
+                                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                                    fileName
+                                )
+                                val pdfUri = Uri.fromFile(file)
+                                val intent = Intent(Intent.ACTION_VIEW)
+                                intent.setDataAndType(pdfUri, "application/pdf")
+                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
 
-//                                CONTENT ID NHI MIIIL RHI
+                                context.startActivity(intent)
 
-                                contentItem
-
-
+                            } else {
                                 val notificationId = Random().nextInt()
                                 downloadPdfNotifination (
                                     context,
@@ -496,19 +516,19 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                                 Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
                             }
 
+//
 
-                            Log.i("caatcatcatcatcatfcat", downloadableURL.value.githuburl.toString())
+
+
+                            }
+
+
 
 
                         }
                     }
                 ) {
-//                    Icon(
-//                        imageVector = Icons.Default.Download,
-//                        contentDescription = "Download",
-//                        tint = Color.Black, //,
-//                        modifier = Modifier.padding(8.dp) // Adjust padding as needed
-//                    )
+
                     Image(
                         painter = painterResource(id = R.drawable.download),
                         contentDescription = ""
@@ -564,7 +584,37 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         }
     }
 }
+fun openPdfInExternalViewer(context: android.content.Context, fileName: String) {
+    val file = File(context.filesDir, fileName)
 
+    if (file.exists()) {
+        val pdfUri = Uri.fromFile(file)
+
+        val intent = Intent(Intent.ACTION_VIEW)
+        intent.setDataAndType(pdfUri, "application/pdf")
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+
+        context.startActivity(intent)
+    } else {
+        // Handle the case when the file doesn't exist
+        // You might want to show an error message to the user
+    }
+}
+
+private fun openFile(
+    context: Context,
+    file: File,
+    launcher: ManagedActivityResultLauncher<String, Uri?>
+) {
+    val uri: Uri = FileProvider.getUriForFile(
+        context,
+        context.applicationContext.packageName + ".provider",
+        file
+    )
+
+    launcher.launch("application/pdf")
+}
 
 @Composable
 fun EditTextWithBorder(fileName: String, omChangeValue: (String) -> Unit) {
@@ -944,7 +994,7 @@ fun downloadPdfNotifination(
         .setDestinationInExternalFilesDir(
             context,
             Environment.DIRECTORY_DOWNLOADS,
-            contentItem.contentID
+            contentItem.contentID + ".pdf"
         )
     val downloadId = downloadManager.enqueue(request)
     val query = DownloadManager.Query().setFilterById(downloadId)

@@ -1,5 +1,8 @@
 package com.falcon.unikit.screens
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -39,6 +42,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -205,6 +209,7 @@ private fun TopBar(
 
 @Composable
 fun DrawerContent(navController: NavHostController) {
+    val context = LocalContext.current
     Column(
         verticalArrangement = Arrangement.spacedBy(0.dp),
         modifier = Modifier
@@ -236,8 +241,14 @@ fun DrawerContent(navController: NavHostController) {
             navController.navigate("redeem")
         }
         NavDrawerContent("Book To Story", R.drawable.baseline_menu_book_24) {
-            navController.navigate("comicify")
+            openUrlInBrowser(context = context, url = "https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")
         }
     }
 
+}
+
+fun openUrlInBrowser(context: Context, url: String) {
+    val uri = Uri.parse(url)
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+    context.startActivity(intent)
 }

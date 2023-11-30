@@ -65,8 +65,10 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -86,6 +88,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -669,6 +672,7 @@ fun OtpComp() {
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OtpCell(
     modifier: Modifier,
@@ -691,12 +695,33 @@ fun OtpCell(
         modifier = modifier
             .padding(15.dp)
             .shadow(elevation = 8.dp, shape = RoundedCornerShape(20.dp))
+            .fillMaxSize()
+
     ) {
-        Text(
-            text = if (isCursorVisible) cursorSymbol else value,
-            style = MaterialTheme.typography.body1,
-            modifier = Modifier.padding(5.dp)
-        )
+        var textValue2 = remember() { mutableStateOf("") }
+//        TextField(
+//            value = textValue,
+//            onValueChange = { newValue ->
+//                textValue = newValue
+//            },
+//            modifier = Modifier
+//                .fillMaxSize()
+//                .padding(16.dp)
+//        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            OutlinedTextField(
+                value = textValue2.value,
+                onValueChange = {
+                    textValue2.value = it
+                },
+                modifier = Modifier.padding(6.dp),
+                visualTransformation = VisualTransformation.None,
+            )
+        }
+
     }
 }
 

@@ -483,8 +483,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-//                        val fileName = contentItem.contentName + ".pdf"
-                        val fileName = "sample" + ".pdf"
+                        val fileName = contentItem.contentName + ".pdf"
                         val file = File(
                             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                             fileName

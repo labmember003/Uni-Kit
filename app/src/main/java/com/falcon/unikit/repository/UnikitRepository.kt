@@ -6,6 +6,8 @@ import com.falcon.unikit.api.Content
 import com.falcon.unikit.api.DownloadableURL
 import com.falcon.unikit.api.GetDownloadableUrlBody
 import com.falcon.unikit.api.Item
+import com.falcon.unikit.api.OTP
+import com.falcon.unikit.api.PhoneNumber
 import com.falcon.unikit.models.body.JWTbody
 import com.falcon.unikit.api.UnikitAPI
 import com.falcon.unikit.api.UserData
@@ -61,6 +63,9 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     val downloadableLink:  StateFlow<DownloadableURL>
         get() = _downloadableLink
 
+    private val _OTP = MutableStateFlow(OTP())
+    val OTP: StateFlow<OTP>
+        get() = _OTP
 
     suspend fun getCollege() {
         val response = unikitAPI.getCollegeList()
@@ -147,6 +152,16 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
         val response = unikitAPI.getDownloadableURL(GetDownloadableUrlBody(contentId))
         if (response.isSuccessful && response.body() != null) {
             _downloadableLink.emit(response.body()!!)
+        } else {
+            // Handle unsuccessful response (e.g., log error message)
+            Log.e("NetworkError", "Unsuccessful response: ${response.code()}")
+        }
+    }
+
+    suspend fun getOTP(phoneNumber: String) {
+        val response = unikitAPI.getOTP(PhoneNumber(phoneNumber))
+        if (response.isSuccessful && response.body() != null) {
+            _OTP.emit(response.body()!!)
         } else {
             // Handle unsuccessful response (e.g., log error message)
             Log.e("NetworkError", "Unsuccessful response: ${response.code()}")

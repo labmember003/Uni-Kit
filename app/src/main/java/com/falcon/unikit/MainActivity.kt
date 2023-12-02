@@ -1,9 +1,6 @@
 package com.falcon.unikit
 
 import android.app.Activity
-import android.app.NotificationManager
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.content.IntentSender
@@ -62,6 +59,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -76,9 +74,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
@@ -164,20 +159,20 @@ class MainActivity : ComponentActivity() {
                             lifecycleScope.launch {
                                 authViewModel.getToken(idToken)
                                 authViewModel.jwtToken.collect { userData ->
-                                    val clipboardManager = ContextCompat.getSystemService(
-                                        this@MainActivity,
-                                        ClipboardManager::class.java
-                                    ) as ClipboardManager?
-                                    clipboardManager?.let {
-                                        val clipData = ClipData.newPlainText("label", userData.token)
-                                        it.setPrimaryClip(clipData)
-
-                                        Toast.makeText(
-                                            this@MainActivity,
-                                            "token copied to clipboard",
-                                            Toast.LENGTH_SHORT
-                                        ).show()
-                                    }
+//                                    val clipboardManager = ContextCompat.getSystemService(
+//                                        this@MainActivity,
+//                                        ClipboardManager::class.java
+//                                    ) as ClipboardManager?
+//                                    clipboardManager?.let {
+//                                        val clipData = ClipData.newPlainText("label", userData.token)
+//                                        it.setPrimaryClip(clipData)
+//
+//                                        Toast.makeText(
+//                                            this@MainActivity,
+//                                            "token copied to clipboard",
+//                                            Toast.LENGTH_SHORT
+//                                        ).show()
+//                                    }
 
 
                                     val sharedPreferences = this@MainActivity.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
@@ -276,13 +271,22 @@ class MainActivity : ComponentActivity() {
                                 navController.navigate("select_college_screen")
                             }
                         }
-                        OtpSignIn {
-                            navController.navigate("get_otp")
+
+                        OtpSignIn() { otp ->
+                            navController.navigate("get_otp/${otp}")
 
                         }
                     }
-                    composable("get_otp") {
-                        OTPScreen {
+                    composable(
+                        route= "get_otp/{otp}",
+                        arguments = listOf(
+                            navArgument("otp") {
+                                type = NavType.StringType
+                            }
+                        )
+                    ) { entry ->
+                        val otp = entry.arguments?.getString("otp")
+                        OTPScreen(otp) {
                             navController.navigate("select_college_screen")
                         }
                     }
@@ -799,12 +803,11 @@ fun GoogleSignInMainScreen(
 }
 
 @Composable
-fun OTPScreen(onClick: () -> Unit) {
+fun OTPScreen(OTP: String?, onClick: () -> Unit) {
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
-            .fillMaxSize()
     ) {
         Text(
             text = "ENTER OTP",
@@ -813,12 +816,32 @@ fun OTPScreen(onClick: () -> Unit) {
         )
         LottieAnimation(R.raw.otp)
         Spacer(modifier = Modifier.padding(32.dp))
-        OtpComp()
+//        OtpComp()
+        val otp = remember {
+            mutableStateOf("")
+        }
+        OutlinedTextField(
+            value = otp.value,
+            onValueChange = {
+                otp.value = it
+            },
+            label = { androidx.compose.material.Text("OTP") },
+            modifier = Modifier
+                .padding(16.dp),
+            visualTransformation = VisualTransformation.None,
+        )
         Spacer(modifier = Modifier
             .size(30.dp))
         FloatingActionButton(
             onClick = {
-                onClick()
+                if (OTP == otp.value) {
+                    onClick()
+                }
+                onClick() // TODO REMOVE THIS LINE AND CHECK IF OTP IS OK OR NOT
+                //TODO HANDLE INCORRECT OTP
+                //TODO HANDLE INCORRECT OTP
+                //TODO HANDLE INCORRECT OTP
+                //TODO HANDLE INCORRECT OTP
             },
             modifier = Modifier
                 .padding(4.dp)
@@ -985,7 +1008,7 @@ fun saveUserDataToSharedPreferences(context: Context, userData: UserData, shared
 
 @Composable
 fun OtpSignIn(
-    onClick: () -> Unit
+    onClick: (String) -> Unit
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -995,7 +1018,9 @@ fun OtpSignIn(
     ) {
         LottieAnimation(R.raw.login_animation)
         Spacer(modifier = Modifier.padding(32.dp))
-        OTPSignInCard(onClick = onClick)
+        OTPSignInCard { OTP ->
+            onClick(OTP.toString())
+        }
     }
 }
 
@@ -1005,9 +1030,10 @@ fun OtpSignIn(
 
 @Composable
 fun OTPSignInCard(
-    onClick: () -> Unit
+    onClick: (String?) -> Unit
 ) {
-
+        val authViewModel : AuthViewModel = hiltViewModel()
+        val scope = rememberCoroutineScope()
         Row(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -1028,7 +1054,12 @@ fun OTPSignInCard(
             )
             FloatingActionButton(
                 onClick = {
-                    onClick()
+                    scope.launch {
+                        authViewModel.getOTP(content.value)
+                        authViewModel.OTP.collect { OTP ->
+                            onClick(OTP.toString())
+                        }
+                    }
                 },
                 modifier = Modifier
                     .weight(0.25f)
@@ -1061,7 +1092,9 @@ fun Redeem() {
         modifier = Modifier
             .fillMaxSize()
             .clickable {
-                Toast.makeText(context, "Insufficient Coins", Toast.LENGTH_SHORT).show()
+                Toast
+                    .makeText(context, "Insufficient Coins", Toast.LENGTH_SHORT)
+                    .show()
             }
     )
     

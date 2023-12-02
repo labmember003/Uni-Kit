@@ -1,6 +1,5 @@
 package com.falcon.unikit.api
 
 data class OTP (
-
-    val otp: String
+    val otp: String? = null
 )

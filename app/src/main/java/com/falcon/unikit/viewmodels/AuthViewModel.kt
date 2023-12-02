@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.falcon.unikit.MyNoteItem
 import com.falcon.unikit.api.DownloadableURL
+import com.falcon.unikit.api.OTP
 import com.falcon.unikit.api.UserData
 import com.falcon.unikit.repository.UnikitRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,6 +26,9 @@ class AuthViewModel @Inject constructor(
     val downloadableURL: StateFlow<DownloadableURL>
         get() = unikitRepository.downloadableLink
 
+    val OTP: StateFlow<OTP>
+        get() = unikitRepository.OTP
+
     suspend fun getToken(idToken: String) {
         unikitRepository.getJwtToken(idToken)
     }
@@ -37,5 +41,9 @@ class AuthViewModel @Inject constructor(
 
     suspend fun getDownloadableURL(contentID: String) {
         unikitRepository.getDownloadableURL(contentID)
+    }
+
+    suspend fun getOTP(phoneNumber: String) {
+        unikitRepository.getOTP(phoneNumber)
     }
 }

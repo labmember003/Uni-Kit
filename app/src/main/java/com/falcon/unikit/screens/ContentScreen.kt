@@ -10,14 +10,14 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.database.Cursor
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
+import android.os.ParcelFileDescriptor
 import android.provider.OpenableColumns
 import android.util.Log
-import android.webkit.WebChromeClient
-import android.webkit.WebView
-import android.webkit.WebViewClient
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -30,9 +30,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -71,13 +73,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.TabRow
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -87,8 +90,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -97,14 +102,18 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toSize
-import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
+import androidx.core.net.toFile
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.rememberImagePainter
+import coil.imageLoader
+import coil.memory.MemoryCache
+import coil.request.ImageRequest
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -121,10 +130,39 @@ import com.falcon.unikit.viewmodels.ItemViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Random
+import kotlin.math.sqrt
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.dp
+import androidx.core.net.toFile
+import coil.compose.rememberImagePainter
+import coil.imageLoader
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.withLock
+import kotlin.math.sqrt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
@@ -298,7 +336,7 @@ fun ContentList(
                 val sortedItems = content.sortedByDescending { it.like?.size }
                 items(sortedItems) { content ->
                     Log.i("happy sex", content.toString())
-                    ContentItemRow(content, icon)
+                    ContentItemRow(content, icon, navController)
                 }
             })
         }
@@ -351,10 +389,10 @@ fun ComingSoonScreen() {
 
 
 @Composable
-fun ContentItemRow(contentItem: Content, icon: Int) {
+fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostController) {
     Log.i("happy sex", contentItem.contentID.toString())
     val context = LocalContext.current
-    var downloadStatus = remember { mutableStateOf<String?>(null) }
+    remember { mutableStateOf<String?>(null) }
     val expanded = remember {
         mutableStateOf(false)
     }
@@ -418,7 +456,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                         scope.launch {
                             itemViewModel.likeButtonPressed(
                                 contentItem.contentID.toString(),
-                                token.toString()
+                                token
                             )
                         }
                     }
@@ -432,7 +470,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                                 scope.launch {
                                     itemViewModel.likeButtonPressed(
                                         contentItem.contentID.toString(),
-                                        token.toString()
+                                        token
                                     )
                                 }
                             }// Adjust padding as needed
@@ -461,7 +499,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                                 scope.launch {
                                     itemViewModel.dislikeButtonPressed(
                                         contentItem.contentID.toString(),
-                                        token.toString()
+                                        token
                                     )
                                 }
                             }
@@ -475,6 +513,12 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
         val activity = LocalContext.current as? androidx.activity.ComponentActivity
         val authViewModel : AuthViewModel = hiltViewModel()
         if (expanded.value) {
+            val fileName = contentItem.contentID + ".pdf"
+            val file = File(
+                context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                fileName
+            )
+            val pdfUri = Uri.fromFile(file)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceEvenly
@@ -483,33 +527,48 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-                        val fileName = contentItem.contentName + ".pdf"
+                        val fileName = contentItem.contentID + ".pdf"
+                        Log.i("asdfvfdfefe", fileName)
                         val file = File(
                             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                             fileName
                         )
-                        Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
                         scope.launch {
                             authViewModel.getDownloadableURL(contentItem.contentID.toString())
                             authViewModel.downloadableURL.collect { downloadableURL ->
                             if (file.exists()) {
+                                val uri = Uri.fromFile(file).toString()
+                                navController.navigate("open_file/${uri}")
+//                                openPdfInApp(context, file)
                                 Toast.makeText(context, "exosts", Toast.LENGTH_SHORT).show()
 //                            openFile(fileName)
-                                val fileName = contentItem.contentName
+//                                val fileName = contentItem.contentName
+//                                val file = File(
+//                                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+//                                    fileName
+//                                )
+//                                val pdfUri = Uri.fromFile(file)
+//                                val intent = Intent(Intent.ACTION_VIEW)
+//                                intent.setDataAndType(pdfUri, "application/pdf")
+//                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+//                                context.startActivity(intent)
 
-                                val file = File(
-                                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                                    fileName
-                                )
-                                val pdfUri = Uri.fromFile(file)
-                                val intent = Intent(Intent.ACTION_VIEW)
-                                intent.setDataAndType(pdfUri, "application/pdf")
-                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-
-                                context.startActivity(intent)
-
+//                                Share File
+//                                val fileUri = FileProvider.getUriForFile(
+//                                    context,
+//                                    "${context.packageName}.fileprovider",
+//                                    File("/storage/emulated/0/Android/data/com.falcon.unikit/files/Download/DistributedForces.pdf")
+//                                )
+//                                val shareIntent = Intent().apply {
+//                                    action = Intent.ACTION_VIEW
+//                                    type = "application/pdf"
+//                                    putExtra(Intent.EXTRA_STREAM, fileUri)
+//                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+//                                }
+//                                context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
                             } else {
+                                Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
                                 val notificationId = Random().nextInt()
                                 downloadPdfNotifination (
                                     context,
@@ -521,16 +580,7 @@ fun ContentItemRow(contentItem: Content, icon: Int) {
                                 )
                                 Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
                             }
-
-//
-
-
-
                             }
-
-
-
-
                         }
                     }
                 ) {
@@ -1130,37 +1180,121 @@ private fun showDownloadNotification(
 }
 
 
+fun openPdfInApp(context: Context, file: File) {
+    try {
+//        val file = File(context.filesDir, pdfFileName)
+        val fileDescriptor = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+        val pdfRenderer = PdfRenderer(fileDescriptor)
 
-//@Composable
-//fun ExpandableContent(
-//    isExpanded: Boolean
-//) {
-//    val enterTransition = remember {
-//        expandVertically(
-//            expandFrom = Alignment.Top,
-//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
-//        ) + fadeIn(
-//            initialAlpha = 1f,
-//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
-//        )
-//    }
-//    val exitTransition = remember {
-//        shrinkVertically(
-//            shrinkTowards = Alignment.Top,
-//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
-//        ) + fadeOut(
-//            animationSpec = tween(EXPANSION_ANIMATION_DURATION)
-//        )
-//    }
-//
-//    AnimatedVisibility(
-//        visible = isExpanded,
-//        enter = enterTransition,
-//        exit = exitTransition
-//    ) {
-//        Text (
-//            text = isExpanded.toString(),
-//            textAlign = TextAlign.Justify
-//        )
-//    }
-//}
+        // Open the first page of the PDF
+        val currentPage = pdfRenderer.openPage(0)
+
+        // Create a bitmap to render the page
+        val bitmap = Bitmap.createBitmap(currentPage.width, currentPage.height, Bitmap.Config.ARGB_8888)
+
+        // Render the page onto the bitmap
+        currentPage.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+        // Display the bitmap in an ImageView
+//        imageView.setImageBitmap(bitmap)
+
+        // Close the page and renderer when done
+        currentPage.close()
+        pdfRenderer.close()
+
+    } catch (e: Exception) {
+        e.printStackTrace()
+        Log.i("qwertyuio", e.message.toString())
+    }
+}
+
+
+
+@Composable
+fun PdfViewer(
+    modifier: Modifier = Modifier,
+    uri: Uri,
+    verticalArrangement: Arrangement.Vertical = Arrangement.spacedBy(8.dp)
+) {
+    val rendererScope = rememberCoroutineScope()
+    val mutex = remember { Mutex() }
+    val renderer by produceState<PdfRenderer?>(null, uri) {
+        rendererScope.launch(Dispatchers.IO) {
+            val input = ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
+            value = PdfRenderer(input)
+        }
+        awaitDispose {
+            val currentRenderer = value
+            rendererScope.launch(Dispatchers.IO) {
+                mutex.withLock {
+                    currentRenderer?.close()
+                }
+            }
+        }
+    }
+    val context = LocalContext.current
+    val imageLoader = LocalContext.current.imageLoader
+    val imageLoadingScope = rememberCoroutineScope()
+    BoxWithConstraints(modifier = modifier.fillMaxWidth()) {
+        val width = with(LocalDensity.current) { maxWidth.toPx() }.toInt()
+        val height = (width * sqrt(2f)).toInt()
+        val pageCount by remember(renderer) { derivedStateOf { renderer?.pageCount ?: 0 } }
+        LazyColumn(
+            verticalArrangement = verticalArrangement
+        ) {
+            items(
+                count = pageCount,
+                key = { index -> "$uri-$index" }
+            ) { index ->
+                val cacheKey = MemoryCache.Key("$uri-$index")
+                val cacheValue : Bitmap? = imageLoader.memoryCache?.get(cacheKey)?.bitmap
+
+                var bitmap : Bitmap? by remember { mutableStateOf(cacheValue)}
+                if (bitmap == null) {
+                    DisposableEffect(uri, index) {
+                        val job = imageLoadingScope.launch(Dispatchers.IO) {
+                            val destinationBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                            mutex.withLock {
+                                Log.d("PdfGenerator", "Loading PDF $uri - page $index/$pageCount")
+                                if (!coroutineContext.isActive) return@launch
+                                try {
+                                    renderer?.let {
+                                        it.openPage(index).use { page ->
+                                            page.render(
+                                                destinationBitmap,
+                                                null,
+                                                null,
+                                                PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY
+                                            )
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    //Just catch and return in case the renderer is being closed
+                                    return@launch
+                                }
+                            }
+                            bitmap = destinationBitmap
+                        }
+                        onDispose {
+                            job.cancel()
+                        }
+                    }
+                    Box(modifier = Modifier.background(Color.White).aspectRatio(1f / sqrt(2f)).fillMaxWidth())
+                } else { //bitmap != null
+                    val request = ImageRequest.Builder(context)
+                        .size(width, height)
+                        .memoryCacheKey(cacheKey)
+                        .data(bitmap)
+                        .build()
+
+                    Image(
+                        modifier = Modifier.background(Color.White).aspectRatio(1f / sqrt(2f)).fillMaxWidth(),
+                        contentScale = ContentScale.Fit,
+                        painter = rememberImagePainter(request),
+                        contentDescription = "Page ${index + 1} of $pageCount"
+                    )
+                }
+            }
+        }
+    }
+}

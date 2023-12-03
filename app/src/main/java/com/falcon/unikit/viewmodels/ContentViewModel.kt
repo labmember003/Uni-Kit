@@ -24,7 +24,7 @@ class ContentViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             val subjectID = savedStateHandle.get<String>("subjectID") ?: "123"
-            Log.i("diwaliiii", subjectID.toString())
+            Log.i("diwaliiiicatdog", subjectID.toString())
             unikitRepository.getContent(subjectID)
         }
     }

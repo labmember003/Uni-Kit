@@ -9,6 +9,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -100,6 +101,7 @@ import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.screens.OtpComp
+import com.falcon.unikit.screens.PdfViewer
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.AuthViewModel
@@ -116,6 +118,7 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 import javax.inject.Inject
 
 
@@ -490,8 +493,30 @@ class MainActivity : ComponentActivity() {
                             LoadingScreen()
                         }
                     }
+                    composable(
+//                        route = "open_file/{uri}",
+                        route = "open_file",
+//                        arguments = listOf(
+//                            navArgument("uri") {
+//                                type = NavType.StringType
+//                            }
+//                        )
+                    ) { entry ->
+//                        val uri = Uri.parse(entry.arguments?.getString("uri"))
+//                        Log.i("qwqwqwqwqw", uri.toString())
+                        val filename = "e51d8ef5-07ff-4aa1-9e9c-9df6fb9e1894.pdf"
+                        val file = File(
+                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            filename
+                        )
+                        PdfViewer(Modifier, Uri.fromFile(file))
+                    }
                     composable("community") {
                         Community()
+                        LaunchedEffect(key1 = Unit) {
+                            navController.navigate("open_file")
+                        }
+
                     }
                     composable("profile") {
                         val gson = Gson()

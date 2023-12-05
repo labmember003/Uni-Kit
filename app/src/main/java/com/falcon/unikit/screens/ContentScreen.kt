@@ -23,6 +23,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -159,9 +160,12 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toFile
 import coil.compose.rememberImagePainter
 import coil.imageLoader
+import com.falcon.unikit.PDFviewActivity
+import com.falcon.unikit.encode
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
+import java.util.Base64
 import kotlin.math.sqrt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -388,6 +392,7 @@ fun ComingSoonScreen() {
 }
 
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostController) {
     Log.i("happy sex", contentItem.contentID.toString())
@@ -537,8 +542,11 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                             authViewModel.getDownloadableURL(contentItem.contentID.toString())
                             authViewModel.downloadableURL.collect { downloadableURL ->
                             if (file.exists()) {
-                                val uri = Uri.fromFile(file).toString()
-                                navController.navigate("open_file/${uri}")
+                                val uri: String? = Uri.fromFile(file).toString()
+
+                                val encoded = uri?.let { encode(it) }
+
+                                navController.navigate("open_file/${encoded}")
 //                                openPdfInApp(context, file)
                                 Toast.makeText(context, "exosts", Toast.LENGTH_SHORT).show()
 //                            openFile(fileName)

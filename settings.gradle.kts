@@ -5,6 +5,7 @@ pluginManagement {
         gradlePluginPortal()
         maven {
             url = uri("https://my.pspdfkit.com/maven/")
+            url = uri("https://jcenter.bintray.com")
         }
     }
 }
@@ -15,6 +16,7 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             url = uri("https://my.pspdfkit.com/maven/")
+            url = uri("https://jcenter.bintray.com")
         }
     }
 }

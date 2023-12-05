@@ -10,6 +10,7 @@ import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import android.util.Base64
 import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -119,6 +120,8 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
+import java.net.URLDecoder
+import java.net.URLEncoder
 import javax.inject.Inject
 
 
@@ -143,7 +146,6 @@ class MainActivity : ComponentActivity() {
                     .setFilterByAuthorizedAccounts(false)
                     .build())
             .build()
-
         val intentSenderLauncher = registerForActivityResult(StartIntentSenderForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 try {
@@ -494,29 +496,24 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                     composable(
-//                        route = "open_file/{uri}",
-                        route = "open_file",
-//                        arguments = listOf(
-//                            navArgument("uri") {
-//                                type = NavType.StringType
-//                            }
-//                        )
-                    ) { entry ->
-//                        val uri = Uri.parse(entry.arguments?.getString("uri"))
-//                        Log.i("qwqwqwqwqw", uri.toString())
-                        val filename = "e51d8ef5-07ff-4aa1-9e9c-9df6fb9e1894.pdf"
-                        val file = File(
-                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                            filename
+                        route = "open_file" + "/{uri}",
+//                        route = "open_file",
+                        arguments = listOf(
+                            navArgument("uri") {
+                                type = NavType.StringType
+                            }
                         )
-                        PdfViewer(Modifier, Uri.fromFile(file))
+                    ) { entry ->
+                        val uriString = entry.arguments?.getString("uri")
+                        val decoded = uriString?.let { decode(it) }
+                        LaunchedEffect(key1 = Unit) {
+                            val intent = Intent(this@MainActivity, PDFviewActivity::class.java)
+                            intent.putExtra("uri", decoded)
+                            startActivity(intent)
+                        }
                     }
                     composable("community") {
                         Community()
-                        LaunchedEffect(key1 = Unit) {
-                            navController.navigate("open_file")
-                        }
-
                     }
                     composable("profile") {
                         val gson = Gson()
@@ -1153,3 +1150,6 @@ fun FullWebView(url: String) {
         // WebView is configured and loaded with the provided URL
     }
 }
+
+fun encode(url: String): String = URLEncoder.encode(url, "UTF-8")
+fun decode(url: String) = URLDecoder.decode(url, "UTF-8")

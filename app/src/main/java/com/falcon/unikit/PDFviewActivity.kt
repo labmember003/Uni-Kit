@@ -19,6 +19,8 @@ class PDFviewActivity : AppCompatActivity() {
         val fileUri = Uri.parse(receivedData)
         try {
             pdfLayout.fromUri(fileUri)
+                .password("ABC")
+                .enableDoubletap(true)
                 .load()
         } catch (e: Exception) {
             Log.i("erty",e.message.toString())

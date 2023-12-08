@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.os.Environment
 import android.util.Log
 import androidx.core.net.toUri
+import com.falcon.unikit.Utils.PDF_PASSWORD
 import com.github.barteksc.pdfviewer.PDFView
 import java.io.File
 
@@ -19,7 +20,7 @@ class PDFviewActivity : AppCompatActivity() {
         val fileUri = Uri.parse(receivedData)
         try {
             pdfLayout.fromUri(fileUri)
-                .password("ABC")
+                .password(PDF_PASSWORD)
                 .enableDoubletap(true)
                 .load()
         } catch (e: Exception) {

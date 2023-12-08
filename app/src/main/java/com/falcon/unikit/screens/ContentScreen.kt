@@ -123,6 +123,7 @@ import com.falcon.unikit.LottieAnimation
 import com.falcon.unikit.R
 import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.Utils
+import com.falcon.unikit.Utils.PDF_PASSWORD
 import com.falcon.unikit.api.Content
 import com.falcon.unikit.encode
 import com.falcon.unikit.uploadfile.FileUploadViewModel
@@ -1067,8 +1068,7 @@ fun downloadPdfNotifination(
                             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                             contentItem.contentID + ".pdf"
                         )
-                        addPasswordToPdf(context, file.absolutePath, file2.absolutePath, "ABC")
-//                        manipulatePdf(file2.absolutePath, file.absolutePath, "ABC")
+                        addPasswordToPdf(context, file.absolutePath, file2.absolutePath, PDF_PASSWORD)
                         file.delete()
                     }
                     DownloadManager.STATUS_FAILED -> {
@@ -1282,44 +1282,6 @@ fun PdfViewer(
         }
     }
 }
-
-/*
-    This file is part of the iText (R) project.
-    Copyright (c) 1998-2023 Apryse Group NV
-    Authors: Apryse Software.
-
-    For more information, please contact iText Software at this address:
-    sales@itextpdf.com
- */
-
-
-//@Throws(java.lang.Exception::class)
-//private fun manipulatePdf(destinationPath: String?, sourcePath: String, password: String) {
-//    val pdfDoc = PdfDocument(
-//        PdfReader(sourcePath),
-//        PdfWriter(
-//            destinationPath,
-//            WriterProperties().setStandardEncryption( // null user password argument is equal to empty string,
-//                // this means that no user password required
-//                null,
-//                password.toByteArray(),
-//                EncryptionConstants.ALLOW_PRINTING,
-//                EncryptionConstants.ENCRYPTION_AES_128 or EncryptionConstants.DO_NOT_ENCRYPT_METADATA
-//            )
-//        )
-//    )
-//    pdfDoc.close()
-//}
-
-//@Throws(java.lang.Exception::class)
-//fun main2() {
-//    val DEST = "./target/sandbox/security/encrypt_pdf_without_user_password.pdf"
-//    val SRC = "./src/main/resources/pdfs/hello.pdf"
-//    val OWNER_PASSWORD = "World"
-//    val file = File(DEST)
-//    file.parentFile.mkdirs()
-//    manipulatePdf(DEST, SRC, OWNER_PASSWORD)
-//}
 
 fun addPasswordToPdf(context: Context, inputPath: String, outputPath: String, password: String) {
     try {

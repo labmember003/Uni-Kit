@@ -124,10 +124,17 @@ import com.falcon.unikit.R
 import com.falcon.unikit.TextWithBorder
 import com.falcon.unikit.Utils
 import com.falcon.unikit.api.Content
+import com.falcon.unikit.encode
 import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
+import com.itextpdf.kernel.pdf.EncryptionConstants
+import com.itextpdf.kernel.pdf.PdfDocument
+import com.itextpdf.kernel.pdf.PdfReader
+import com.itextpdf.kernel.pdf.PdfWriter
+import com.itextpdf.kernel.pdf.WriterProperties
+import com.tom_roush.pdfbox.pdmodel.PDDocument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -138,34 +145,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Random
-import kotlin.math.sqrt
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
-import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.produceState
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.unit.dp
-import androidx.core.net.toFile
-import coil.compose.rememberImagePainter
-import coil.imageLoader
-import com.falcon.unikit.PDFviewActivity
-import com.falcon.unikit.encode
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
-import java.util.Base64
 import kotlin.math.sqrt
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
@@ -557,6 +536,10 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                                     activity,
                                     contentItem
                                 )
+                                // UPAR WAALE CODE SE FILE SAVE HOGI WITH NAME : contentItem.contentID + "ENC" + ".pdf"
+                                // NICHE WAALE CODE SE NEW FILE BNEGI WITH NAME : contentItem.contentID + ".pdf"
+                                // AUR FIR ENC WAALI FILE KO DELETE KR DENGE
+
                                 Toast.makeText(context, "Downloading started", Toast.LENGTH_SHORT).show()
                             }
                             }
@@ -1051,7 +1034,7 @@ fun downloadPdfNotifination(
         .setDestinationInExternalFilesDir(
             context,
             Environment.DIRECTORY_DOWNLOADS,
-            contentItem.contentID + ".pdf"
+            contentItem.contentID + "UN" + ".pdf"
         )
     val downloadId = downloadManager.enqueue(request)
     val query = DownloadManager.Query().setFilterById(downloadId)
@@ -1071,7 +1054,20 @@ fun downloadPdfNotifination(
                         val localUri = cursor.getString(cursor.getColumnIndex(DownloadManager.COLUMN_LOCAL_URI))
                         Toast.makeText(context, localUri, Toast.LENGTH_SHORT).show()
                         notificationManager.cancel(notificationId)
-                        break
+//                        break
+
+
+                        val file = File(
+                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            contentItem.contentID + "UN" + ".pdf"
+                        )
+                        val file2 = File(
+                            context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                            contentItem.contentID + ".pdf"
+                        )
+
+                        manipulatePdf(file2.absolutePath, file.absolutePath, "ABC")
+                        file.delete()
                     }
                     DownloadManager.STATUS_FAILED -> {
                         // Download failed
@@ -1102,6 +1098,7 @@ fun downloadPdfNotifination(
         }
     }
 }
+
 
 private fun createNotificationChannel(context: Context) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -1258,7 +1255,10 @@ fun PdfViewer(
                             job.cancel()
                         }
                     }
-                    Box(modifier = Modifier.background(Color.White).aspectRatio(1f / sqrt(2f)).fillMaxWidth())
+                    Box(modifier = Modifier
+                        .background(Color.White)
+                        .aspectRatio(1f / sqrt(2f))
+                        .fillMaxWidth())
                 } else { //bitmap != null
                     val request = ImageRequest.Builder(context)
                         .size(width, height)
@@ -1267,7 +1267,10 @@ fun PdfViewer(
                         .build()
 
                     Image(
-                        modifier = Modifier.background(Color.White).aspectRatio(1f / sqrt(2f)).fillMaxWidth(),
+                        modifier = Modifier
+                            .background(Color.White)
+                            .aspectRatio(1f / sqrt(2f))
+                            .fillMaxWidth(),
                         contentScale = ContentScale.Fit,
                         painter = rememberImagePainter(request),
                         contentDescription = "Page ${index + 1} of $pageCount"
@@ -1276,4 +1279,42 @@ fun PdfViewer(
             }
         }
     }
+}
+
+/*
+    This file is part of the iText (R) project.
+    Copyright (c) 1998-2023 Apryse Group NV
+    Authors: Apryse Software.
+
+    For more information, please contact iText Software at this address:
+    sales@itextpdf.com
+ */
+
+
+@Throws(java.lang.Exception::class)
+private fun manipulatePdf(destinationPath: String?, sourcePath: String, password: String) {
+    val pdfDoc = PdfDocument(
+        PdfReader(sourcePath),
+        PdfWriter(
+            destinationPath,
+            WriterProperties().setStandardEncryption( // null user password argument is equal to empty string,
+                // this means that no user password required
+                null,
+                password.toByteArray(),
+                EncryptionConstants.ALLOW_PRINTING,
+                EncryptionConstants.ENCRYPTION_AES_128 or EncryptionConstants.DO_NOT_ENCRYPT_METADATA
+            )
+        )
+    )
+    pdfDoc.close()
+}
+
+@Throws(java.lang.Exception::class)
+fun main2() {
+    val DEST = "./target/sandbox/security/encrypt_pdf_without_user_password.pdf"
+    val SRC = "./src/main/resources/pdfs/hello.pdf"
+    val OWNER_PASSWORD = "World"
+    val file = File(DEST)
+    file.parentFile.mkdirs()
+    manipulatePdf(DEST, SRC, OWNER_PASSWORD)
 }

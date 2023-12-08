@@ -543,38 +543,9 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                             authViewModel.downloadableURL.collect { downloadableURL ->
                             if (file.exists()) {
                                 val uri: String? = Uri.fromFile(file).toString()
-
                                 val encoded = uri?.let { encode(it) }
-
                                 navController.navigate("open_file/${encoded}")
-//                                openPdfInApp(context, file)
                                 Toast.makeText(context, "exosts", Toast.LENGTH_SHORT).show()
-//                            openFile(fileName)
-//                                val fileName = contentItem.contentName
-//                                val file = File(
-//                                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-//                                    fileName
-//                                )
-//                                val pdfUri = Uri.fromFile(file)
-//                                val intent = Intent(Intent.ACTION_VIEW)
-//                                intent.setDataAndType(pdfUri, "application/pdf")
-//                                intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//                                intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-//                                context.startActivity(intent)
-
-//                                Share File
-//                                val fileUri = FileProvider.getUriForFile(
-//                                    context,
-//                                    "${context.packageName}.fileprovider",
-//                                    File("/storage/emulated/0/Android/data/com.falcon.unikit/files/Download/DistributedForces.pdf")
-//                                )
-//                                val shareIntent = Intent().apply {
-//                                    action = Intent.ACTION_VIEW
-//                                    type = "application/pdf"
-//                                    putExtra(Intent.EXTRA_STREAM, fileUri)
-//                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-//                                }
-//                                context.startActivity(Intent.createChooser(shareIntent, "Share PDF"))
                             } else {
                                 Toast.makeText(context, "Please Wait Downloading is being starting", Toast.LENGTH_SHORT).show()
                                 val notificationId = Random().nextInt()

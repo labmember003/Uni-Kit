@@ -129,11 +129,8 @@ import com.falcon.unikit.uploadfile.FileUploadViewModel
 import com.falcon.unikit.uploadfile.UploadFileBody
 import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
-import com.itextpdf.kernel.pdf.EncryptionConstants
-import com.itextpdf.kernel.pdf.PdfDocument
-import com.itextpdf.kernel.pdf.PdfReader
-import com.itextpdf.kernel.pdf.PdfWriter
-import com.itextpdf.kernel.pdf.WriterProperties
+import com.itextpdf.text.pdf.PdfWriter
+
 import com.tom_roush.pdfbox.pdmodel.PDDocument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -146,7 +143,12 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Random
 import kotlin.math.sqrt
-
+import com.itextpdf.text.Document
+import com.itextpdf.text.Paragraph
+import com.itextpdf.text.pdf.PdfCopy
+import com.itextpdf.text.pdf.PdfReader
+import com.itextpdf.text.pdf.PdfStamper
+import java.io.FileOutputStream
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ContentScreen(content: List<Content>, navController: NavHostController, subjectName: String?) {
@@ -1065,8 +1067,8 @@ fun downloadPdfNotifination(
                             context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
                             contentItem.contentID + ".pdf"
                         )
-
-                        manipulatePdf(file2.absolutePath, file.absolutePath, "ABC")
+                        addPasswordToPdf(context, file.absolutePath, file2.absolutePath, "ABC")
+//                        manipulatePdf(file2.absolutePath, file.absolutePath, "ABC")
                         file.delete()
                     }
                     DownloadManager.STATUS_FAILED -> {
@@ -1291,30 +1293,44 @@ fun PdfViewer(
  */
 
 
-@Throws(java.lang.Exception::class)
-private fun manipulatePdf(destinationPath: String?, sourcePath: String, password: String) {
-    val pdfDoc = PdfDocument(
-        PdfReader(sourcePath),
-        PdfWriter(
-            destinationPath,
-            WriterProperties().setStandardEncryption( // null user password argument is equal to empty string,
-                // this means that no user password required
-                null,
-                password.toByteArray(),
-                EncryptionConstants.ALLOW_PRINTING,
-                EncryptionConstants.ENCRYPTION_AES_128 or EncryptionConstants.DO_NOT_ENCRYPT_METADATA
-            )
-        )
-    )
-    pdfDoc.close()
-}
+//@Throws(java.lang.Exception::class)
+//private fun manipulatePdf(destinationPath: String?, sourcePath: String, password: String) {
+//    val pdfDoc = PdfDocument(
+//        PdfReader(sourcePath),
+//        PdfWriter(
+//            destinationPath,
+//            WriterProperties().setStandardEncryption( // null user password argument is equal to empty string,
+//                // this means that no user password required
+//                null,
+//                password.toByteArray(),
+//                EncryptionConstants.ALLOW_PRINTING,
+//                EncryptionConstants.ENCRYPTION_AES_128 or EncryptionConstants.DO_NOT_ENCRYPT_METADATA
+//            )
+//        )
+//    )
+//    pdfDoc.close()
+//}
 
-@Throws(java.lang.Exception::class)
-fun main2() {
-    val DEST = "./target/sandbox/security/encrypt_pdf_without_user_password.pdf"
-    val SRC = "./src/main/resources/pdfs/hello.pdf"
-    val OWNER_PASSWORD = "World"
-    val file = File(DEST)
-    file.parentFile.mkdirs()
-    manipulatePdf(DEST, SRC, OWNER_PASSWORD)
+//@Throws(java.lang.Exception::class)
+//fun main2() {
+//    val DEST = "./target/sandbox/security/encrypt_pdf_without_user_password.pdf"
+//    val SRC = "./src/main/resources/pdfs/hello.pdf"
+//    val OWNER_PASSWORD = "World"
+//    val file = File(DEST)
+//    file.parentFile.mkdirs()
+//    manipulatePdf(DEST, SRC, OWNER_PASSWORD)
+//}
+
+fun addPasswordToPdf(context: Context, inputPath: String, outputPath: String, password: String) {
+    try {
+        val reader = PdfReader(inputPath)
+        val fileOutputStream = FileOutputStream(outputPath)
+        val stamper = PdfStamper(reader, fileOutputStream)
+        stamper.setEncryption(password.toByteArray(), password.toByteArray(), PdfWriter.ALLOW_PRINTING, PdfWriter.ENCRYPTION_AES_128)
+
+        stamper.close()
+        reader.close()
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
 }

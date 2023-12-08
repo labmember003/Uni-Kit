@@ -130,7 +130,11 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.44")
     implementation ("com.github.barteksc:android-pdf-viewer:2.8.2")
 //    implementation ("com.itextpdf:itext7-core:8.0.2")
-    implementation ("com.itextpdf.android:kernel-android:8.0.1")
+//    implementation ("com.itextpdf.android:kernel-android:8.0.1")
+    implementation ("com.itextpdf:itextg:5.5.10") // Use the version appropriate for your project
+    implementation ("com.madgag.spongycastle:prov:1.56.0.0") // Use the version appropriate for your project
+
+
 
 
 }

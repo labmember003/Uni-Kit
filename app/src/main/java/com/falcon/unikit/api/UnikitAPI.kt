@@ -46,11 +46,14 @@ interface UnikitAPI {
     @POST("users/mycontent")
     suspend fun getMyNotes(@Body token: GetMyNotesBody): Response<List<MyNoteItem>>
 
+    @POST("content/delete")
+    suspend fun deleteNote(@Body deleteNoteBody: DeleteNoteBody): Response<String>
+
     @POST("/content/likeCount")
-    suspend fun likeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<String>
+    suspend fun likeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<LikeResponse>
 
     @POST("/content/dislikeCount")
-    suspend fun dislikeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<String>
+    suspend fun dislikeButtonPressed(@Query("contentid") contentid: String, @Query("userid") userId: String): Response<DisLikeResponse>
 
     @Multipart
     @POST("/content/upload")
@@ -71,3 +74,4 @@ interface UnikitAPI {
     @POST("users/otp")
     suspend fun getOTP(@Body phoneNumber: PhoneNumber): Response<OTP>
 }
+

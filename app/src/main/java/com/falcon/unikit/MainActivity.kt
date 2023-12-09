@@ -9,8 +9,6 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
-import android.util.Base64
 import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -101,8 +99,6 @@ import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
-import com.falcon.unikit.screens.OtpComp
-import com.falcon.unikit.screens.PdfViewer
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.AuthViewModel
@@ -119,7 +115,6 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.io.File
 import java.net.URLDecoder
 import java.net.URLEncoder
 import javax.inject.Inject
@@ -464,14 +459,14 @@ class MainActivity : ComponentActivity() {
                             BranchesScreen(
                                 branches.value
                             ) { subjectID, subjectName ->
-                                navController.navigate("content_screen/${subjectID}/${subjectName}")
+                                navController.navigate("content_screen/${subjectID}/${subjectName}/${"0"}")
                             }
                         } else {
                             LoadingScreen()
                         }
                     }
                     composable(
-                        "content_screen" + "/{subjectID}" + "/{subjectName}",
+                        "content_screen" + "/{subjectID}" + "/{subjectName}" + "/{pageNumber}",
                         arguments = listOf(
                             navArgument("subjectID") {
                                 type = NavType.StringType
@@ -480,20 +475,39 @@ class MainActivity : ComponentActivity() {
                             navArgument("subjectName") {
                                 type = NavType.StringType
                                 nullable = false
+                            },
+                            navArgument("pageNumber") {
+                                type = NavType.StringType
+                                nullable = false
                             }
                         )
                     ) { entry ->
+                        val subjectID = entry.arguments?.getString("subjectID")
+                        val subjectName = entry.arguments?.getString("subjectName")
+                        val recompose = { pageNumber: String ->
+                            navController.popBackStack()
+                            navController.navigate("content_screen/${subjectID}/${subjectName}/${pageNumber}")
+                        }
+
+
+
                         val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
                         if (content.value != emptyList<Content>()) {
                             ContentScreen(
                                 content.value,
                                 navController,
-                                entry.arguments?.getString("subjectName")
+                                entry.arguments?.getString("subjectName"),
+                                entry.arguments?.getString("pageNumber"),
+                                recompose
                             )
                         } else {
                             LoadingScreen()
                         }
+
+
+
+
                     }
                     composable(
                         route = "open_file" + "/{uri}",

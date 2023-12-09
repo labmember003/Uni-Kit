@@ -132,7 +132,6 @@ import com.falcon.unikit.viewmodels.AuthViewModel
 import com.falcon.unikit.viewmodels.ItemViewModel
 import com.itextpdf.text.pdf.PdfWriter
 
-import com.tom_roush.pdfbox.pdmodel.PDDocument
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -144,18 +143,21 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.util.Random
 import kotlin.math.sqrt
-import com.itextpdf.text.Document
-import com.itextpdf.text.Paragraph
-import com.itextpdf.text.pdf.PdfCopy
 import com.itextpdf.text.pdf.PdfReader
 import com.itextpdf.text.pdf.PdfStamper
 import java.io.FileOutputStream
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
-fun ContentScreen(content: List<Content>, navController: NavHostController, subjectName: String?) {
+fun ContentScreen(
+    content: List<Content>,
+    navController: NavHostController,
+    subjectName: String?,
+    pageNumber: String?,
+    recompose: (String) -> Unit
+) {
     val scope = rememberCoroutineScope()
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
-    val pageState = rememberPagerState()
+    val pageState = rememberPagerState(pageNumber?.toInt() ?: 0)
 
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -172,7 +174,7 @@ fun ContentScreen(content: List<Content>, navController: NavHostController, subj
         sheetState = modalSheetState,
         sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
         sheetContent = {
-            BottomSheetContent(modalSheetState, currentType, currentSubject, content)
+            BottomSheetContent(modalSheetState, currentType, currentSubject, content, recompose, pageState.currentPage)
         }
     ) {
         Column(
@@ -750,7 +752,9 @@ fun BottomSheetContent(
     modalSheetState: ModalBottomSheetState,
     currentType: MutableState<String>,
     currentSubject: MutableState<String?>,
-    content: List<Content>
+    content: List<Content>,
+    recompose: (String) -> Unit,
+    currentPage: Int
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -852,7 +856,7 @@ fun BottomSheetContent(
                         Toast.makeText(context, "Upload Successful", Toast.LENGTH_SHORT).show()
                     }, {
                         isUploading.value = true
-                    }, finalFileName.value)
+                    }, finalFileName.value, recompose, currentPage)
                 }
             }
         }
@@ -868,7 +872,9 @@ fun SubmitButton(
     onSuccess: () -> Unit,
     onFailure: () -> Unit,
     displayLoader: () -> Unit,
-    fileName: String
+    fileName: String,
+    recompose: (String) -> Unit,
+    currentPage: Int
 ) {
     val submitText = remember {
         mutableStateOf("SUBMIT")
@@ -887,6 +893,7 @@ fun SubmitButton(
             submitText.value = "Uploading Please Wait"
             scope.launch {
                 submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure, fileName)
+                recompose(currentPage.toString())
                 displayLoader()
             }
 

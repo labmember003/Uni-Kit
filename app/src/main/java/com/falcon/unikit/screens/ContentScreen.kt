@@ -870,6 +870,9 @@ fun SubmitButton(
     displayLoader: () -> Unit,
     fileName: String
 ) {
+    val submitText = remember {
+        mutableStateOf("SUBMIT")
+    }
     var subjectID : String? = null
     if (content.isNotEmpty()) {
         subjectID = content[0].subjectID
@@ -881,7 +884,8 @@ fun SubmitButton(
     val contentResolver = context.contentResolver  // Assuming you have access to the context
     Button(
         onClick = {
-            scope.launch{
+            submitText.value = "Uploading Please Wait"
+            scope.launch {
                 submitPDF(pdfURI, currentType, subjectID, viewModel, contentResolver, context, onSuccess, onFailure, fileName)
                 displayLoader()
             }
@@ -893,7 +897,7 @@ fun SubmitButton(
         ),
     ) {
         androidx.compose.material3.Text(
-            text = "SUBMIT",
+            text = submitText.value,
         )
     }
 }

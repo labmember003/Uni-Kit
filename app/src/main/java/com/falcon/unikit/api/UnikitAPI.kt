@@ -37,6 +37,9 @@ interface UnikitAPI {
     @POST("content/data")
     suspend fun getContent(@Query("subjectid") contentQueryParam: String): Response<List<Content>>
 
+    @POST("content/data")
+    suspend fun getContentFromContentID (@Query("contentid") contentid: String): Response<List<Content>>
+
     @POST("college/data")
     suspend fun getItem(@Query("content_id") itemQueryParam: String): Response<List<Item>>
 

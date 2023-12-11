@@ -106,6 +106,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.startActivity
 import androidx.core.content.FileProvider
 import androidx.core.content.getSystemService
 import androidx.core.net.toFile
@@ -551,7 +552,6 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                         }
                     }
                 ) {
-
                     Image(
                         painter = painterResource(id = R.drawable.download),
                         contentDescription = ""
@@ -561,7 +561,14 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                     modifier = Modifier
                         .padding(8.dp) ,
                     onClick = {
-
+                        val text = "https://uni-kit-api.vercel.app/" + contentItem.contentID
+                        val sendIntent: Intent = Intent().apply {
+                            action = Intent.ACTION_SEND
+                            putExtra(Intent.EXTRA_TEXT, text)
+                            type = "text/plain"
+                        }
+                        val shareIntent = Intent.createChooser(sendIntent, null)
+                        context.startActivity(shareIntent)
                     }
                 ) {
 //                    Icon(

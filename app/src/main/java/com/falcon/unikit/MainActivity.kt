@@ -1,5 +1,6 @@
 package com.falcon.unikit
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -60,6 +61,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,6 +85,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -97,8 +100,10 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.screens.ContentItemRow
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
+import com.falcon.unikit.screens.getIcon
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
 import com.falcon.unikit.viewmodels.AuthViewModel
@@ -130,6 +135,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var unikitAPI: UnikitAPI
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         oneTapClient = Identity.getSignInClient(this)
@@ -504,14 +510,9 @@ class MainActivity : ComponentActivity() {
                         } else {
                             LoadingScreen()
                         }
-
-
-
-
                     }
                     composable(
                         route = "open_file" + "/{uri}",
-//                        route = "open_file",
                         arguments = listOf(
                             navArgument("uri") {
                                 type = NavType.StringType
@@ -524,6 +525,34 @@ class MainActivity : ComponentActivity() {
                             val intent = Intent(this@MainActivity, PDFviewActivity::class.java)
                             intent.putExtra("uri", decoded)
                             startActivity(intent)
+                        }
+                    }
+                    composable(
+                        route = "display_file_deeplink",
+                        deepLinks = listOf(
+                            navDeepLink {
+                                uriPattern = "https://uni-kit-api.vercel.app/{contentId}"
+                                action = Intent.ACTION_VIEW
+                            }
+                        ),
+                        arguments = listOf(
+                            navArgument("contentId") {
+                                type = NavType.StringType
+                                defaultValue = "null"
+                            }
+                        )
+                    ) { entry ->
+                        val scope = rememberCoroutineScope()
+                        val contentId = entry.arguments?.getString("contentId")
+                        val authViewModel : AuthViewModel = hiltViewModel()
+                        scope.launch {
+                            authViewModel.getContentFromContentID(contentId!!)
+                        }
+                        val content by rememberUpdatedState(authViewModel.contentFromID.collectAsState())
+                        if (content.value.isNotEmpty()) {
+                            DisplayFileDeepLink(content.value[0], navController)
+                        } else {
+                            LoadingScreen()
                         }
                     }
                     composable("community") {
@@ -1163,6 +1192,29 @@ fun FullWebView(url: String) {
     ) { webView ->
         // WebView is configured and loaded with the provided URL
     }
+}
+
+@Composable
+fun DisplayFileDeepLink(content : Content, navController: NavHostController) {
+    val icon = getIcon(content.contentType.toString(), true)
+    Column {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)
+        ) {
+            androidx.compose.material.Text(
+                text = "Content",
+                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
+                fontSize = 20.sp,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        ContentItemRow(contentItem = content, icon = icon,  navController = navController)
+    }
+
 }
 
 fun encode(url: String): String = URLEncoder.encode(url, "UTF-8")

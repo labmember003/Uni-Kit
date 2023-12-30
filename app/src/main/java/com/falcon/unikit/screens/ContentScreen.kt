@@ -380,7 +380,7 @@ fun ComingSoonScreen() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostController) {
-    Log.i("happy sex", contentItem.contentID.toString())
+//    Log.i("happy sex", contentItem.contentID.toString())
     val context = LocalContext.current
     remember { mutableStateOf<String?>(null) }
     val expanded = remember {
@@ -406,6 +406,21 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
     }
     val likeIcon = if (liked.value) Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
     val dislikeIcon = if (disliked.value)  Icons.Default.ThumbDown else Icons.Outlined.ThumbDown
+    val likeFunction = {
+        if (liked.value && disliked.value) { // WILL NOT HAPPEN
+            liked.value = false
+            disliked.value = false
+        } else if (liked.value && !disliked.value) {
+            liked.value = false
+            disliked.value = false
+        } else if (!liked.value && disliked.value) {
+            liked.value = true
+            disliked.value= false
+        } else if (!liked.value && !disliked.value) {
+            liked.value = true
+            disliked.value = false
+        }
+    }
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(Color.White),

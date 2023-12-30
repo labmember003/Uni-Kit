@@ -382,7 +382,6 @@ fun ComingSoonScreen() {
 fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostController) {
 //    Log.i("happy sex", contentItem.contentID.toString())
     val context = LocalContext.current
-    remember { mutableStateOf<String?>(null) }
     val expanded = remember {
         mutableStateOf(false)
     }
@@ -398,29 +397,46 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
     val disliked = remember {
         mutableStateOf(false)
     }
-    if (contentItem.like?.contains(token) == true) {
-        liked.value = true
-    }
-    if (contentItem.dislike?.contains(token) == true) {
-        disliked.value = true
+    LaunchedEffect(Unit) {
+        if (contentItem.like?.contains(token) == true) {
+            liked.value = true
+        }
+        if (contentItem.dislike?.contains(token) == true) {
+            disliked.value = true
+        }
     }
     val likeIcon = if (liked.value) Icons.Default.ThumbUp else Icons.Outlined.ThumbUp
     val dislikeIcon = if (disliked.value)  Icons.Default.ThumbDown else Icons.Outlined.ThumbDown
+
+    val numLikes = remember {
+        mutableStateOf(contentItem.like?.size ?: 0)
+    }
+    val numDisLikes = remember {
+        mutableStateOf(contentItem.dislike?.size ?: 0)
+    }
     val likeFunction = {
-        if (liked.value && disliked.value) { // WILL NOT HAPPEN
-            liked.value = false
-            disliked.value = false
-        } else if (liked.value && !disliked.value) {
-            liked.value = false
-            disliked.value = false
-        } else if (!liked.value && disliked.value) {
-            liked.value = true
-            disliked.value= false
-        } else if (!liked.value && !disliked.value) {
-            liked.value = true
+        if (liked.value && disliked.value) {
             disliked.value = false
         }
+        if (disliked.value) {
+            numDisLikes.value = numDisLikes.value - 1
+        }
+        disliked.value = false
+        numLikes.value = numLikes.value.plus(if (liked.value) -1 else 1)
+        liked.value = !liked.value
     }
+    val dislikeFunction = {
+        if (liked.value && disliked.value) {
+            liked.value = false
+        }
+        if (liked.value) {
+            numLikes.value = numLikes.value - 1
+        }
+        liked.value = false
+        numDisLikes.value = numDisLikes.value.plus(if (disliked.value) -1 else 1)
+        disliked.value = !disliked.value
+    }
+
     Card(
         elevation = CardDefaults.cardElevation(8.dp),
         colors = CardDefaults.cardColors(Color.White),
@@ -464,6 +480,7 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                                 token
                             )
                         }
+                        likeFunction()
                     }
                 ) {
                     Icon(
@@ -471,18 +488,10 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                         contentDescription = "Thumbs Up",
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable {
-                                scope.launch {
-                                    itemViewModel.likeButtonPressed(
-                                        contentItem.contentID.toString(),
-                                        token
-                                    )
-                                }
-                            }// Adjust padding as needed
                     )
                 }
                 Text(
-                    text = contentItem.like?.size.toString()
+                    text = numLikes.value.toString()
                 )
                 IconButton(
                     modifier = Modifier,
@@ -493,6 +502,7 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                                 token.toString()
                             )
                         }
+                        dislikeFunction()
                     }
                 ) {
                     Icon(
@@ -500,18 +510,10 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                         contentDescription = "Thumbs Up",
                         modifier = Modifier
                             .padding(8.dp)
-                            .clickable {
-                                scope.launch {
-                                    itemViewModel.dislikeButtonPressed(
-                                        contentItem.contentID.toString(),
-                                        token
-                                    )
-                                }
-                            }
                     )
                 }
                 Text(
-                    text = contentItem.dislike?.size.toString()
+                    text = numDisLikes.value.toString()
                 )
             }
         }

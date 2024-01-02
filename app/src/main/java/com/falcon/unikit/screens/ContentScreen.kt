@@ -380,7 +380,6 @@ fun ComingSoonScreen() {
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostController) {
-//    Log.i("happy sex", contentItem.contentID.toString())
     val context = LocalContext.current
     val expanded = remember {
         mutableStateOf(false)

@@ -20,7 +20,6 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,7 +28,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -72,8 +70,8 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -1194,7 +1192,7 @@ fun Redeem() {
                     text = "Total Balance",
                     fontSize = 14.sp,
                     fontFamily = FontFamily(Font(R.font.nunito_semibold)),
-                    color = Color(R.color.grey)
+                    color = colorResource(R.color.grey)
                 )
                 Spacer(
                     modifier = Modifier
@@ -1206,7 +1204,7 @@ fun Redeem() {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Card(
-                        backgroundColor = Color(R.color.light_purple),
+                        backgroundColor = colorResource(id = R.color.light_purple),
                         modifier = Modifier,
                         shape = RoundedCornerShape(48.dp),
                     ) {
@@ -1228,7 +1226,7 @@ fun Redeem() {
                         }
                     }
                     Card(
-                        backgroundColor = Color(R.color.light_green),
+                        backgroundColor = colorResource(R.color.light_green),
                         modifier = Modifier,
                         shape = RoundedCornerShape(48.dp),
                     ) {
@@ -1276,12 +1274,90 @@ fun Redeem() {
                         fontWeight = FontWeight.SemiBold
                     )
                 )
+                Spacer(modifier = Modifier.padding(6.dp))
+
+                val data = listOf(
+                    WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$10", "$12"),
+                    WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$20", "$22"),
+                    WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$10", "$12"),
+                    WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$20", "$22")
+                )
+
+                WithdrawComposable(
+                    icon = R.drawable.paytm_icon,
+                    title = "Paytm Withdrawal",
+                    withdrawalAmount = "$10",
+                    withdrawalCoins = "$12"
+                    )
+                Spacer(modifier = Modifier.padding(6.dp))
+                WithdrawComposable(R.drawable.paytm_icon, "Paytm Withdrawal", "$20", "$22")
+                Spacer(modifier = Modifier.padding(6.dp))
+                WithdrawComposable(R.drawable.amazon_icon, "Paytm Withdrawal", "$10", "$12")
+                Spacer(modifier = Modifier.padding(6.dp))
+                WithdrawComposable(R.drawable.amazon_icon, "Paytm Withdrawal", "$20", "$22")
             }
         }
 
     }
 }
 
+@Composable
+private fun WithdrawComposable(
+    icon: Int,
+    title: String,
+    withdrawalAmount: String,
+    withdrawalCoins: String
+) {
+    Card(
+        elevation = 8.dp,
+        shape = RoundedCornerShape(48.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround,
+            modifier = Modifier
+                .padding(8.dp)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Image(
+                    painter = painterResource(id = icon),
+                    contentDescription = "Paytm Icon",
+                    modifier = Modifier
+                        .size(25.dp)
+                )
+                Column(
+                    modifier = Modifier
+                        .padding(12.dp)
+                ) {
+                    Text(
+                        text = title,
+                        fontSize = 16.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    )
+                    Text(
+                        text = withdrawalAmount,
+                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    )
+                }
+            }
+            Card(
+                backgroundColor = colorResource(id = R.color.light_blue),
+                shape = RoundedCornerShape(24.dp)
+            ) {
+                Row(
+                    Modifier.padding(24.dp)
+                ) {
+                    Text(text = withdrawalCoins)
+                }
+
+            }
+        }
+    }
+}
 
 
 fun openUrlInBrowser(context: Context, url: String) {

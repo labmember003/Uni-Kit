@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
@@ -50,6 +51,7 @@ import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -237,9 +239,6 @@ class MainActivity : ComponentActivity() {
                         WalkThroughScreen {
                             navController.navigate("sign_in")
                         }
-                    }
-                    composable("redeem") {
-                        Redeem()
                     }
                     composable("sign_in") {
                         BackHandler(
@@ -635,6 +634,12 @@ class MainActivity : ComponentActivity() {
                                 })
                             }
                         }
+                    }
+                    composable("redeem") {
+                        Redeem(navController)
+                    }
+                    composable("reward_history") {
+                        RewardHistory(navController)
                     }
                 }
             }
@@ -1153,107 +1158,164 @@ fun Community() {
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun Redeem() {
+fun _RewardHistory() {
+    RewardHistory(NavHostController(LocalContext.current))
+}
+@Composable
+fun RewardHistory(navController: NavHostController) {
+    MyRewardsUpperComposable(navController)
+}
+
+
+@Composable
+private fun MyRewardsUpperComposable(navController: NavHostController) {
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+            .padding(24.dp)
+    ) {
+        Text(
+            text = "Reward History",
+            fontSize = 24.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Spacer(
+            modifier = Modifier
+                .size(24.dp)
+        )
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "$ 667.89",
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                color = Color(R.color.space_purple)
+            )
+            Text(
+                text = "Total Rewards",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                color = colorResource(R.color.grey)
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(16.dp)
+            )
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(16.dp)
+            )
+            Text(
+                text = "$ 667.89",
+                fontSize = 20.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                color = Color(R.color.space_purple)
+            )
+            Text(
+                text = "103 Rewards",
+                fontSize = 12.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                color = colorResource(R.color.grey)
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(16.dp)
+            )
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(16.dp)
+            )
+            LazyColumn(content = {
+                val rewardList = listOf(
+                    Reward("1 January 2024", "$8.19"),
+                    Reward("2 January 2024", "$8.19"),
+                    Reward("3 January 2024", "$8.19"),
+                    Reward("4 January 2024", "$8.19"),
+                    Reward("5 January 2024", "$8.19"),
+                    Reward("6 January 2024", "$8.19"),
+                    Reward("7 January 2024", "$8.19")
+                )
+                items(rewardList) { content ->
+                    RewardComposable(date = content.date.toString(), amount = content.amount.toString())
+                }
+            })
+        }
+    }
+}
+
+@Composable
+private fun RewardComposable(date: String, amount: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.menu_icon_sec),
+                contentDescription = "menu icon",
+                modifier = Modifier
+                    .size(25.dp)
+            )
+            Column(
+                modifier = Modifier
+                    .padding(12.dp)
+            ) {
+                Text(
+                    text = date,
+                    fontSize = 16.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                )
+                Text(
+                    text = "Reward",
+                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                )
+            }
+        }
+        Text(
+            text = amount,
+            fontSize = 16.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+            color = colorResource(id = R.color.greenny)
+        )
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun _Redeem() {
+    Redeem(NavHostController(LocalContext.current))
+}
+@Composable
+fun Redeem(navController: NavHostController) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
             .fillMaxSize()
     ) {
-        Card(
-            elevation = 8.dp,
-            shape = RoundedCornerShape(0.dp, 0.dp, 48.dp, 48.dp),
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Column(
-                horizontalAlignment = Alignment.Start,
-                modifier = Modifier
-                    .padding(24.dp)
-            ) {
-                Text(
-                    text = "My Balance",
-                    fontSize = 24.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_bold)),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontWeight = FontWeight.SemiBold
-                    )
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(32.dp)
-                )
-                Text(
-                    text = "$ 100.0",
-                    fontSize = 24.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_bold)),
-                    color = Color(R.color.space_purple)
-                )
-                Text(
-                    text = "Total Balance",
-                    fontSize = 14.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
-                    color = colorResource(R.color.grey)
-                )
-                Spacer(
-                    modifier = Modifier
-                        .size(32.dp)
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Card(
-                        backgroundColor = colorResource(id = R.color.light_purple),
-                        modifier = Modifier,
-                        shape = RoundedCornerShape(48.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.baseline_history_24),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .size(20.dp),
-                                colorFilter = ColorFilter.tint(Color.Black)
-                            )
-                            Spacer(modifier = Modifier.size(7.dp))
-                            Text(
-                                text = "Reward History"
-                            )
-                        }
-                    }
-                    Card(
-                        backgroundColor = colorResource(R.color.light_green),
-                        modifier = Modifier,
-                        shape = RoundedCornerShape(48.dp),
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.transaction),
-                                contentDescription = "",
-                                modifier = Modifier
-                                    .size(20.dp),
-                                colorFilter = ColorFilter.tint(Color.Black)
-                            )
-                            Spacer(modifier = Modifier.size(7.dp))
-                            Text(
-                                text = "Recent Transactions"
-                            )
-                        }
-                    }
-                }
-                Spacer(
-                    modifier = Modifier
-                        .size(24.dp)
-                )
-            }
-        }
+        MyBalanceComposable(navController)
         Spacer(modifier = Modifier.size(30.dp))
         Card(
             elevation = 8.dp,
@@ -1275,34 +1337,126 @@ fun Redeem() {
                     )
                 )
                 Spacer(modifier = Modifier.padding(6.dp))
-
-                val data = listOf(
-                    WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$10", "$12"),
-                    WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$20", "$22"),
-                    WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$10", "$12"),
-                    WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$20", "$22")
-                )
-
-                WithdrawComposable(
-                    icon = R.drawable.paytm_icon,
-                    title = "Paytm Withdrawal",
-                    withdrawalAmount = "$10",
-                    withdrawalCoins = "$12"
+                LazyColumn(content = {
+                    val data = listOf(
+                        WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$10", "$12"),
+                        WithdrawalCoins(R.drawable.paytm_icon, "Paytm Withdrawal", "$20", "$22"),
+                        WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$10", "$12"),
+                        WithdrawalCoins(R.drawable.amazon_icon, "Amazon Withdrawal", "$20", "$22")
                     )
-                Spacer(modifier = Modifier.padding(6.dp))
-                WithdrawComposable(R.drawable.paytm_icon, "Paytm Withdrawal", "$20", "$22")
-                Spacer(modifier = Modifier.padding(6.dp))
-                WithdrawComposable(R.drawable.amazon_icon, "Paytm Withdrawal", "$10", "$12")
-                Spacer(modifier = Modifier.padding(6.dp))
-                WithdrawComposable(R.drawable.amazon_icon, "Paytm Withdrawal", "$20", "$22")
+                    items(data) { content ->
+                        WithdrawCoinsComposable(content.icon ?: 0, content.title.toString(), content.withdrawalAmount.toString(), content.withdrawalCoins.toString())
+                    }
+                })
             }
         }
-
     }
 }
 
 @Composable
-private fun WithdrawComposable(
+private fun MyBalanceComposable(navController: NavHostController) {
+    Card(
+        elevation = 8.dp,
+        shape = RoundedCornerShape(0.dp, 0.dp, 48.dp, 48.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+            horizontalAlignment = Alignment.Start,
+            modifier = Modifier
+                .padding(24.dp)
+        ) {
+            Text(
+                text = "My Balance",
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(32.dp)
+            )
+            Text(
+                text = "$ 100.0",
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                color = Color(R.color.space_purple)
+            )
+            Text(
+                text = "Total Balance",
+                fontSize = 14.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                color = colorResource(R.color.grey)
+            )
+            Spacer(
+                modifier = Modifier
+                    .size(32.dp)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Card(
+                    backgroundColor = colorResource(id = R.color.light_purple),
+                    modifier = Modifier
+                        .clickable {
+                            navController.navigate("reward_history")
+                        },
+                    shape = RoundedCornerShape(48.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.baseline_history_24),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(20.dp),
+                            colorFilter = ColorFilter.tint(Color.Black)
+                        )
+                        Spacer(modifier = Modifier.size(7.dp))
+                        Text(
+                            text = "Reward History"
+                        )
+                    }
+                }
+                Card(
+                    backgroundColor = colorResource(R.color.light_green),
+                    modifier = Modifier,
+                    shape = RoundedCornerShape(48.dp),
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.transaction),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(20.dp),
+                            colorFilter = ColorFilter.tint(Color.Black)
+                        )
+                        Spacer(modifier = Modifier.size(7.dp))
+                        Text(
+                            text = "Recent Transactions"
+                        )
+                    }
+                }
+            }
+            Spacer(
+                modifier = Modifier
+                    .size(24.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun WithdrawCoinsComposable(
     icon: Int,
     title: String,
     withdrawalAmount: String,
@@ -1357,6 +1511,7 @@ private fun WithdrawComposable(
             }
         }
     }
+    Spacer(modifier = Modifier.padding(8.dp))
 }
 
 

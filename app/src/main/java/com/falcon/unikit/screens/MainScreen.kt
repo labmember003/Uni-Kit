@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -182,6 +184,8 @@ private fun TopBar(
             }
             Text(
                 text = "UniKit",
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 modifier = Modifier,
                 style = MaterialTheme.typography.subtitle1
             )

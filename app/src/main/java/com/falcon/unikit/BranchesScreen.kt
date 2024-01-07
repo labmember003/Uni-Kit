@@ -31,6 +31,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.text.font.Font
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -71,7 +73,8 @@ fun BranchesScreen(
                             list[index]?: "ERROR: branchName is NULL",
                             // on below line we are specifying the text color
                             // for the text in that tab
-                            color = if (pageState.currentPage == index) colorResource(R.color.custom_color_tab_bar) else Color.Black
+                            color = if (pageState.currentPage == index) colorResource(R.color.custom_color_tab_bar) else Color.Black,
+                            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                         )
                     },
                     // on below line we are specifying
@@ -172,7 +175,8 @@ fun SubjectItemRow(
         Text(
             text = subjectItem.subjectName ?: "ERROR: subjectName is NULL",
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold,
+//            fontWeight = FontWeight.Bold,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
             modifier = Modifier.weight(1f)
         )
     }
@@ -189,8 +193,11 @@ fun HeadingSummarizedPage() {
     ) {
         Text(
             text = "Unikit",
-            style = MaterialTheme.typography.subtitle1,
             fontSize = 20.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            ),
             modifier = Modifier.weight(1f)
         )
         IconButton(onClick = {

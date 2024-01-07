@@ -30,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -70,7 +71,7 @@ fun BranchesScreen(
                             list[index]?: "ERROR: branchName is NULL",
                             // on below line we are specifying the text color
                             // for the text in that tab
-                            color = if (pageState.currentPage == index) Color(R.color.custom_color_tab_bar) else Color.Black
+                            color = if (pageState.currentPage == index) colorResource(R.color.custom_color_tab_bar) else Color.Black
                         )
                     },
                     // on below line we are specifying

@@ -95,6 +95,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
@@ -210,8 +211,8 @@ fun ContentScreen(
                     // on below line we are creating a tab.
                     Tab(
                         modifier = Modifier.fillMaxWidth(),
-                        selectedContentColor = Color(R.color.teal_200),
-                        unselectedContentColor = Color(R.color.teal_200),
+                        selectedContentColor = colorResource(R.color.custom_color_primary),
+                        unselectedContentColor = colorResource(R.color.custom_color_primary),
                         text = {
                             Column(
                                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -230,7 +231,7 @@ fun ContentScreen(
                                     fontSize = 13.sp,
                                     // on below line we are specifying the text color
                                     // for the text in that tab
-                                    color = if (pageState.currentPage == index) Color(R.color.teal_200) else Color.Black,
+                                    color = if (pageState.currentPage == index) colorResource(R.color.custom_color_primary) else Color.Black,
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis,
                                     modifier = Modifier.padding(bottom = 10.dp)

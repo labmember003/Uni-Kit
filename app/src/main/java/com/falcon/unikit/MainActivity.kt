@@ -1180,7 +1180,7 @@ private fun MyRewardsUpperComposable(navController: NavHostController) {
         Text(
             text = "Reward History",
             fontSize = 24.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_bold)),
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold
             )
@@ -1198,13 +1198,13 @@ private fun MyRewardsUpperComposable(navController: NavHostController) {
             Text(
                 text = "$ 667.89",
                 fontSize = 24.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 color = Color(R.color.space_purple)
             )
             Text(
                 text = "Total Rewards",
                 fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 color = colorResource(R.color.grey)
             )
             Spacer(
@@ -1224,13 +1224,13 @@ private fun MyRewardsUpperComposable(navController: NavHostController) {
             Text(
                 text = "$ 667.89",
                 fontSize = 20.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 color = Color(R.color.space_purple)
             )
             Text(
                 text = "103 Rewards",
                 fontSize = 12.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 color = colorResource(R.color.grey)
             )
             Spacer(
@@ -1289,18 +1289,18 @@ private fun RewardComposable(date: String, amount: String) {
                 Text(
                     text = date,
                     fontSize = 16.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                    fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 )
                 Text(
                     text = "Reward",
-                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                    fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 )
             }
         }
         Text(
             text = amount,
             fontSize = 16.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+            fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
             color = colorResource(id = R.color.greenny)
         )
     }
@@ -1334,7 +1334,7 @@ fun Redeem(navController: NavHostController) {
                 Text(
                     text = "WithDraw Coins",
                     fontSize = 24.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                     style = MaterialTheme.typography.bodyLarge.copy(
                         fontWeight = FontWeight.SemiBold
                     )
@@ -1372,7 +1372,7 @@ private fun MyBalanceComposable(navController: NavHostController) {
             Text(
                 text = "My Balance",
                 fontSize = 24.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 style = MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold
                 )
@@ -1384,13 +1384,13 @@ private fun MyBalanceComposable(navController: NavHostController) {
             Text(
                 text = "$ 100.0",
                 fontSize = 24.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 color = Color(R.color.space_purple)
             )
             Text(
                 text = "Total Balance",
                 fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 color = colorResource(R.color.grey)
             )
             Spacer(
@@ -1496,11 +1496,11 @@ private fun WithdrawCoinsComposable(
                     Text(
                         text = title,
                         fontSize = 16.sp,
-                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                        fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                     )
                     Text(
                         text = withdrawalAmount,
-                        fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                        fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                     )
                 }
             }
@@ -1536,7 +1536,7 @@ fun WithdrawalHistory(navController: NavHostController) {
         Text(
             text = "WithDrawal History",
             fontSize = 24.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_bold)),
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold
             )
@@ -1554,13 +1554,13 @@ fun WithdrawalHistory(navController: NavHostController) {
             Text(
                 text = "$ 100",
                 fontSize = 24.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 color = Color(R.color.space_purple)
             )
             Text(
                 text = "Current Balance",
                 fontSize = 14.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 color = colorResource(R.color.grey)
             )
             Spacer(
@@ -1581,7 +1581,7 @@ fun WithdrawalHistory(navController: NavHostController) {
         Text(
             text = "History",
             fontSize = 18.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_bold)),
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.SemiBold
             )
@@ -1628,18 +1628,18 @@ private fun WithdrawalListItem(icon: Int, title: String, dateText: String, cost:
                 Text(
                     text = title,
                     fontSize = 17.sp,
-                    fontFamily = FontFamily(Font(R.font.nunito_bold)),
+                    fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 )
                 Text(
                     text = dateText,
-                    fontFamily = FontFamily(Font(R.font.nunito_semibold)),
+                    fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                 )
             }
         }
         Text(
             text = "-$cost",
             fontSize = 14.sp,
-            fontFamily = FontFamily(Font(R.font.nunito_bold))
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1))
         )
     }
 }

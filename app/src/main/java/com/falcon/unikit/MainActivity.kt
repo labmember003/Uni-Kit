@@ -46,6 +46,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
@@ -1504,9 +1505,29 @@ private fun WithdrawCoinsComposable(
                     )
                 }
             }
+            val openAlertDialog = remember { mutableStateOf(false) }
+            when {
+                openAlertDialog.value -> {
+                    AlertDialogExample(
+                        onDismissRequest = { openAlertDialog.value = false },
+                        onConfirmation = {
+                            openAlertDialog.value = false
+//                            TODO ("PROCESS THE PURCHASE")
+                            println("Confirmation registered") // Add logic here to handle confirmation.
+                        },
+                        dialogTitle = "Purchase Confirmation",
+                        dialogText = "Are you sure to withdraw $title of $withdrawalAmount for $withdrawalCoins coins ?",
+                        icon = Icons.Default.Info
+                    )
+                }
+            }
             Card(
                 backgroundColor = colorResource(id = R.color.light_blue),
-                shape = RoundedCornerShape(24.dp)
+                shape = RoundedCornerShape(24.dp),
+                modifier = Modifier
+                    .clickable {
+                        openAlertDialog.value = true
+                    }
             ) {
                 Row(
                     Modifier.padding(24.dp)

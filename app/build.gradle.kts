@@ -133,6 +133,7 @@ dependencies {
 //    implementation ("com.itextpdf.android:kernel-android:8.0.1")
     implementation ("com.itextpdf:itextg:5.5.10") // Use the version appropriate for your project
     implementation ("com.madgag.spongycastle:prov:1.56.0.0") // Use the version appropriate for your project
+    implementation("androidx.core:core-splashscreen:1.0.1")
 
 
 

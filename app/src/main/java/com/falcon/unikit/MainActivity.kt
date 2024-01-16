@@ -9,7 +9,9 @@ import android.content.SharedPreferences
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.os.Environment
 import android.util.Log
 import android.webkit.WebChromeClient
 import android.webkit.WebView
@@ -20,12 +22,15 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
+import androidx.annotation.RequiresApi
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -35,12 +40,17 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.ModalBottomSheetState
+import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Scaffold
 import androidx.compose.material.TopAppBar
@@ -50,11 +60,16 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
+import androidx.compose.material.icons.outlined.ThumbDown
+import androidx.compose.material.icons.outlined.ThumbUp
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -69,6 +84,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -79,6 +95,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -108,9 +125,13 @@ import com.falcon.unikit.models.item.CollegeItem
 import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
+import com.falcon.unikit.screens.AddNotesFAB
+import com.falcon.unikit.screens.ComingSoonScreen
 import com.falcon.unikit.screens.ContentItemRow
+import com.falcon.unikit.screens.ContentList
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
+import com.falcon.unikit.screens.downloadPdfNotifination
 import com.falcon.unikit.screens.getIcon
 import com.falcon.unikit.settings.SettingsScreen
 import com.falcon.unikit.ui.walkthrough.WalkThroughScreen
@@ -119,6 +140,7 @@ import com.falcon.unikit.viewmodels.BranchViewModel
 import com.falcon.unikit.viewmodels.CollegeViewModel
 import com.falcon.unikit.viewmodels.ContentViewModel
 import com.falcon.unikit.viewmodels.CourseViewModel
+import com.falcon.unikit.viewmodels.ItemViewModel
 import com.falcon.unikit.viewmodels.YearViewModel
 import com.google.android.gms.auth.api.identity.BeginSignInRequest
 import com.google.android.gms.auth.api.identity.Identity
@@ -128,8 +150,10 @@ import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.io.File
 import java.net.URLDecoder
 import java.net.URLEncoder
+import java.util.Random
 import javax.inject.Inject
 
 
@@ -1160,6 +1184,411 @@ fun OTPSignInCard(
 @Composable
 fun Community() {
     HeadingSummarizedPage()
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun _ContentScreenFigma() {
+    ContentScreenFigma(
+        listOf(Content("")),
+        NavHostController(LocalContext.current),
+        "",
+        ""
+    ) {}
+}
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
+@Composable
+fun ContentScreenFigma(
+    content: List<Content>,
+    navController: NavHostController,
+    subjectName: String?,
+    pageNumber: String?,
+    recompose: (String) -> Unit
+) {
+    val scope = rememberCoroutineScope()
+    val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
+    val pageState = rememberPagerState(pageNumber?.toInt() ?: 0)
+//    TODO(UNCOMMENT UPAR WAALI LINE)
+
+    val modalSheetState = rememberModalBottomSheetState(
+        initialValue = ModalBottomSheetValue.Hidden,
+        confirmValueChange = { it != ModalBottomSheetValue.HalfExpanded },
+        skipHalfExpanded = true
+    )
+    val currentType = remember {
+        mutableStateOf("Type")
+    }
+    val currentSubject = remember {
+        mutableStateOf(subjectName)
+    }
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+            .padding(16.dp)
+    ) {
+        ContentScreenTitle()
+        HorizontalPager(
+            pageCount = list.size,
+            state = pageState,
+            modifier = Modifier
+                .fillMaxSize()
+                .weight(1f)
+                .padding(bottom = 8.dp),
+            pageContent = { pageNumber ->
+                val specificContent = content.filter {
+                    it.contentType == list[pageNumber]
+                }
+                LaunchedEffect(key1 = pageNumber) {
+                    currentType.value = list[pageNumber]
+                    Log.i("catcatcatwty2", pageNumber.toString())
+                }
+                NotesList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
+            }
+        )
+
+        TabRow(
+            selectedTabIndex = pageState.currentPage,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            list.forEachIndexed { index, _ ->
+                // on below line we are creating a tab.
+                Tab(
+                    modifier = Modifier.fillMaxWidth(),
+                    selectedContentColor = colorResource(R.color.custom_color_primary),
+                    unselectedContentColor = colorResource(R.color.custom_color_primary),
+                    text = {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                        ) {
+                            Image(
+                                painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
+                                contentDescription = "Icon",
+                                modifier = Modifier
+                                    .size(20.dp)
+                            )
+                            androidx.compose.material.Text(
+                                list[index],
+                                fontSize = 13.sp,
+                                // on below line we are specifying the text color
+                                // for the text in that tab
+                                color = if (pageState.currentPage == index) colorResource(R.color.custom_color_primary) else Color.Black,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.padding(bottom = 10.dp)
+                            )
+                            if (pageState.currentPage == index) {
+
+                            }
+                        }
+
+                    },
+                    // on below line we are specifying
+                    // the tab which is selected.
+                    selected = pageState.currentPage == index,
+                    // on below line we are specifying the
+                    // on click for the tab which is selected.
+                    onClick = {
+                        // on below line we are specifying the scope.
+                        Log.i("happppy", pageState.currentPage.toString())
+                        Log.i("happppy2", index.toString())
+                        scope.launch {
+                            pageState.scrollToPage(index)
+                        }
+                    }
+                )
+            }
+        }
+    }
+
+}
+
+@RequiresApi(Build.VERSION_CODES.O)
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun NotesList(
+    content: List<Content>,
+    navController: NavHostController,
+    icon: Int,
+    modalSheetState: ModalBottomSheetState
+) {
+    if (content.isEmpty()) {
+        ComingSoonScreen()
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            LazyColumn(content = {
+                val sortedItems = content.sortedByDescending { it.like?.size }
+                items(sortedItems) { content ->
+                    Log.i("happy sex", content.toString())
+                    NotesCard(content, icon, navController)
+                }
+            })
+        }
+    }
+    AddNotesFAB(modalSheetState)
+}
+
+@Composable
+private fun NotesCard(
+    contentItem: Content, icon: Int, navController: NavHostController
+) {
+    val context = LocalContext.current
+    val expanded = remember {
+        mutableStateOf(false)
+    }
+    val scope = rememberCoroutineScope()
+    val itemViewModel : ItemViewModel = hiltViewModel()
+    val sharedPreferences = remember {
+        context.getSharedPreferences("token_prefs", Context.MODE_PRIVATE)
+    }
+    val token = sharedPreferences.getString(Utils.JWT_TOKEN, "").toString()
+    val liked = remember {
+        mutableStateOf(false)
+    }
+    val disliked = remember {
+        mutableStateOf(false)
+    }
+    LaunchedEffect(Unit) {
+        if (contentItem.like?.contains(token) == true) {
+            liked.value = true
+        }
+        if (contentItem.dislike?.contains(token) == true) {
+            disliked.value = true
+        }
+    }
+    val likeIcon = if (liked.value) R.drawable.like_green else R.drawable.like_grey
+    val dislikeIcon = if (disliked.value) R.drawable.dislike_red else R.drawable.dislike_grey
+
+    val numLikes = remember {
+        mutableStateOf(contentItem.like?.size ?: 0)
+    }
+    val numDisLikes = remember {
+        mutableStateOf(contentItem.dislike?.size ?: 0)
+    }
+    val likeFunction = {
+        if (liked.value && disliked.value) {
+            disliked.value = false
+        }
+        if (disliked.value) {
+            numDisLikes.value = numDisLikes.value - 1
+        }
+        disliked.value = false
+        numLikes.value = numLikes.value.plus(if (liked.value) -1 else 1)
+        liked.value = !liked.value
+    }
+    val dislikeFunction = {
+        if (liked.value && disliked.value) {
+            liked.value = false
+        }
+        if (liked.value) {
+            numLikes.value = numLikes.value - 1
+        }
+        liked.value = false
+        numDisLikes.value = numDisLikes.value.plus(if (disliked.value) -1 else 1)
+        disliked.value = !disliked.value
+    }
+    val activity = LocalContext.current as? androidx.activity.ComponentActivity
+    val authViewModel : AuthViewModel = hiltViewModel()
+    Card(
+        elevation = 8.dp,
+        shape = RoundedCornerShape(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .size(100.dp)
+            .clickable {
+                val fileName = contentItem.contentID + ".pdf"
+                Log.i("asdfvfdfefe", fileName)
+                val file = File(
+                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+                    fileName
+                )
+                scope.launch {
+                    authViewModel.getDownloadableURL(contentItem.contentID.toString())
+                    authViewModel.downloadableURL.collect { downloadableURL ->
+                        if (file.exists()) {
+                            val uri: String? = Uri
+                                .fromFile(file)
+                                .toString()
+                            val encoded = uri?.let { encode(it) }
+                            navController.navigate("open_file/${encoded}")
+                            Toast
+                                .makeText(context, "exosts", Toast.LENGTH_SHORT)
+                                .show()
+                        } else {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Please Wait Downloading is being starting",
+                                    Toast.LENGTH_SHORT
+                                )
+                                .show()
+                            val notificationId = Random().nextInt()
+                            downloadPdfNotifination(
+                                context,
+                                downloadableURL.githuburl.toString(),
+                                notificationId,
+                                scope,
+                                activity,
+                                contentItem
+                            )
+                            // UPAR WAALE CODE SE FILE SAVE HOGI WITH NAME : contentItem.contentID + "ENC" + ".pdf"
+                            // NICHE WAALE CODE SE NEW FILE BNEGI WITH NAME : contentItem.contentID + ".pdf"
+                            // AUR FIR ENC WAALI FILE KO DELETE KR DENGE
+
+                            Toast
+                                .makeText(context, "Downloading started", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                    }
+                }
+            }
+    ) {
+        Column {
+            Row(
+                modifier = Modifier
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = icon),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(28.dp)
+                    )
+                    Spacer(modifier = Modifier.size(11.dp))
+                    Text(
+                        text = "NotesName.pdf",
+                        fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
+                        fontSize = 16.sp,
+                        modifier = Modifier
+                            .width(119.dp)
+                    )
+                }
+                Row(
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .height(50.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = likeIcon),
+                            contentDescription = "likeIcon",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clickable {
+                                    scope.launch {
+                                        itemViewModel.likeButtonPressed(
+                                            contentItem.contentID.toString(),
+                                            token
+                                        )
+                                    }
+                                    likeFunction()
+                                }
+                        )
+                        Text(
+                            text = numLikes.value.toString(),
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = colorResource(R.color.light_grey_text_image)
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(20.dp))
+                    Column(
+                        modifier = Modifier
+                            .height(50.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(id = dislikeIcon),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(28.dp)
+                                .clickable {
+                                    scope.launch {
+                                        itemViewModel.dislikeButtonPressed(
+                                            contentItem.contentID.toString(),
+                                            token.toString()
+                                        )
+                                    }
+                                    dislikeFunction()
+                                }
+                        )
+                        Text(
+                            text = numDisLikes.value.toString(),
+                            fontSize = 13.sp,
+                            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.SemiBold
+                            ),
+                            color = colorResource(R.color.light_grey_text_image)
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(24.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxHeight(),
+                        verticalArrangement = Arrangement.SpaceAround
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.dots),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(23.dp)
+                                .clickable {
+//                                TODO (Show menu option)
+                                }
+                        )
+                        Image(
+                            painter = painterResource(id = R.drawable.expand),
+                            contentDescription = "",
+                            modifier = Modifier
+                                .size(23.dp)
+                                .rotate(180f)
+                                .clickable {
+                                    expanded.value = !expanded.value
+                                }
+                        )
+                    }
+                }
+
+            }
+            if (expanded.value) {
+                // YAAHA EXPANDED WAALA PART DAALNA HAI
+            }
+        }
+    }
+}
+
+@Composable
+private fun ContentScreenTitle() {
+    Text(
+        text = "Unikit",
+        fontSize = 24.sp,
+        fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+        style = MaterialTheme.typography.bodyLarge.copy(
+            fontWeight = FontWeight.SemiBold
+        )
+    )
+    Spacer(
+        modifier = Modifier
+            .size(23.dp)
+    )
 }
 
 @Preview(showBackground = true, showSystemUi = true)

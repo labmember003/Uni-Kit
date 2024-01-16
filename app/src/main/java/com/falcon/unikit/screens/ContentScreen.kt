@@ -267,19 +267,19 @@ fun getIcon(contentName: String, selected: Boolean): Int {
     if (selected) {
         when (contentName) {
             "Notes" -> {
-                return R.drawable.notes
+                return R.drawable.notes_blue
             }
             "Books" -> {
-                return R.drawable.book
+                return R.drawable.book_grey
             }
             "Papers" -> {
-                return R.drawable.exam
+                return R.drawable.test_blue
             }
             "Playlists" -> {
-                return R.drawable.playlisticon
+                return R.drawable.playlist_blue
             }
             "Syllabus" -> {
-                return R.drawable.syllabusicon
+                return R.drawable.syllabus_blue
             }
             else -> return R.drawable.ic_goole
         }
@@ -287,19 +287,19 @@ fun getIcon(contentName: String, selected: Boolean): Int {
     else {
         when (contentName) {
             "Notes" -> {
-                return R.drawable.notes_unseleted
+                return R.drawable.notes_grey
             }
             "Books" -> {
-                return R.drawable.book_unseleted
+                return R.drawable.book_blue
             }
             "Papers" -> {
-                return R.drawable.exam_unseleted
+                return R.drawable.test_grey
             }
             "Playlists" -> {
-                return R.drawable.playlisticon_unseleted
+                return R.drawable.playlist_grey
             }
             "Syllabus" -> {
-                return R.drawable.syllabusicon_unseleted
+                return R.drawable.syllabus_grey
             }
             else -> return R.drawable.error
         }
@@ -517,6 +517,8 @@ fun ContentItemRow(contentItem: Content, icon: Int, navController: NavHostContro
                 )
             }
         }
+
+
         val activity = LocalContext.current as? androidx.activity.ComponentActivity
         val authViewModel : AuthViewModel = hiltViewModel()
         if (expanded.value) {

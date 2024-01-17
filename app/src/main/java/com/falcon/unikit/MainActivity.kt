@@ -1431,7 +1431,7 @@ private fun NotesCard(
                     )
                     Spacer(modifier = Modifier.size(11.dp))
                     Text(
-                        text = "NotesName.pdf",
+                        text = contentItem.contentName.toString(),
                         fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
                         fontSize = 16.sp,
                         modifier = Modifier

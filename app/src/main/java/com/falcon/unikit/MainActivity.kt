@@ -49,6 +49,7 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetState
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.OutlinedTextField
@@ -124,6 +125,7 @@ import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.AddNotesFAB
+import com.falcon.unikit.screens.BottomSheetContent
 import com.falcon.unikit.screens.ComingSoonScreen
 import com.falcon.unikit.screens.ContentItemRow
 import com.falcon.unikit.screens.ContentScreen
@@ -165,6 +167,7 @@ class MainActivity : ComponentActivity() {
     @Inject
     lateinit var unikitAPI: UnikitAPI
 
+    @RequiresApi(Build.VERSION_CODES.O)
     @SuppressLint("CoroutineCreationDuringComposition")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -528,7 +531,7 @@ class MainActivity : ComponentActivity() {
                         val contentViewModel : ContentViewModel = hiltViewModel()
                         val content: State<List<Content>> = contentViewModel.contents.collectAsState()
                         if (content.value != emptyList<Content>()) {
-                            ContentScreen(
+                            ContentScreenFigma(
                                 content.value,
                                 navController,
                                 entry.arguments?.getString("subjectName"),
@@ -1184,6 +1187,7 @@ fun Community() {
     HeadingSummarizedPage()
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun _ContentScreenFigma() {
@@ -1208,7 +1212,6 @@ fun ContentScreenFigma(
     val scope = rememberCoroutineScope()
     val list = listOf("Notes", "Books", "Papers", "Playlists", "Syllabus")
     val pageState = rememberPagerState(pageNumber?.toInt() ?: 0)
-//    TODO(UNCOMMENT UPAR WAALI LINE)
 
     val modalSheetState = rememberModalBottomSheetState(
         initialValue = ModalBottomSheetValue.Hidden,
@@ -1221,89 +1224,96 @@ fun ContentScreenFigma(
     val currentSubject = remember {
         mutableStateOf(subjectName)
     }
-    Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier
-            .padding(16.dp)
+    ModalBottomSheetLayout(
+        sheetState = modalSheetState,
+        sheetShape = RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp),
+        sheetContent = {
+            BottomSheetContent(modalSheetState, currentType, currentSubject, content, recompose, pageState.currentPage)
+        }
     ) {
-        ContentScreenTitle()
-        HorizontalPager(
-            pageCount = list.size,
-            state = pageState,
+        Column(
+            horizontalAlignment = Alignment.Start,
             modifier = Modifier
-                .fillMaxSize()
-                .weight(1f)
-                .padding(bottom = 8.dp),
-            pageContent = { pageNumber ->
-                val specificContent = content.filter {
-                    it.contentType == list[pageNumber]
-                }
-                LaunchedEffect(key1 = pageNumber) {
-                    currentType.value = list[pageNumber]
-                    Log.i("catcatcatwty2", pageNumber.toString())
-                }
-                NotesList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
-            }
-        )
-
-        TabRow(
-            selectedTabIndex = pageState.currentPage,
-            modifier = Modifier
-                .fillMaxWidth()
+                .padding(16.dp)
         ) {
-            list.forEachIndexed { index, _ ->
-                // on below line we are creating a tab.
-                Tab(
-                    modifier = Modifier.fillMaxWidth(),
-                    selectedContentColor = colorResource(R.color.custom_color_primary),
-                    unselectedContentColor = colorResource(R.color.custom_color_primary),
-                    text = {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                        ) {
-                            Image(
-                                painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
-                                contentDescription = "Icon",
-                                modifier = Modifier
-                                    .size(20.dp)
-                            )
-                            androidx.compose.material.Text(
-                                list[index],
-                                fontSize = 13.sp,
-                                // on below line we are specifying the text color
-                                // for the text in that tab
-                                color = if (pageState.currentPage == index) colorResource(R.color.custom_color_primary) else Color.Black,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.padding(bottom = 10.dp)
-                            )
-                            if (pageState.currentPage == index) {
+            ContentScreenTitle()
+            HorizontalPager(
+                pageCount = list.size,
+                state = pageState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .weight(1f)
+                    .padding(bottom = 8.dp),
+                pageContent = { pageNumber ->
+                    val specificContent = content.filter {
+                        it.contentType == list[pageNumber]
+                    }
+                    LaunchedEffect(key1 = pageNumber) {
+                        currentType.value = list[pageNumber]
+                        Log.i("catcatcatwty2", pageNumber.toString())
+                    }
+                    NotesList(specificContent, navController, getIcon(list[pageNumber], true), modalSheetState)
+                }
+            )
 
+            TabRow(
+                selectedTabIndex = pageState.currentPage,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
+                list.forEachIndexed { index, _ ->
+                    Tab(
+                        modifier = Modifier.fillMaxWidth(),
+                        selectedContentColor = colorResource(R.color.icon_blue),
+                        text = {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                Image(
+                                    painter = painterResource(id = getIcon(list[index], pageState.currentPage == index)),
+                                    contentDescription = "Icon",
+                                    modifier = Modifier
+                                        .size(20.dp)
+                                )
+                                if (pageState.currentPage == index) {
+                                    androidx.compose.material.Text(
+                                        list[index],
+                                        fontSize = 13.sp,
+                                        // on below line we are specifying the text color
+                                        // for the text in that tab
+                                        color = if (pageState.currentPage == index) colorResource(R.color.icon_blue) else Color.Black,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        modifier = Modifier.padding(bottom = 10.dp)
+                                    )
+                                }
+                                if (pageState.currentPage == index) {
+
+                                }
+                            }
+
+                        },
+                        // on below line we are specifying
+                        // the tab which is selected.
+                        selected = pageState.currentPage == index,
+                        // on below line we are specifying the
+                        // on click for the tab which is selected.
+                        onClick = {
+                            // on below line we are specifying the scope.
+                            Log.i("happppy", pageState.currentPage.toString())
+                            Log.i("happppy2", index.toString())
+                            scope.launch {
+                                pageState.scrollToPage(index)
                             }
                         }
-
-                    },
-                    // on below line we are specifying
-                    // the tab which is selected.
-                    selected = pageState.currentPage == index,
-                    // on below line we are specifying the
-                    // on click for the tab which is selected.
-                    onClick = {
-                        // on below line we are specifying the scope.
-                        Log.i("happppy", pageState.currentPage.toString())
-                        Log.i("happppy2", index.toString())
-                        scope.launch {
-                            pageState.scrollToPage(index)
-                        }
-                    }
-                )
+                    )
+                }
             }
         }
     }
-
 }
 
 @RequiresApi(Build.VERSION_CODES.O)
@@ -1323,10 +1333,11 @@ fun NotesList(
                 .fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            LazyColumn(content = {
+            LazyColumn(
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                content = {
                 val sortedItems = content.sortedByDescending { it.like?.size }
                 items(sortedItems) { content ->
-                    Log.i("happy sex", content.toString())
                     NotesCard(content, icon, navController)
                 }
             })
@@ -1396,12 +1407,14 @@ private fun NotesCard(
     }
     val activity = LocalContext.current as? androidx.activity.ComponentActivity
     val authViewModel : AuthViewModel = hiltViewModel()
+    val showMenu = remember {
+        mutableStateOf(false)
+    }
     Card(
         elevation = 8.dp,
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .size(100.dp)
             .clickable {
                 initiateDownloadOrLaunch(
                     contentItem,
@@ -1416,7 +1429,8 @@ private fun NotesCard(
         Column {
             Row(
                 modifier = Modifier
-                    .padding(16.dp),
+                    .padding(16.dp)
+                    .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -1444,7 +1458,8 @@ private fun NotesCard(
                 ) {
                     Column(
                         modifier = Modifier
-                            .height(50.dp)
+                            .height(50.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
                             painter = painterResource(id = likeIcon),
@@ -1474,7 +1489,8 @@ private fun NotesCard(
                     Spacer(modifier = Modifier.size(20.dp))
                     Column(
                         modifier = Modifier
-                            .height(50.dp)
+                            .height(50.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Image(
                             painter = painterResource(id = dislikeIcon),
@@ -1518,12 +1534,19 @@ private fun NotesCard(
                         )
                         Image(
                             painter = painterResource(id = R.drawable.expand),
-                            contentDescription = "",
+                            contentDescription = "expand icon",
                             modifier = Modifier
                                 .size(23.dp)
                                 .rotate(180f)
                                 .clickable {
                                     expanded.value = !expanded.value
+                                    Toast
+                                        .makeText(
+                                            context,
+                                            expanded.value.toString(),
+                                            Toast.LENGTH_LONG
+                                        )
+                                        .show()
                                 }
                         )
                     }
@@ -1531,7 +1554,9 @@ private fun NotesCard(
 
             }
             if (expanded.value) {
-                ExpandedNotesView()
+                Row {
+                    ExpandedNotesView()
+                }
             }
         }
     }
@@ -2388,7 +2413,7 @@ fun DisplayFileDeepLink(content : Content, navController: NavHostController) {
                 modifier = Modifier.weight(1f)
             )
         }
-        ContentItemRow(contentItem = content, icon = icon,  navController = navController)
+        NotesCard(contentItem = content, icon = icon,  navController = navController)
     }
 
 }

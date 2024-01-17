@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="custom_color_primary">#643AE7</color>
+    <color name="icon_blue">#386BF6</color>
     <color name="custom_text_primary">#5357B6</color>
     <color name="custom_color_tab_bar">#6750a4</color>
     <color name="purple_200">#FFBB86FC</color>

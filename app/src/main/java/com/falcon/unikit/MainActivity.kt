@@ -127,8 +127,6 @@ import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.AddNotesFAB
 import com.falcon.unikit.screens.BottomSheetContent
 import com.falcon.unikit.screens.ComingSoonScreen
-import com.falcon.unikit.screens.ContentItemRow
-import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.screens.downloadPdfNotifination
 import com.falcon.unikit.screens.getIcon
@@ -1524,14 +1522,22 @@ private fun NotesCard(
                         verticalArrangement = Arrangement.SpaceAround
                     ) {
                         Image(
-                            painter = painterResource(id = R.drawable.dots),
+                            painter = painterResource(id = R.drawable.share_grey),
                             contentDescription = "",
                             modifier = Modifier
                                 .size(23.dp)
                                 .clickable {
-//                                TODO (Show menu option)
+                                    val text = "https://uni-kit-api.vercel.app/" + contentItem.contentID
+                                    val sendIntent: Intent = Intent().apply {
+                                        action = Intent.ACTION_SEND
+                                        putExtra(Intent.EXTRA_TEXT, text)
+                                        type = "text/plain"
+                                    }
+                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                    context.startActivity(shareIntent)
                                 }
                         )
+                        Spacer(modifier = Modifier.size(8.dp))
                         Image(
                             painter = painterResource(id = R.drawable.expand),
                             contentDescription = "expand icon",
@@ -1569,7 +1575,11 @@ fun ExpandedNotesView() {
         modifier = Modifier
             .padding(16.dp),
     ) {
-        UploadDate("Uploaded on: 5 September 2024")
+        UploadDateAndReport(
+            date = "Uploaded on: 5 September 2024"
+        ) {
+
+        }
         Spacer(modifier = Modifier.size(8.dp))
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1717,12 +1727,40 @@ private fun AuthorName(icon: Int, name: String) {
 }
 
 @Composable
-private fun UploadDate(date: String) {
-    Text(
-        text = date,
-        fontSize = 11.sp,
-        fontFamily = FontFamily(Font(R.font.nunito_light_1)),
-    )
+private fun UploadDateAndReport(date: String, reportOnClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = date,
+            fontSize = 11.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .clickable {
+                    reportOnClick()
+                }
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.warning_icon),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(18.dp)
+            )
+            Spacer(modifier = Modifier.size(7.dp))
+            Text(
+                text = "Report",
+                fontSize = 11.sp,
+                color = Color.Red,
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+            )
+        }
+    }
 }
 
 @Composable
@@ -2406,11 +2444,10 @@ fun DisplayFileDeepLink(content : Content, navController: NavHostController) {
                 .fillMaxWidth()
                 .padding(8.dp)
         ) {
-            androidx.compose.material.Text(
+            Text(
                 text = "Content",
-                style = androidx.compose.material.MaterialTheme.typography.subtitle1,
                 fontSize = 20.sp,
-                modifier = Modifier.weight(1f)
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
             )
         }
         NotesCard(contentItem = content, icon = icon,  navController = navController)

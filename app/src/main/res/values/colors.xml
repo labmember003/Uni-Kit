@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="custom_color_primary">#643AE7</color>
+    <color name="custom_text_primary">#5357B6</color>
     <color name="custom_color_tab_bar">#6750a4</color>
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
@@ -12,6 +13,7 @@
     <color name="space_purple">#5664E9</color>
     <color name="grey">#707070</color>
     <color name="light_grey_text_image">#9DB2CE</color>
+    <color name="card_grey">#EFEFEF</color>
     <color name="light_purple">#D1C4E9</color>
     <color name="light_blue">#B8E2F2</color>
     <color name="light_green">#B2DFDB</color>
@@ -21,4 +23,6 @@
     <color name="light_grey">#999999</color>
     <color name="dark_grey">#A9A9A9</color>
     <color name="greenny">#008030</color>
+    <color name="off_white">#F5F6FA</color>
+    <color name="text_purple">#5357B6</color>
 </resources>

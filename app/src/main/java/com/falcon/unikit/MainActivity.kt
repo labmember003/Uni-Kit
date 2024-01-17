@@ -60,8 +60,6 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
-import androidx.compose.material.icons.outlined.ThumbDown
-import androidx.compose.material.icons.outlined.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -128,7 +126,6 @@ import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.AddNotesFAB
 import com.falcon.unikit.screens.ComingSoonScreen
 import com.falcon.unikit.screens.ContentItemRow
-import com.falcon.unikit.screens.ContentList
 import com.falcon.unikit.screens.ContentScreen
 import com.falcon.unikit.screens.MainScreen
 import com.falcon.unikit.screens.downloadPdfNotifination
@@ -148,6 +145,7 @@ import com.google.android.gms.auth.api.identity.SignInClient
 import com.google.android.gms.common.api.ApiException
 import com.google.gson.Gson
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.io.File
@@ -1197,6 +1195,7 @@ fun _ContentScreenFigma() {
     ) {}
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterialApi::class)
 @Composable
 fun ContentScreenFigma(
@@ -1404,51 +1403,14 @@ private fun NotesCard(
             .fillMaxWidth()
             .size(100.dp)
             .clickable {
-                val fileName = contentItem.contentID + ".pdf"
-                Log.i("asdfvfdfefe", fileName)
-                val file = File(
-                    context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
-                    fileName
+                initiateDownloadOrLaunch(
+                    contentItem,
+                    context,
+                    scope,
+                    authViewModel,
+                    navController,
+                    activity
                 )
-                scope.launch {
-                    authViewModel.getDownloadableURL(contentItem.contentID.toString())
-                    authViewModel.downloadableURL.collect { downloadableURL ->
-                        if (file.exists()) {
-                            val uri: String? = Uri
-                                .fromFile(file)
-                                .toString()
-                            val encoded = uri?.let { encode(it) }
-                            navController.navigate("open_file/${encoded}")
-                            Toast
-                                .makeText(context, "exosts", Toast.LENGTH_SHORT)
-                                .show()
-                        } else {
-                            Toast
-                                .makeText(
-                                    context,
-                                    "Please Wait Downloading is being starting",
-                                    Toast.LENGTH_SHORT
-                                )
-                                .show()
-                            val notificationId = Random().nextInt()
-                            downloadPdfNotifination(
-                                context,
-                                downloadableURL.githuburl.toString(),
-                                notificationId,
-                                scope,
-                                activity,
-                                contentItem
-                            )
-                            // UPAR WAALE CODE SE FILE SAVE HOGI WITH NAME : contentItem.contentID + "ENC" + ".pdf"
-                            // NICHE WAALE CODE SE NEW FILE BNEGI WITH NAME : contentItem.contentID + ".pdf"
-                            // AUR FIR ENC WAALI FILE KO DELETE KR DENGE
-
-                            Toast
-                                .makeText(context, "Downloading started", Toast.LENGTH_SHORT)
-                                .show()
-                        }
-                    }
-                }
             }
     ) {
         Column {
@@ -1569,7 +1531,289 @@ private fun NotesCard(
 
             }
             if (expanded.value) {
-                // YAAHA EXPANDED WAALA PART DAALNA HAI
+                ExpandedNotesView()
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ExpandedNotesView() {
+    Column(
+        modifier = Modifier
+            .padding(16.dp),
+    ) {
+        UploadDate("Uploaded on: 5 September 2024")
+        Spacer(modifier = Modifier.size(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            AuthorName(icon = R.drawable.user, name = "Choco Byte")
+            Downloads(downloads = "5.4K")
+        }
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = "Comments (102)",
+            fontSize = 11.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_regular_1)),
+        )
+        Spacer(modifier = Modifier.size(8.dp))
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.weight(0.6f)
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.user),
+                    contentDescription = "",
+                    modifier = Modifier
+                        .size(23.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Column {
+                    Text(
+                        text = "Add a comment",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                    )
+                    Divider(
+                        modifier = Modifier
+                            .height(1.dp)
+                            .fillMaxWidth(),
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.size(20.dp))
+            Image(
+                painter = painterResource(id = R.drawable.expand),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(23.dp)
+                    .rotate(90F)
+            )
+        }
+        Card(
+            modifier = Modifier
+                .padding(16.dp)
+                .shadow(elevation = 3.dp, shape = RoundedCornerShape(10.dp))
+                .fillMaxWidth(),
+            backgroundColor = colorResource(id = R.color.card_grey)
+        ) {
+            Column(
+                Modifier
+                    .padding(8.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Image(
+                        painter = painterResource(id = R.drawable.user),
+                        contentDescription = "",
+                        modifier = Modifier
+                            .size(23.dp)
+                    )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(
+                        text = "maxblagun",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_regular_1)),
+                    )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(
+                        text = "2 weeks ago",
+                        fontSize = 10.sp,
+                        fontFamily = FontFamily(Font(R.font.nunito_extralight)),
+                    )
+                }
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = "Woah, your project looks awesome! How long have you been coding for? I’m still new, but think I want to dive into React as well soon.",
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_regular_1)),
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                ) {
+                    PlusMinusOnComment()
+                    ReplyButton()
+                }
+                Spacer(modifier = Modifier.size(5.dp))
+                Text(
+                    text = "view/hide reply (10)",
+                    color = colorResource(id = R.color.custom_text_primary),
+                    fontSize = 10.sp,
+                    fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun Downloads(downloads: String) {
+    Text(
+        text = "Downloads: $downloads",
+        fontSize = 11.sp,
+        fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+    )
+}
+
+@Composable
+private fun AuthorName(icon: Int, name: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Image(
+            painter = painterResource(id = icon),
+            contentDescription = "",
+            modifier = Modifier
+                .size(23.dp)
+        )
+        Spacer(modifier = Modifier.size(6.dp))
+        Text(
+            text = name,
+            fontSize = 11.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+        )
+    }
+}
+
+@Composable
+private fun UploadDate(date: String) {
+    Text(
+        text = date,
+        fontSize = 11.sp,
+        fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+    )
+}
+
+@Composable
+private fun ReplyButton() {
+    val context = LocalContext.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clickable {
+                Toast.makeText(context, "Coming Soon", Toast.LENGTH_SHORT).show()
+            }
+    ) {
+        Image(
+            painter = painterResource(id = R.drawable.reply),
+            contentDescription = "",
+            modifier = Modifier
+                .size(16.dp)
+        )
+        Spacer(modifier = Modifier.size(5.dp))
+        Text(
+            text = "Reply",
+            fontSize = 10.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
+            color = colorResource(id = R.color.text_purple)
+        )
+    }
+}
+
+@Composable
+private fun PlusMinusOnComment() {
+    Card(
+        elevation = 4.dp,
+        shape = RoundedCornerShape(8.dp),
+        modifier = Modifier
+            .padding(4.dp),
+        backgroundColor = colorResource(id = R.color.off_white)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .padding(4.dp)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.plus_icon),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(14.dp)
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            Text(
+                text = "5",
+                color = colorResource(id = R.color.custom_text_primary),
+                fontSize = 10.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
+            )
+            Spacer(modifier = Modifier.size(4.dp))
+            Image(
+                painter = painterResource(id = R.drawable.minus),
+                contentDescription = "",
+                modifier = Modifier
+                    .size(14.dp)
+            )
+        }
+    }
+}
+
+private fun initiateDownloadOrLaunch(
+    contentItem: Content,
+    context: Context,
+    scope: CoroutineScope,
+    authViewModel: AuthViewModel,
+    navController: NavHostController,
+    activity: ComponentActivity?
+) {
+    val fileName = contentItem.contentID + ".pdf"
+    Log.i("asdfvfdfefe", fileName)
+    val file = File(
+        context.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS),
+        fileName
+    )
+    scope.launch {
+        authViewModel.getDownloadableURL(contentItem.contentID.toString())
+        authViewModel.downloadableURL.collect { downloadableURL ->
+            if (file.exists()) {
+                val uri: String? = Uri
+                    .fromFile(file)
+                    .toString()
+                val encoded = uri?.let { encode(it) }
+                navController.navigate("open_file/${encoded}")
+                Toast
+                    .makeText(context, "exosts", Toast.LENGTH_SHORT)
+                    .show()
+            } else {
+                Toast
+                    .makeText(
+                        context,
+                        "Please Wait Downloading is being starting",
+                        Toast.LENGTH_SHORT
+                    )
+                    .show()
+                val notificationId = Random().nextInt()
+                downloadPdfNotifination(
+                    context,
+                    downloadableURL.githuburl.toString(),
+                    notificationId,
+                    scope,
+                    activity,
+                    contentItem
+                )
+                // UPAR WAALE CODE SE FILE SAVE HOGI WITH NAME : contentItem.contentID + "ENC" + ".pdf"
+                // NICHE WAALE CODE SE NEW FILE BNEGI WITH NAME : contentItem.contentID + ".pdf"
+                // AUR FIR ENC WAALI FILE KO DELETE KR DENGE
+
+                Toast
+                    .makeText(context, "Downloading started", Toast.LENGTH_SHORT)
+                    .show()
             }
         }
     }
@@ -1631,7 +1875,7 @@ private fun MyRewardsUpperComposable(navController: NavHostController) {
                 text = "$ 667.89",
                 fontSize = 24.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
-                color = Color(R.color.space_purple)
+                color = colorResource(R.color.space_purple)
             )
             Text(
                 text = "Total Rewards",
@@ -1657,7 +1901,7 @@ private fun MyRewardsUpperComposable(navController: NavHostController) {
                 text = "$ 667.89",
                 fontSize = 20.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
-                color = Color(R.color.space_purple)
+                color = colorResource(R.color.space_purple)
             )
             Text(
                 text = "103 Rewards",
@@ -1817,7 +2061,7 @@ private fun MyBalanceComposable(navController: NavHostController) {
                 text = "$ 100.0",
                 fontSize = 24.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
-                color = Color(R.color.space_purple)
+                color = colorResource(R.color.space_purple)
             )
             Text(
                 text = "Total Balance",
@@ -2007,7 +2251,7 @@ fun WithdrawalHistory(navController: NavHostController) {
                 text = "$ 100",
                 fontSize = 24.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
-                color = Color(R.color.space_purple)
+                color = colorResource(R.color.space_purple)
             )
             Text(
                 text = "Current Balance",
@@ -2125,6 +2369,7 @@ fun FullWebView(url: String) {
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun DisplayFileDeepLink(content : Content, navController: NavHostController) {
     val icon = getIcon(content.contentType.toString(), true)

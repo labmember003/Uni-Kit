@@ -25,6 +25,7 @@ import androidx.activity.result.contract.ActivityResultContracts.StartIntentSend
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -1263,8 +1264,10 @@ fun ContentScreenFigma(
 
             TabRow(
                 selectedTabIndex = pageState.currentPage,
+                indicator = {},
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(color = Color.White)
             ) {
                 list.forEachIndexed { index, _ ->
                     Tab(

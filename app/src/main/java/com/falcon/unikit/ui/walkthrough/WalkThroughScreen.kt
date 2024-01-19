@@ -38,7 +38,7 @@ val walkThroughPagerContent = listOf(
     WalkThroughPager(R.raw.resources, "Streamlined Resources", "Effortless Access to Notes, Books, and More."),
     WalkThroughPager(R.raw.multiple_inputs, "Bridging the Knowledge Gap", "Access, Discuss, Learn, Grow.")
 )
-@Preview
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
 fun _WalkThroughScreen() {
     WalkThroughScreen {

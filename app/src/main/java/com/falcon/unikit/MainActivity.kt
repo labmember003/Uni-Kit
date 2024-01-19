@@ -62,6 +62,7 @@ import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.ThumbDown
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.rememberModalBottomSheetState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
@@ -70,8 +71,10 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -87,6 +90,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -125,9 +129,12 @@ import com.falcon.unikit.models.item.CourseItem
 import com.falcon.unikit.models.item.YearItem
 import com.falcon.unikit.profile.ProfileScreen
 import com.falcon.unikit.screens.AddNotesFAB
+import com.falcon.unikit.screens.AlertExample
 import com.falcon.unikit.screens.BottomSheetContent
 import com.falcon.unikit.screens.ComingSoonScreen
 import com.falcon.unikit.screens.MainScreen
+import com.falcon.unikit.screens.RadioButtonWithText
+import com.falcon.unikit.screens.Report
 import com.falcon.unikit.screens.downloadPdfNotifination
 import com.falcon.unikit.screens.getIcon
 import com.falcon.unikit.settings.SettingsScreen
@@ -1405,7 +1412,7 @@ private fun NotesCard(
     }
     val activity = LocalContext.current as? androidx.activity.ComponentActivity
     val authViewModel : AuthViewModel = hiltViewModel()
-    val showMenu = remember {
+    val reportDialogueVisibility = remember {
         mutableStateOf(false)
     }
     Card(
@@ -1413,22 +1420,22 @@ private fun NotesCard(
         shape = RoundedCornerShape(10.dp),
         modifier = Modifier
             .fillMaxWidth()
-            .clickable {
-                initiateDownloadOrLaunch(
-                    contentItem,
-                    context,
-                    scope,
-                    authViewModel,
-                    navController,
-                    activity
-                )
-            }
     ) {
         Column {
             Row(
                 modifier = Modifier
                     .padding(16.dp)
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .clickable {
+                        initiateDownloadOrLaunch(
+                            contentItem,
+                            context,
+                            scope,
+                            authViewModel,
+                            navController,
+                            activity
+                        )
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -1561,16 +1568,29 @@ private fun NotesCard(
             }
             if (expanded.value) {
                 Row {
-                    ExpandedNotesView()
+                    ExpandedNotesView(reportDialogueVisibility)
                 }
+            }
+            if (reportDialogueVisibility.value) {
+                ReportDialog(
+                    onDismissRequest = { reportDialogueVisibility.value = false },
+                    onConfirmation = { parameter ->
+                        reportDialogueVisibility.value = false
+                        Log.i("meri billi ausppicious", parameter)
+                        scope.launch {
+                            itemViewModel.reportContent(token.toString(), contentItem.contentID.toString(), parameter)
+                        }
+                    },
+                    dialogTitle = "Report Content",
+                    icon = Icons.Default.Info
+                )
             }
         }
     }
 }
 
-@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun ExpandedNotesView() {
+fun ExpandedNotesView(reportDialogueVisibility: MutableState<Boolean>) {
     Column(
         modifier = Modifier
             .padding(16.dp),
@@ -1578,7 +1598,7 @@ fun ExpandedNotesView() {
         UploadDateAndReport(
             date = "Uploaded on: 5 September 2024"
         ) {
-
+            reportDialogueVisibility.value = !reportDialogueVisibility.value
         }
         Spacer(modifier = Modifier.size(8.dp))
         Row(

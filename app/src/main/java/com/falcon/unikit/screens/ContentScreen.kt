@@ -979,6 +979,14 @@ object Report {
     const val Plagiarism = "Plagiarism"
     const val Irrelevant = "Irrelevant"
 }
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun _AlertExample() {
+    AlertExample {
+
+    }
+}
 @Composable
 fun AlertExample(onSubmit: (String) -> Unit) {
     var dialogVisibility by remember { mutableStateOf(true) }
@@ -1036,7 +1044,7 @@ fun AlertExample(onSubmit: (String) -> Unit) {
 }
 
 @Composable
-private fun RadioButtonWithText(selectedOption: MutableState<String>, option: String) {
+fun RadioButtonWithText(selectedOption: MutableState<String>, option: String) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround,

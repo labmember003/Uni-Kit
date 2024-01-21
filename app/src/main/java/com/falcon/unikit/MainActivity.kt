@@ -678,6 +678,9 @@ class MainActivity : ComponentActivity() {
                     composable("withdrawal_history") {
                         WithdrawalHistory(navController)
                     }
+                    composable("refer_and_earn") {
+                        ReferAndEarnScreen()
+                    }
                 }
             }
         }

@@ -245,7 +245,7 @@ fun DrawerContent(navController: NavHostController) {
             navController.navigate("redeem")
         }
         NavDrawerContent("Refer & Earn", R.drawable.baseline_redeem_24) {
-            navController.navigate("redeem")
+            navController.navigate("refer_and_earn")
         }
         NavDrawerContent("Book To Story", R.drawable.baseline_menu_book_24) {
             openUrlInBrowser(context = context, url = "https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")

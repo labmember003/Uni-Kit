@@ -230,26 +230,26 @@ fun DrawerContent(navController: NavHostController) {
         NavDrawerContent("Profile", R.drawable.baseline_person_24) {
             navController.navigate("profile")
         }
-        Spacer(modifier = Modifier.height(2.dp))
-        NavDrawerContent("My Notes", R.drawable.baseline_sticky_note_2_24) {
-            navController.navigate("my_notes")
-        }
+//        Spacer(modifier = Modifier.height(2.dp))
+//        NavDrawerContent("My Notes", R.drawable.baseline_sticky_note_2_24) {
+//            navController.navigate("my_notes")
+//        }
         Spacer(modifier = Modifier.height(2.dp))
         NavDrawerContent("Settings", R.drawable.baseline_settings_24) {
             navController.navigate("settings")
         }
-        NavDrawerContent("Community", R.drawable.baseline_people_alt_24) {
-            navController.navigate("community")
-        }
+//        NavDrawerContent("Community", R.drawable.baseline_people_alt_24) {
+//            navController.navigate("community")
+//        }
         NavDrawerContent("Redeem", R.drawable.baseline_redeem_24) {
             navController.navigate("redeem")
         }
         NavDrawerContent("Refer & Earn", R.drawable.baseline_redeem_24) {
             navController.navigate("refer_and_earn")
         }
-        NavDrawerContent("Book To Story", R.drawable.baseline_menu_book_24) {
-            openUrlInBrowser(context = context, url = "https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")
-        }
+//        NavDrawerContent("Book To Story", R.drawable.baseline_menu_book_24) {
+//            openUrlInBrowser(context = context, url = "https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")
+//        }
     }
 
 }

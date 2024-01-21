@@ -9,4 +9,5 @@ object Utils {
     const val JWT_TOKEN = "JWT_TOKEN"
     const val USER_DATA = "USER_DATA"
     const val PDF_PASSWORD = "ABC"
+    const val GENDER = "GENDER"
 }

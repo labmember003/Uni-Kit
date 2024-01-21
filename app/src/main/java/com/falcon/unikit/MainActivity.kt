@@ -1354,6 +1354,8 @@ fun NotesList(
     AddNotesFAB(modalSheetState)
 }
 
+
+
 @Composable
 private fun NotesCard(
     contentItem: Content, icon: Int, navController: NavHostController
@@ -1537,7 +1539,8 @@ private fun NotesCard(
                             modifier = Modifier
                                 .size(23.dp)
                                 .clickable {
-                                    val text = "https://uni-kit-api.vercel.app/" + contentItem.contentID
+                                    val text =
+                                        "https://uni-kit-api.vercel.app/" + contentItem.contentID
                                     val sendIntent: Intent = Intent().apply {
                                         action = Intent.ACTION_SEND
                                         putExtra(Intent.EXTRA_TEXT, text)
@@ -2474,6 +2477,67 @@ fun DisplayFileDeepLink(content : Content, navController: NavHostController) {
             )
         }
         NotesCard(contentItem = content, icon = icon,  navController = navController)
+    }
+
+}
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun ReferAndEarnScreen() {
+    val refferalCode = remember {
+        mutableStateOf("ABCDE")
+    }
+    val context = LocalContext.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .padding(24.dp)
+    ) {
+        Text(
+            text = "Refer & Earn",
+            fontSize = 24.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        val composition by rememberLottieComposition(spec = LottieCompositionSpec.RawRes(R.raw.refer_and_earn))
+        com.airbnb.lottie.compose.LottieAnimation(
+            composition = composition,
+            iterations = LottieConstants.IterateForever,
+            modifier = Modifier
+                .size(350.dp)
+        )
+        Text(
+            text = "Invite your friends and get $10 each",
+            fontSize = 24.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_semibold_1)),
+        )
+        Spacer(modifier = Modifier.size(20.dp))
+        Text(
+            text = "Share the code below or ask them to enter it during they signup. Earn when your friend signs up on your app",
+            fontSize = 16.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+        )
+        Spacer(modifier = Modifier.size(20.dp))
+        TextWithBorderAndCopyIcon(headingValue = "Referal Code", descriptionValue = refferalCode.value)
+        Spacer(modifier = Modifier.size(20.dp))
+        Button(onClick = {
+            val text = "Hey, I recently stumbled upon this amazing application called Unikit. It serves as a comprehensive hub for all the resources related to my college, accessible with just a single click. What's even more exciting is that you have the opportunity to earn rewards by contributing and uploading your own notes. To explore this all-in-one college resource platform, download the app from the following link: https://play.google.com/store/apps/details?id=com.falcon.unikit. Don't forget to use the referral code ${refferalCode.value} to enhance your experience!"
+            val sendIntent: Intent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_TEXT, text)
+                type = "text/plain"
+            }
+            val shareIntent = Intent.createChooser(sendIntent, null)
+            context.startActivity(shareIntent)
+        },colors = ButtonDefaults.buttonColors(containerColor = Color.Black, contentColor = Color.White),
+        ) {
+            Text(
+                text = "Invite Friend",
+            )
+        }
     }
 
 }

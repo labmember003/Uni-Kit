@@ -12,10 +12,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -30,6 +32,7 @@ import androidx.compose.material.ModalDrawer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberDrawerState
+import androidx.compose.material.Card
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -40,12 +43,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -96,51 +102,92 @@ fun ChooseYearScreen(
     navigateToBranchScreen: (yearID: String) -> Unit
 ) {
     val scope = rememberCoroutineScope()
-    Column {
-        TopBar(scope, drawerState)
+    Column(
+        horizontalAlignment = Alignment.Start,
+        modifier = Modifier
+            .padding(24.dp)
+    ) {
+        Row {
+            Text(
+                text = "Unikit",
+                fontSize = 24.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                )
+            )
+            Image(
+                painter = painterResource(id = R.drawable.menu_icon),
+                contentDescription = "Redeem Brand Icon",
+                modifier = Modifier
+                    .size(25.dp)
+                    .clickable {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+            )
+        }
         LazyVerticalGrid(
             columns = GridCells.Fixed(2),
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier,
             verticalArrangement = Arrangement.SpaceAround) {
-                val reversedList = yearList.value.reversed()
-               items(reversedList){
-                   YearItemComposable(year = it, navigateToBranchScreen)
-               }
+            val reversedList = yearList.value.reversed()
+            items(reversedList){
+                YearCard(year = it, navigateToBranchScreen)
             }
+        }
     }
 }
 
+@Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun YearItemComposable(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
+fun _YearCard() {
+    YearCard(
+        YearItem("", "First"),
+        {}
+    )
+}
+@Composable
+fun YearCard(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
     var backGroundImage = R.drawable.year4
     if (year.numofYear != null) {
         backGroundImage = getImageFromYear(year.numofYear)
     }
-    Box(
-        contentAlignment = Alignment.BottomCenter,
+    Card(
         modifier = Modifier
-            .padding(4.dp)
-            .size(160.dp)
-            .clip(RoundedCornerShape(8.dp))
-            .paint(
-                painterResource(id = backGroundImage),
-                contentScale = ContentScale.Crop
-            )
+            .padding(15.dp)
+            .shadow(elevation = 3.dp, shape = RoundedCornerShape(48.dp))
             .clickable {
                 navigateToBranchScreen(
                     year.yearID ?: "Error: yearID is NULL"
                 )
-            },
+            }
+            .size(123.dp),
+        backgroundColor = Color.White
     ) {
-        Text(
-            text =  year.numofYear?: "Error: yearName is NULL",
-            fontSize = 18.sp,
-            color = Color.White,
-            modifier = Modifier
-                .padding(8.dp, 20.dp),
-            style = MaterialTheme.typography.body1
+        Image(
+            painter = painterResource(id = backGroundImage),
+            contentDescription = "Redeem Brand Icon",
+            modifier = Modifier,
+            contentScale = ContentScale.Crop
         )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Spacer(modifier = Modifier.height(60.dp))
+            Text(
+                text = year.numofYear?: "Error: yearName is NULL",
+                fontSize = 10.sp,
+                color = Color.White,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            )
+        }
+
     }
 }
 
@@ -160,55 +207,6 @@ fun getImageFromYear(yearName: String): Int {
         }
     }
     return R.drawable.graduation
-}
-
-@Composable
-private fun TopBar(
-    scope: CoroutineScope,
-    drawerState: DrawerState
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            IconButton(onClick = {
-                scope.launch {
-                    drawerState.open()
-                }
-            }) {
-                Icon(Icons.Filled.Menu, contentDescription = "Open Drawer")
-            }
-            Text(
-                text = "UniKit",
-                fontSize = 18.sp,
-                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
-                modifier = Modifier,
-                style = MaterialTheme.typography.subtitle1
-            )
-        }
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Image(
-                painter = painterResource(R.drawable.token),
-                contentDescription = "Your Image",
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .size(32.dp)
-            )
-            Spacer(modifier = Modifier.size(2.dp))
-            Text(
-                text = "100₹",
-                modifier = Modifier
-                    .padding(0.dp, 10.dp, 10.dp, 10.dp)
-            )
-        }
-
-    }
 }
 
 @Composable

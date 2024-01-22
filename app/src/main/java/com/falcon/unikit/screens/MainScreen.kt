@@ -6,7 +6,6 @@ import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -18,35 +17,31 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalDrawer
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.Card
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.paint
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
@@ -95,6 +90,25 @@ fun ModalDrawerSample(
     )
 }
 
+
+@Preview(showBackground = true, showSystemUi = true)
+@Composable
+fun _ChooseYearScreen() {
+    val yearlist = remember {
+        mutableStateOf(
+            listOf(
+                YearItem("123", "First"),
+                YearItem("123", "Second"),
+                YearItem("123", "Third"),
+                YearItem("123", "Fourth")
+            )
+        )
+    }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    ChooseYearScreen(yearlist, drawerState) {
+
+    }
+}
 @Composable
 fun ChooseYearScreen(
     yearList: State<List<YearItem>>,
@@ -106,39 +120,232 @@ fun ChooseYearScreen(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier
             .padding(24.dp)
+            .verticalScroll(rememberScrollState())
     ) {
-        Row {
+        MainScreenHeader(scope, drawerState)
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
             Text(
-                text = "Unikit",
-                fontSize = 24.sp,
+                text = "Your Curriculam",
+                fontSize = 18.sp,
                 fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                 style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
                     fontWeight = FontWeight.SemiBold
-                )
-            )
-            Image(
-                painter = painterResource(id = R.drawable.menu_icon),
-                contentDescription = "Redeem Brand Icon",
+                ),
                 modifier = Modifier
-                    .size(25.dp)
-                    .clickable {
-                        scope.launch {
-                            drawerState.open()
-                        }
-                    }
+                    .weight(0.8f)
+            )
+            Text(
+                text = "View All",
+                fontSize = 14.sp,
+                color = colorResource(id = R.color.view_all_text_blue),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .weight(0.2f)
             )
         }
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
+        LazyRow(
             contentPadding = PaddingValues(8.dp),
             modifier = Modifier,
-            verticalArrangement = Arrangement.SpaceAround) {
-            val reversedList = yearList.value.reversed()
+            horizontalArrangement = Arrangement.SpaceAround) {
+            val reversedList = yearList.value
             items(reversedList){
                 YearCard(year = it, navigateToBranchScreen)
             }
         }
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Courses For You",
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .weight(0.8f)
+
+            )
+            Text(
+                text = "View All",
+                fontSize = 14.sp,
+                color = colorResource(id = R.color.view_all_text_blue),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .weight(0.2f)
+            )
+        }
+        LazyRow(
+            contentPadding = PaddingValues(8.dp),
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.SpaceAround) {
+            val list = listOf<PaidCourseOrEvent>(
+                PaidCourseOrEvent(R.drawable.android, "Android Development By Coding Ninjas 4.8 ⭐"),
+                PaidCourseOrEvent(R.drawable.fullstack, "Full Stack Web Development By Coding Ninjas 4.8 ⭐"),
+                PaidCourseOrEvent(R.drawable.data_analytics, "Data Analytics By Coding Ninjas 4.8 ⭐"),
+            )
+            items(list){ course ->
+                CourseCard(course)
+            }
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+        ) {
+            Text(
+                text = "Upcoming Hackathons & Meetups Near You",
+                fontSize = 18.sp,
+                fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .weight(0.8f)
+            )
+            Text(
+                text = "View All",
+                fontSize = 14.sp,
+                color = colorResource(id = R.color.view_all_text_blue),
+                fontFamily = FontFamily(Font(R.font.nunito_light_1)),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                    fontWeight = FontWeight.SemiBold
+                ),
+                modifier = Modifier
+                    .weight(0.2f)
+            )
+        }
+        LazyRow(
+            contentPadding = PaddingValues(8.dp),
+            modifier = Modifier,
+            horizontalArrangement = Arrangement.SpaceAround) {
+            val list = listOf<PaidCourseOrEvent>(
+                PaidCourseOrEvent(R.drawable.hackathon, "Hackathon\n" +
+                        "Venue : DTU\n" +
+                        "Date : 11-12th Feb"),
+                PaidCourseOrEvent(R.drawable.meeting, "Web3 Meetup\n" +
+                        "Venue : Microsoft Noida\n" +
+                        "Date : 11-12th Feb"),
+            )
+            items(list){ course ->
+                EventCard(course)
+            }
+        }
     }
+}
+
+@Composable
+private fun MainScreenHeader(
+    scope: CoroutineScope,
+    drawerState: DrawerState
+) {
+    Row(
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Text(
+            text = "Unikit",
+            fontSize = 32.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+        Image(
+            painter = painterResource(id = R.drawable.menu_icon),
+            contentDescription = "Menu Icon",
+            modifier = Modifier
+                .size(23.dp)
+                .clickable {
+                    scope.launch {
+                        drawerState.open()
+                    }
+                }
+        )
+    }
+}
+
+@Composable
+fun CourseCard(course: PaidCourseOrEvent) {
+    var backGroundImage = R.drawable.year4
+    if (course.image != null) {
+        backGroundImage = course.image
+    }
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .width(140.dp)
+    ) {
+        Image(
+            painter = painterResource(id = backGroundImage),
+            contentDescription = "Redeem Brand Icon",
+            modifier = Modifier
+                .size(100.dp),
+            contentScale = ContentScale.Crop
+        )
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = course.description.toString(),
+            fontSize = 12.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+    }
+    Spacer(modifier = Modifier.width(8.dp))
+}
+
+@Composable
+fun EventCard(event: PaidCourseOrEvent) {
+    var backGroundImage = R.drawable.year4
+    if (event.image != null) {
+        backGroundImage = event.image
+    }
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center,
+        modifier = Modifier
+            .width(140.dp)
+    ) {
+        Image(
+            painter = painterResource(id = backGroundImage),
+            contentDescription = "Redeem Brand Icon",
+            modifier = Modifier
+                .size(123.dp),
+            contentScale = ContentScale.Crop
+        )
+        Text(
+            text = event.description.toString(),
+            fontSize = 12.sp,
+            fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
+            style = androidx.compose.material3.MaterialTheme.typography.bodyLarge.copy(
+                fontWeight = FontWeight.SemiBold
+            )
+        )
+    }
+    Spacer(modifier = Modifier.width(8.dp))
 }
 
 @Preview(showBackground = true, showSystemUi = true)

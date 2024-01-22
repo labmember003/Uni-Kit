@@ -153,9 +153,10 @@ fun ChooseYearScreen(
             )
         }
         LazyRow(
-            contentPadding = PaddingValues(8.dp),
+//            contentPadding = PaddingValues(0.dp),
             modifier = Modifier,
-            horizontalArrangement = Arrangement.SpaceAround) {
+//            horizontalArrangement = Arrangement.SpaceAround
+        ) {
             val reversedList = yearList.value
             items(reversedList){
                 YearCard(year = it, navigateToBranchScreen)

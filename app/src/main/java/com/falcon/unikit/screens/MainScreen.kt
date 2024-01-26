@@ -365,7 +365,7 @@ fun YearCard(year: YearItem, navigateToBranchScreen: (yearID: String) -> Unit) {
     }
     Card(
         modifier = Modifier
-            .padding(15.dp)
+            .padding(12.dp)
             .shadow(elevation = 3.dp, shape = RoundedCornerShape(48.dp))
             .clickable {
                 navigateToBranchScreen(

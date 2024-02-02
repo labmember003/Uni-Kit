@@ -417,14 +417,16 @@ fun DrawerContent(navController: NavHostController, modalSheetState: ModalBottom
     Column(
         verticalArrangement = Arrangement.spacedBy(0.dp),
         modifier = Modifier
-            .fillMaxHeight()
-        ) {
+            .fillMaxWidth()
+            .padding(16.dp)
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp)
             ,
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             androidx.compose.material3.Text(
                 text = "Menu",

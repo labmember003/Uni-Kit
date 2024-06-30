@@ -1,5 +1,9 @@
 package com.falcon.unikit
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+
 object Utils {
     const val INITIAL_LAUCH = "INITIAL_LAUCH"
     const val COLLEGE_NAME = "COLLEGE_NAME"
@@ -10,4 +14,10 @@ object Utils {
     const val USER_DATA = "USER_DATA"
     const val PDF_PASSWORD = "ABC"
     const val GENDER = "GENDER"
+}
+
+fun openUrlInBrowser(context: Context, url: String) {
+    val uri = Uri.parse(url)
+    val intent = Intent(Intent.ACTION_VIEW, uri)
+    context.startActivity(intent)
 }

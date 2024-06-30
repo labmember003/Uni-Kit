@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.falcon.unikit.LottieAnimation
+import com.falcon.unikit.composables.general.LottieAnimation
 import com.falcon.unikit.R
 import com.google.accompanist.pager.HorizontalPagerIndicator
 

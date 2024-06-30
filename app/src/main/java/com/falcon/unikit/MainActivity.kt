@@ -22,6 +22,7 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts.StartIntentSenderForResult
 import androidx.annotation.RequiresApi
@@ -111,6 +112,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -262,66 +264,13 @@ class MainActivity : ComponentActivity() {
                 }
                 NavHost(navController = navController, startDestination = "walk_through_screen") {
                     composable("walk_through_screen") {
-                        BackHandler(
-                            onBack = {
-                                finish()
-                            }
-                        )
-                        LaunchedEffect(key1 = Unit) {
-                            val userDataJson = sharedPreferences.getString(USER_DATA, "NO_USER_FOUND")
-                            if (userDataJson != "NO_USER_FOUND") {
-                                navController.navigate("select_college_screen")
-                            }
-                        }
-                        WalkThroughScreen {
-                            navController.navigate("sign_in")
-                        }
+                        WalkThoughScreen(sharedPreferences, navController)
                     }
                     composable("sign_in") {
-                        BackHandler(
-                            onBack = {
-                                navController.navigate("walk_through_screen")
-                            }
-                        )
-                        LaunchedEffect(isSigninSuccess) {
-                            if (isSigninSuccess) {
-                                navController.navigate("sign_in_otp")
-                            }
-                        }
-                        GoogleSignInMainScreen {
-                            oneTapClient.beginSignIn(signUpRequest)
-                                .addOnSuccessListener(this@MainActivity) { result ->
-                                    try {
-                                        val intentSenderRequest = IntentSenderRequest
-                                            .Builder(result.pendingIntent.intentSender).build()
-                                        intentSenderLauncher.launch(intentSenderRequest)
-                                    } catch (e: IntentSender.SendIntentException) {
-                                        Log.e("TAG", "Couldn't start One Tap UI: ${e.localizedMessage}")
-                                        Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
-                                    }
-                                }
-                                .addOnFailureListener(this@MainActivity) { e ->
-                                    // No Google Accounts found. Just continue presenting the signed-out UI.
-                                    Log.d("TAG", e.localizedMessage)
-                                }
-                        }
+                        SignIn(navController, intentSenderLauncher, context)
                     }
                     composable("sign_in_otp") {
-                        BackHandler(
-                            onBack = {
-                                navController.navigate("walk_through_screen")
-                            }
-                        )
-                        LaunchedEffect(isSigninSuccess2) {
-                            if (isSigninSuccess2) {
-                                navController.navigate("select_college_screen")
-                            }
-                        }
-
-                        OtpSignIn() { otp ->
-                            navController.navigate("get_otp/${otp}")
-
-                        }
+                        SignInOTP(navController)
                     }
                     composable(
                         route= "get_otp/{otp}",
@@ -331,72 +280,13 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) { entry ->
-                        val otp = entry.arguments?.getString("otp")
-                        OTPScreen(otp) {
-                            navController.navigate("select_college_screen")
-                        }
+                        OTPScreen(entry, navController)
                     }
                     composable("comicify") {
                         FullWebView("https://mediafiles.botpress.cloud/865dac6b-a4c7-49f9-91e9-4e45c76ee3cc/webchat/bot.html")
                     }
                     composable("select_college_screen") {
-//                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
-                        LaunchedEffect(Unit) {
-                            val collegeID = sharedPreferences.getString(COLLEGE_ID, "NO_COLLEGE_SELECTED")
-                            Log.i("collegeID", collegeID.toString())
-                            if (collegeID != "NO_COLLEGE_SELECTED") {
-                                navController.navigate("select_course_screen/${collegeID}")
-                            }
-                        }
-                        BackHandler(
-                            onBack = {
-                                navController.navigate("walk_through_screen")
-                            }
-                        )
-
-//                        TODO - PERFORM AT CHANGE COLLEGE OPTION IN SETTINGS
-//                        val editor = sharedPreferences.edit()
-//                        editor.clear()
-//                        editor.apply()
-                        val errorState = remember { mutableStateOf(false) }
-                        val collegeViewModel : CollegeViewModel = hiltViewModel()
-                        val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
-
-                        LaunchedEffect(key1 = errorState.value) {
-                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
-                            delay(timeoutDurationMillis) // Wait for the timeout duration
-                            // Check if the data is still not available (i.e., an error occurred)
-                            if (colleges.value.isEmpty()) {
-                                errorState.value = true
-                            }
-                        }
-
-                        if (errorState.value) {
-                            // Show error message and retry button
-                            ErrorPage {
-                                errorState.value = false
-                            }
-                        } else {
-                            if (colleges.value != emptyList<CollegeItem>()) {
-                                SelectCollegeScreen(
-                                    itemList = colleges.value,
-                                    title = "Select Your College",
-                                    sharedPrefTitle = "COLLEGE",
-                                    sharedPreferences = sharedPreferences
-                                ) { collegeID ->
-                                    if (collegeID == null) {
-                                        Toast.makeText(this@MainActivity, "Please Select College", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        navController.navigate("select_course_screen/${collegeID}")
-                                    }
-
-                                }
-                            } else {
-                                LoadingScreen()
-                            }
-                        }
-//                        TODO
-//                          use ErrorPage() composable also
+                        SelectYourCollegeScreen(sharedPreferences, navController)
                     }
                     composable(
                         "select_course_screen/{collegeID}",
@@ -406,47 +296,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
-                        LaunchedEffect(Unit) {
-                            val courseID = sharedPreferences.getString(COURSE_ID, "NO_COURSE_SELECTED")
-                            if (courseID != "NO_COURSE_SELECTED") {
-                                navController.navigate("main_screen/${courseID}")
-                            }
-                        }
-                        val errorState = remember { mutableStateOf(false) }
-                        val courseViewModel : CourseViewModel = hiltViewModel()
-                        val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
-                        Log.i("catcatcatcat", courses.value.size.toString())
-                        LaunchedEffect(key1 = errorState.value) {
-                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
-                            delay(timeoutDurationMillis) // Wait for the timeout duration
-                            // Check if the data is still not available (i.e., an error occurred)
-                            if (courses.value.isEmpty()) {
-                                errorState.value = true
-                            }
-                        }
-                        if (errorState.value) {
-                            // Show error message and retry button
-                            ErrorPage {
-                                errorState.value = false
-                            }
-                        } else {
-                            if (courses.value != emptyList<CourseItem>()) {
-                                SelectCourseScreen(
-                                    itemList = courses.value,
-                                    title = "Select Your Course",
-                                    sharedPrefTitle = "COURSE",
-                                    sharedPreferences = sharedPreferences
-                                ) { courseID ->
-                                    if (courseID == null) {
-                                        Toast.makeText(this@MainActivity, "Please Select Course", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        navController.navigate("main_screen/${courseID}")
-                                    }
-                                }
-                            } else {
-                                LoadingScreen()
-                            }
-                        }
+                        SelectYourCourseScreen(sharedPreferences, navController)
                     }
                     composable(
                         "main_screen/{courseID}",
@@ -456,40 +306,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
-                        BackHandler(
-                            onBack = {
-                                finish()
-                            }
-                        )
-                        val errorState = remember { mutableStateOf(false) }
-                        val yearViewModel : YearViewModel = hiltViewModel()
-                        val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
-                        Log.i("catcatcatdog", years.value.size.toString())
-                        LaunchedEffect(key1 = errorState.value) {
-                            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
-                            delay(timeoutDurationMillis) // Wait for the timeout duration
-                            // Check if the data is still not available (i.e., an error occurred)
-                            if (years.value.isEmpty()) {
-                                errorState.value = true
-                            }
-                        }
-                        if (errorState.value) {
-                            ErrorPage {
-                                errorState.value = false
-                            }
-                        } else {
-                            if (years.value != emptyList<CollegeItem>()) {
-                                MainScreen(
-                                    yearList = years,
-                                    navController = navController
-                                ) { yearID ->
-                                    Log.i("yearyearyear", yearID)
-                                    navController.navigate("branches_screen/${yearID}")
-                                }
-                            } else {
-                                LoadingScreen()
-                            }
-                        }
+                        MainScreen(navController)
                     }
                     composable(
                         "branches_screen/{yearID}",
@@ -499,17 +316,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) {
-                        val branchViewModel : BranchViewModel = hiltViewModel()
-                        val branches: State<List<BranchItem>> = branchViewModel.branches.collectAsState()
-                        if (branches.value != emptyList<BranchItem>()) {
-                            BranchesScreen(
-                                branches.value
-                            ) { subjectID, subjectName ->
-                                navController.navigate("content_screen/${subjectID}/${subjectName}/${"0"}")
-                            }
-                        } else {
-                            LoadingScreen()
-                        }
+                        SelectYourBranchScreen(navController)
                     }
                     composable(
                         "content_screen" + "/{subjectID}" + "/{subjectName}" + "/{pageNumber}",
@@ -528,28 +335,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) { entry ->
-                        val subjectID = entry.arguments?.getString("subjectID")
-                        val subjectName = entry.arguments?.getString("subjectName")
-                        val recompose = { pageNumber: String ->
-                            navController.popBackStack()
-                            navController.navigate("content_screen/${subjectID}/${subjectName}/${pageNumber}")
-                        }
-
-
-
-                        val contentViewModel : ContentViewModel = hiltViewModel()
-                        val content: State<List<Content>> = contentViewModel.contents.collectAsState()
-                        if (content.value != emptyList<Content>()) {
-                            ContentScreenFigma(
-                                content.value,
-                                navController,
-                                entry.arguments?.getString("subjectName"),
-                                entry.arguments?.getString("pageNumber"),
-                                recompose
-                            )
-                        } else {
-                            LoadingScreen()
-                        }
+                        ContentScreen(entry, navController)
                     }
                     composable(
                         route = "open_file" + "/{uri}",
@@ -559,13 +345,7 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) { entry ->
-                        val uriString = entry.arguments?.getString("uri")
-                        val decoded = uriString?.let { decode(it) }
-                        LaunchedEffect(key1 = Unit) {
-                            val intent = Intent(this@MainActivity, PDFviewActivity::class.java)
-                            intent.putExtra("uri", decoded)
-                            startActivity(intent)
-                        }
+                        OpenFileFromURI(entry)
                     }
                     composable(
                         route = "display_file_deeplink",
@@ -582,95 +362,20 @@ class MainActivity : ComponentActivity() {
                             }
                         )
                     ) { entry ->
-                        val scope = rememberCoroutineScope()
-                        val contentId = entry.arguments?.getString("contentId")
-                        val authViewModel : AuthViewModel = hiltViewModel()
-                        scope.launch {
-                            authViewModel.getContentFromContentID(contentId!!)
-                        }
-                        val content by rememberUpdatedState(authViewModel.contentFromID.collectAsState())
-                        if (content.value.isNotEmpty()) {
-                            DisplayFileDeepLink(content.value[0], navController)
-                        } else {
-                            LoadingScreen()
-                        }
+                        DisplayFileDeeplink(entry, navController)
                     }
                     composable("community") {
                         Community()
                     }
                     composable("profile") {
-                        val gson = Gson()
-                        val userData = gson.fromJson(sharedPreferences.getString(USER_DATA, null), UserData::class.java)
-                        ProfileScreen(
-                            userData = userData,
-                            onSignOut = {
-                                isSigninSuccess = false
-                                navController.navigate("walk_through_screen")
-                                val editor = sharedPreferences.edit()
-                                editor.clear()
-                                editor.apply()
-                            },
-                            navController
-                        )
+                        ProfilePage(sharedPreferences, navController)
                     }
                     composable("settings") {
-                        SettingsScreen ({
-                            navController.popBackStack()
-                        }, {
-                            navController.navigate("select_college_screen")
-                        },{
-                            isSigninSuccess = false
-                            navController.navigate("walk_through_screen")
-                            val editor = sharedPreferences.edit()
-                            editor.clear()
-                            editor.apply()
-                        })
+                        SettingsScreen(navController, sharedPreferences)
                     }
 
                     composable("my_notes") {
-                        Scaffold(
-                            topBar = {
-                                TopAppBar(
-                                    title = { androidx.compose.material.Text(text = "My Notes") },
-                                    contentColor = androidx.compose.material.MaterialTheme.colors.onSurface,
-                                    backgroundColor = Color.Transparent,
-                                    elevation = 0.dp,
-                                    navigationIcon = {
-                                        IconButton(
-                                            onClick = {
-                                                navController.popBackStack()
-                                            },
-                                            content = {
-                                                Icon(
-                                                    imageVector = Icons.Default.ArrowBack,
-                                                    contentDescription = null,
-                                                )
-                                            },
-                                        )
-                                    },
-                                    modifier = Modifier.statusBarsPadding(),
-                                )
-                            },
-                        ) { innerPadding ->
-                            innerPadding
-                            val authViewModel : AuthViewModel = hiltViewModel()
-                            val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
-                            Log.i("JWT_TOKEN", jwtToken.toString())
-                            if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
-                                UserNotFound(navController)
-                            } else {
-                                authViewModel.getMyNotes(jwtToken)
-                                val myNotes: State<List<MyNoteItem>> = authViewModel.myNotes.collectAsState()
-                                if (myNotes.value.isEmpty()) {
-                                    LoadingScreen()
-                                }
-                                LazyColumn(content = {
-                                    items(myNotes.value) { myNote ->
-                                        MyNotesItem(myNote)
-                                    }
-                                })
-                            }
-                        }
+                        MyNotesScreen(navController, sharedPreferences)
                     }
                     composable("redeem") {
                         Redeem(navController)
@@ -688,6 +393,416 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    @Composable
+    private fun OTPScreen(
+        entry: NavBackStackEntry,
+        navController: NavHostController
+    ) {
+        val otp = entry.arguments?.getString("otp")
+        OTPScreen(otp) {
+            navController.navigate("select_college_screen")
+        }
+    }
+
+    @Composable
+    private fun MyNotesScreen(
+        navController: NavHostController,
+        sharedPreferences: SharedPreferences
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { androidx.compose.material.Text(text = "My Notes") },
+                    contentColor = androidx.compose.material.MaterialTheme.colors.onSurface,
+                    backgroundColor = Color.Transparent,
+                    elevation = 0.dp,
+                    navigationIcon = {
+                        IconButton(
+                            onClick = {
+                                navController.popBackStack()
+                            },
+                            content = {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = null,
+                                )
+                            },
+                        )
+                    },
+                    modifier = Modifier.statusBarsPadding(),
+                )
+            },
+        ) { innerPadding ->
+            innerPadding
+            val authViewModel: AuthViewModel = hiltViewModel()
+            val jwtToken = sharedPreferences.getString(Utils.JWT_TOKEN, "USER_NOT_SIGN_IN")
+            Log.i("JWT_TOKEN", jwtToken.toString())
+            if (jwtToken == null || jwtToken == "USER_NOT_SIGN_IN") {
+                UserNotFound(navController)
+            } else {
+                authViewModel.getMyNotes(jwtToken)
+                val myNotes: State<List<MyNoteItem>> = authViewModel.myNotes.collectAsState()
+                if (myNotes.value.isEmpty()) {
+                    LoadingScreen()
+                }
+                LazyColumn(content = {
+                    items(myNotes.value) { myNote ->
+                        MyNotesItem(myNote)
+                    }
+                })
+            }
+        }
+    }
+
+    @Composable
+    private fun SettingsScreen(
+        navController: NavHostController,
+        sharedPreferences: SharedPreferences
+    ) {
+        SettingsScreen({
+            navController.popBackStack()
+        }, {
+            navController.navigate("select_college_screen")
+        }, {
+            isSigninSuccess = false
+            navController.navigate("walk_through_screen")
+            val editor = sharedPreferences.edit()
+            editor.clear()
+            editor.apply()
+        })
+    }
+
+    @Composable
+    private fun ProfilePage(
+        sharedPreferences: SharedPreferences,
+        navController: NavHostController
+    ) {
+        val gson = Gson()
+        val userData =
+            gson.fromJson(sharedPreferences.getString(USER_DATA, null), UserData::class.java)
+        ProfileScreen(
+            userData = userData,
+            onSignOut = {
+                isSigninSuccess = false
+                navController.navigate("walk_through_screen")
+                val editor = sharedPreferences.edit()
+                editor.clear()
+                editor.apply()
+            },
+            navController
+        )
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @SuppressLint("CoroutineCreationDuringComposition")
+    @Composable
+    private fun DisplayFileDeeplink(
+        entry: NavBackStackEntry,
+        navController: NavHostController
+    ) {
+        val scope = rememberCoroutineScope()
+        val contentId = entry.arguments?.getString("contentId")
+        val authViewModel: AuthViewModel = hiltViewModel()
+        scope.launch {
+            authViewModel.getContentFromContentID(contentId!!)
+        }
+        val content by rememberUpdatedState(authViewModel.contentFromID.collectAsState())
+        if (content.value.isNotEmpty()) {
+            DisplayFileDeepLink(content.value[0], navController)
+        } else {
+            LoadingScreen()
+        }
+    }
+
+    @Composable
+    private fun OpenFileFromURI(entry: NavBackStackEntry) {
+        val uriString = entry.arguments?.getString("uri")
+        val decoded = uriString?.let { decode(it) }
+        LaunchedEffect(key1 = Unit) {
+            val intent = Intent(this@MainActivity, PDFviewActivity::class.java)
+            intent.putExtra("uri", decoded)
+            startActivity(intent)
+        }
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    @Composable
+    private fun ContentScreen(
+        entry: NavBackStackEntry,
+        navController: NavHostController
+    ) {
+        val subjectID = entry.arguments?.getString("subjectID")
+        val subjectName = entry.arguments?.getString("subjectName")
+        val recompose = { pageNumber: String ->
+            navController.popBackStack()
+            navController.navigate("content_screen/${subjectID}/${subjectName}/${pageNumber}")
+        }
+
+
+        val contentViewModel: ContentViewModel = hiltViewModel()
+        val content: State<List<Content>> = contentViewModel.contents.collectAsState()
+        if (content.value != emptyList<Content>()) {
+            ContentScreenFigma(
+                content.value,
+                navController,
+                entry.arguments?.getString("subjectName"),
+                entry.arguments?.getString("pageNumber"),
+                recompose
+            )
+        } else {
+            LoadingScreen()
+        }
+    }
+
+    @Composable
+    private fun SelectYourBranchScreen(navController: NavHostController) {
+        val branchViewModel: BranchViewModel = hiltViewModel()
+        val branches: State<List<BranchItem>> = branchViewModel.branches.collectAsState()
+        if (branches.value != emptyList<BranchItem>()) {
+            BranchesScreen(
+                branches.value
+            ) { subjectID, subjectName ->
+                navController.navigate("content_screen/${subjectID}/${subjectName}/${"0"}")
+            }
+        } else {
+            LoadingScreen()
+        }
+    }
+
+    @Composable
+    private fun MainScreen(navController: NavHostController) {
+        BackHandler(
+            onBack = {
+                finish()
+            }
+        )
+        val errorState = remember { mutableStateOf(false) }
+        val yearViewModel: YearViewModel = hiltViewModel()
+        val years: State<List<YearItem>> = yearViewModel.years.collectAsState()
+        Log.i("catcatcatdog", years.value.size.toString())
+        LaunchedEffect(key1 = errorState.value) {
+            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+            delay(timeoutDurationMillis) // Wait for the timeout duration
+            // Check if the data is still not available (i.e., an error occurred)
+            if (years.value.isEmpty()) {
+                errorState.value = true
+            }
+        }
+        if (errorState.value) {
+            ErrorPage {
+                errorState.value = false
+            }
+        } else {
+            if (years.value != emptyList<CollegeItem>()) {
+                MainScreen(
+                    yearList = years,
+                    navController = navController
+                ) { yearID ->
+                    Log.i("yearyearyear", yearID)
+                    navController.navigate("branches_screen/${yearID}")
+                }
+            } else {
+                LoadingScreen()
+            }
+        }
+    }
+
+    @Composable
+    private fun SelectYourCourseScreen(
+        sharedPreferences: SharedPreferences,
+        navController: NavHostController
+    ) {
+        LaunchedEffect(Unit) {
+            val courseID = sharedPreferences.getString(COURSE_ID, "NO_COURSE_SELECTED")
+            if (courseID != "NO_COURSE_SELECTED") {
+                navController.navigate("main_screen/${courseID}")
+            }
+        }
+        val errorState = remember { mutableStateOf(false) }
+        val courseViewModel: CourseViewModel = hiltViewModel()
+        val courses: State<List<CourseItem>> = courseViewModel.courses.collectAsState()
+        Log.i("catcatcatcat", courses.value.size.toString())
+        LaunchedEffect(key1 = errorState.value) {
+            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+            delay(timeoutDurationMillis) // Wait for the timeout duration
+            // Check if the data is still not available (i.e., an error occurred)
+            if (courses.value.isEmpty()) {
+                errorState.value = true
+            }
+        }
+        if (errorState.value) {
+            // Show error message and retry button
+            ErrorPage {
+                errorState.value = false
+            }
+        } else {
+            if (courses.value != emptyList<CourseItem>()) {
+                SelectCourseScreen(
+                    itemList = courses.value,
+                    title = "Select Your Course",
+                    sharedPrefTitle = "COURSE",
+                    sharedPreferences = sharedPreferences
+                ) { courseID ->
+                    if (courseID == null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Please Select Course",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        navController.navigate("main_screen/${courseID}")
+                    }
+                }
+            } else {
+                LoadingScreen()
+            }
+        }
+    }
+
+    @Composable
+    private fun SelectYourCollegeScreen(
+        sharedPreferences: SharedPreferences,
+        navController: NavHostController
+    ) {
+        //                        TODO("CHANGE INITIAL_LAUCH TO IS COLLEGE SELECTED OR IS COURSE SELECTED")
+        LaunchedEffect(Unit) {
+            val collegeID = sharedPreferences.getString(COLLEGE_ID, "NO_COLLEGE_SELECTED")
+            Log.i("collegeID", collegeID.toString())
+            if (collegeID != "NO_COLLEGE_SELECTED") {
+                navController.navigate("select_course_screen/${collegeID}")
+            }
+        }
+        BackHandler(
+            onBack = {
+                navController.navigate("walk_through_screen")
+            }
+        )
+
+        //                        TODO - PERFORM AT CHANGE COLLEGE OPTION IN SETTINGS
+        //                        val editor = sharedPreferences.edit()
+        //                        editor.clear()
+        //                        editor.apply()
+        val errorState = remember { mutableStateOf(false) }
+        val collegeViewModel: CollegeViewModel = hiltViewModel()
+        val colleges: State<List<CollegeItem>> = collegeViewModel.colleges.collectAsState()
+
+        LaunchedEffect(key1 = errorState.value) {
+            val timeoutDurationMillis = 15000L // 15 seconds (adjust as needed)
+            delay(timeoutDurationMillis) // Wait for the timeout duration
+            // Check if the data is still not available (i.e., an error occurred)
+            if (colleges.value.isEmpty()) {
+                errorState.value = true
+            }
+        }
+
+        if (errorState.value) {
+            // Show error message and retry button
+            ErrorPage {
+                errorState.value = false
+            }
+        } else {
+            if (colleges.value != emptyList<CollegeItem>()) {
+                SelectCollegeScreen(
+                    itemList = colleges.value,
+                    title = "Select Your College",
+                    sharedPrefTitle = "COLLEGE",
+                    sharedPreferences = sharedPreferences
+                ) { collegeID ->
+                    if (collegeID == null) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Please Select College",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        navController.navigate("select_course_screen/${collegeID}")
+                    }
+
+                }
+            } else {
+                LoadingScreen()
+            }
+        }
+        //                        TODO
+        //                          use ErrorPage() composable also
+    }
+
+    @Composable
+    private fun SignInOTP(navController: NavHostController) {
+        BackHandler(
+            onBack = {
+                navController.navigate("walk_through_screen")
+            }
+        )
+        LaunchedEffect(isSigninSuccess2) {
+            if (isSigninSuccess2) {
+                navController.navigate("select_college_screen")
+            }
+        }
+
+        OtpSignIn() { otp ->
+            navController.navigate("get_otp/${otp}")
+
+        }
+    }
+
+    @Composable
+    private fun SignIn(
+        navController: NavHostController,
+        intentSenderLauncher: ActivityResultLauncher<IntentSenderRequest>,
+        context: Context
+    ) {
+        BackHandler(
+            onBack = {
+                navController.navigate("walk_through_screen")
+            }
+        )
+        LaunchedEffect(isSigninSuccess) {
+            if (isSigninSuccess) {
+                navController.navigate("sign_in_otp")
+            }
+        }
+        GoogleSignInMainScreen {
+            oneTapClient.beginSignIn(signUpRequest)
+                .addOnSuccessListener(this@MainActivity) { result ->
+                    try {
+                        val intentSenderRequest = IntentSenderRequest
+                            .Builder(result.pendingIntent.intentSender).build()
+                        intentSenderLauncher.launch(intentSenderRequest)
+                    } catch (e: IntentSender.SendIntentException) {
+                        Log.e("TAG", "Couldn't start One Tap UI: ${e.localizedMessage}")
+                        Toast.makeText(context, e.localizedMessage, Toast.LENGTH_LONG).show()
+                    }
+                }
+                .addOnFailureListener(this@MainActivity) { e ->
+                    // No Google Accounts found. Just continue presenting the signed-out UI.
+                    Log.d("TAG", e.localizedMessage)
+                }
+        }
+    }
+
+    @Composable
+    private fun WalkThoughScreen(
+        sharedPreferences: SharedPreferences,
+        navController: NavHostController
+    ) {
+        BackHandler(
+            onBack = {
+                finish()
+            }
+        )
+        LaunchedEffect(key1 = Unit) {
+            val userDataJson = sharedPreferences.getString(USER_DATA, "NO_USER_FOUND")
+            if (userDataJson != "NO_USER_FOUND") {
+                navController.navigate("select_college_screen")
+            }
+        }
+        WalkThroughScreen {
+            navController.navigate("sign_in")
+        }
+    }
+
     private fun getIcon(contentName: String): Int {
         when (contentName) {
             "Notes" -> {

@@ -295,7 +295,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-fun isNetworkAvailable(context: Context): Boolean {
+fun isNetworkAvailable(context: Context): Boolean { // Don't Remove This Function
     val connectivityManager =
         context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     val network = connectivityManager.activeNetwork ?: return false

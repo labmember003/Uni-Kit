@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -40,7 +39,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.Font
@@ -50,7 +48,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.falcon.unikit.NavDrawerContent
 import com.falcon.unikit.R
 import com.falcon.unikit.models.item.YearItem
 import kotlinx.coroutines.CoroutineScope
@@ -469,4 +466,34 @@ fun openUrlInBrowser(context: Context, url: String) {
     val uri = Uri.parse(url)
     val intent = Intent(Intent.ACTION_VIEW, uri)
     context.startActivity(intent)
+}
+
+@Composable
+fun NavDrawerContent(contentName: String, imageID: Int, onClick: () -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Start,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                onClick()
+            }
+            .padding(12.dp)
+    ) {
+        Image(
+            painter = painterResource(id = imageID),
+            contentDescription = "" ,
+            modifier = Modifier
+                .size(30.dp)
+        )
+        Spacer(
+            modifier = Modifier
+                .size(5.dp)
+        )
+        Text(
+            text = contentName,
+            style = androidx.compose.material.MaterialTheme.typography.body1,
+            color = Color.Unspecified
+        )
+    }
 }

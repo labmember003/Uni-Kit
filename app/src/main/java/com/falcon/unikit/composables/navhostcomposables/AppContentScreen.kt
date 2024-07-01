@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
-import com.falcon.unikit.NotesCard
+import com.falcon.unikit.composables.general.NotesCard
 import com.falcon.unikit.R
 import com.falcon.unikit.composables.general.LoadingScreen
 import com.falcon.unikit.api.Content

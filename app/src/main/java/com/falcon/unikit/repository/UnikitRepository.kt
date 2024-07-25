@@ -19,6 +19,7 @@ import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.models.item.YearItem
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 
 class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
@@ -100,9 +101,18 @@ class UnikitRepository @Inject constructor(private val unikitAPI: UnikitAPI) {
     }
 
     suspend fun getSubject(branchID: String) {
+        Log.i("UnikitRepository", "Fetching subjects for branchId: $branchID")
         val response = unikitAPI.getSubjectList(branchID)
         if (response.isSuccessful && response.body() != null) {
-            _subject.emit(response.body()!!)
+            try {
+                Log.i("UnikitRepository", "Fetched subjects: ${response.body()!!.size}")
+//                if ()
+                _subject.emit(response.body()!!)
+            } catch (e: Exception) {
+                Log.e("UnikitRepository", "Error fetching subjects: ${e.message}")
+            }
+        } else {
+            Log.e("UnikitRepository", "Failed to fetch subjects: ${response.errorBody()?.string()}")
         }
     }
 

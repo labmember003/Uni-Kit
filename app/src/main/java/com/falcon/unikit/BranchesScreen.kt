@@ -51,11 +51,10 @@ fun BranchesScreen(
     branchList: List<BranchItem>,
     navigateToContentScreen: (String, String) -> Unit
 ) {
-    val list = branchList.map { branch ->
-        branch.branchName
-    }
+    val list = branchList.map { branch -> branch.branchName }
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -66,27 +65,17 @@ fun BranchesScreen(
             modifier = Modifier
         ) {
             list.forEachIndexed { index, _ ->
-                // on below line we are creating a tab.
                 Tab(
                     text = {
                         Text(
-                            list[index]?: "ERROR: branchName is NULL",
-                            // on below line we are specifying the text color
-                            // for the text in that tab
+                            list[index] ?: "ERROR: branchName is NULL",
                             color = if (pageState.currentPage == index) colorResource(R.color.custom_color_tab_bar) else Color.Black,
                             fontFamily = FontFamily(Font(R.font.nunito_bold_1)),
                         )
                     },
-                    // on below line we are specifying
-                    // the tab which is selected.
                     selected = pageState.currentPage == index,
-                    // on below line we are specifying the
-                    // on click for the tab which is selected.
                     onClick = {
-                        // on below line we are specifying the scope.
-                        scope.launch {
-                            pageState.animateScrollToPage(index)
-                        }
+                        scope.launch { pageState.animateScrollToPage(index) }
                     }
                 )
             }
@@ -98,6 +87,7 @@ fun BranchesScreen(
                 .fillMaxWidth()
                 .weight(0.6f),
             pageContent = { pageNumber ->
+                Log.i("Recompose", "Recompose")
                 SubjectList(branchList[pageNumber], navigateToContentScreen)
             }
         )
@@ -109,16 +99,15 @@ fun SubjectList(
     branch: BranchItem,
     navigateToContentScreen: (String, String) -> Unit
 ) {
-    val subjectViewModel : SubjectViewModel = hiltViewModel()
-//    val subjectss = emptyList<State<List<SubjectItem>>>()
-    val subjects by rememberUpdatedState(subjectViewModel.subjects.collectAsState())
-    val isLoading = subjects.value.isEmpty()
+    Log.i("SubjectList1", "branchName: ${branch.branchName}")
+    val subjectViewModel: SubjectViewModel = hiltViewModel()
+    val subjects by subjectViewModel.subjects.collectAsState()
+    val isLoading = subjects.isEmpty()
+    subjectViewModel.getSubjects(branch.branchID.toString())
     LaunchedEffect(branch.branchID) {
-        if (isLoading) {
-            Log.i("branchIDDDD", branch.branchID.toString())
-            subjectViewModel.getSubjects(branch.branchID.toString())
-        }
+        Log.i("SubjectList", "LaunchedEffect with branchID: ${branch.branchID}")
     }
+    Log.i("SubjectList", "isLoading: $isLoading, subjects: ${subjects.size}")
     if (isLoading) {
         LoadingScreen()
     } else {
@@ -128,7 +117,7 @@ fun SubjectList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             LazyColumn(content = {
-                items(subjects.value) { subject ->
+                items(subjects) { subject ->
                     SubjectItemRow(subject, navigateToContentScreen)
                 }
             })

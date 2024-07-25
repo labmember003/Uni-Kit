@@ -1,5 +1,6 @@
 package com.falcon.unikit
 
+import android.content.IntentFilter
 import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -22,8 +23,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -88,42 +90,46 @@ fun BranchesScreen(
                 .weight(0.6f),
             pageContent = { pageNumber ->
                 Log.i("Recompose", "Recompose")
-                SubjectList(branchList[pageNumber], navigateToContentScreen)
+                val subjectViewModel: SubjectViewModel = hiltViewModel()
+                subjectViewModel.getSubjects(branchList[pageNumber].branchID.toString())
+                val subjects by subjectViewModel.subjects.collectAsState()
+
+//                val showList = remember {
+//                    mutableStateOf(false)
+//                }
+//                LaunchedEffect(pageNumber) {
+//                    showList.value = true
+//                }
+//                if (showList.value) {
+//                    SubjectList(navigateToContentScreen, subjects)
+//                }
+                if (subjects.isEmpty()) {
+                    LoadingScreen()
+                } else {
+                    SubjectList(navigateToContentScreen, subjects)
+                }
             }
         )
     }
 }
-
 @Composable
 fun SubjectList(
-    branch: BranchItem,
-    navigateToContentScreen: (String, String) -> Unit
+    navigateToContentScreen: (String, String) -> Unit,
+    subjects: List<SubjectItem>
 ) {
-    Log.i("SubjectList1", "branchName: ${branch.branchName}")
-    val subjectViewModel: SubjectViewModel = hiltViewModel()
-    val subjects by subjectViewModel.subjects.collectAsState()
-    val isLoading = subjects.isEmpty()
-    subjectViewModel.getSubjects(branch.branchID.toString())
-    LaunchedEffect(branch.branchID) {
-        Log.i("SubjectList", "LaunchedEffect with branchID: ${branch.branchID}")
-    }
-    Log.i("SubjectList", "isLoading: $isLoading, subjects: ${subjects.size}")
-    if (isLoading) {
-        LoadingScreen()
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            LazyColumn(content = {
-                items(subjects) { subject ->
-                    SubjectItemRow(subject, navigateToContentScreen)
-                }
-            })
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        LazyColumn(content = {
+            items(subjects) { subject ->
+                SubjectItemRow(subject, navigateToContentScreen)
+            }
+        })
     }
 }
+
 
 @Composable
 fun SubjectItemRow(
@@ -135,7 +141,10 @@ fun SubjectItemRow(
             .fillMaxWidth()
             .padding(16.dp, 8.dp)
             .clickable {
-                navigateToContentScreen(subjectItem.subjectID ?: "ERROR: Subject Id is NULL", subjectItem.subjectName ?: "ERROR: Subject Name is NULL")
+                navigateToContentScreen(
+                    subjectItem.subjectID ?: "ERROR: Subject Id is NULL",
+                    subjectItem.subjectName ?: "ERROR: Subject Name is NULL"
+                )
                 Log.i("subjectID", subjectItem.subjectID.toString())
             },
         verticalAlignment = Alignment.CenterVertically

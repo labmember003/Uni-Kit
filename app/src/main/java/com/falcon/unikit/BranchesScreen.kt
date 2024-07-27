@@ -46,7 +46,7 @@ import com.falcon.unikit.models.item.SubjectItem
 import com.falcon.unikit.viewmodels.SubjectViewModel
 import kotlinx.coroutines.launch
 
-
+var cat : String = ""
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun BranchesScreen(
@@ -56,7 +56,6 @@ fun BranchesScreen(
     val list = branchList.map { branch -> branch.branchName }
     val pageState = rememberPagerState()
     val scope = rememberCoroutineScope()
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -89,10 +88,13 @@ fun BranchesScreen(
                 .fillMaxWidth()
                 .weight(0.6f),
             pageContent = { pageNumber ->
+                cat = branchList[pageNumber].branchID.toString()
                 Log.i("Recompose", "Recompose")
                 val subjectViewModel: SubjectViewModel = hiltViewModel()
-                subjectViewModel.getSubjects(branchList[pageNumber].branchID.toString())
                 val subjects by subjectViewModel.subjects.collectAsState()
+//                LaunchedEffect(subjects.isEmpty()){
+//
+//                }
 
 //                val showList = remember {
 //                    mutableStateOf(false)
